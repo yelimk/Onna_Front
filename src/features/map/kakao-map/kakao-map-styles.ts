@@ -54,12 +54,6 @@ export const kakaoMapCss = `
   html, body, #map { margin: 0; width: 100%; height: 100%; }
   body { -webkit-tap-highlight-color: transparent; }
 
-  /*
-   * 카카오 JavaScript SDK는 지도 색을 바꾸는 기능이 없어서, Figma의 회색 지도처럼 보이도록 지도 그림(img)만 흑백으로 바꾼다.
-   * 마커는 사진이 들어가도 색이 남아야 하므로 .marker 안의 그림은 뺀다.
-   */
-  #map img:not(.marker *) { filter: grayscale(1); }
-
   .marker {
     display: flex; flex-direction: column; align-items: center; gap: ${spacing.xxs}px;
     padding: 0; border: 0; background: none;
