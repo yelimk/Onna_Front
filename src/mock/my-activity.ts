@@ -5,14 +5,12 @@ import type { MapArea } from '@/types/map-area';
 import type { PhotoSource } from '@/types/photo-source';
 
 export const mockProfile = {
-  nickname: '벤치지킴이',
   // 활동에 따라 붙는 칭호. 기준은 백엔드와 정한다.
   badges: ['최초 발견자', '걸음왕'],
 };
 
+// 남긴·연 자리 수는 서버에서 받는다. 좋아요한 자리 수는 API가 없어서 아직 가짜 값이다.
 export const mockMyStats = {
-  leftCount: 12,
-  openedCount: 27,
   likedCount: 9,
 };
 

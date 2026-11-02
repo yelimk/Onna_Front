@@ -7,10 +7,16 @@ import { ScreenContainer } from '@/components/screen-container';
 import { spacing } from '@/constants/layout';
 import { MenuGroup, MenuRow } from '@/features/my/components/menu-group';
 import { ProfileCard, StatsCard } from '@/features/my/components/profile-summary';
+import { useMySummary } from '@/features/my/hooks/use-my-summary';
 import { mockMyStats, mockProfile } from '@/mock/my-activity';
 
-/** ③ 마이 탭: 프로필, 내 숫자, 메뉴. 알림은 오른쪽 위 종 버튼으로 들어간다. */
+/**
+ * ③ 마이 탭: 프로필, 내 숫자, 메뉴. 알림은 오른쪽 위 종 버튼으로 들어간다.
+ * 칭호와 좋아요한 자리 수는 서버에 아직 API가 없어서 가짜 값을 쓴다.
+ */
 export function MyScreen() {
+  const { nickname, leftCount, openedCount } = useMySummary();
+
   return (
     <ScreenContainer withBottomInset={false} background="gray">
       <View style={styles.titleRow}>
@@ -21,11 +27,11 @@ export function MyScreen() {
       </View>
 
       <View style={styles.sections}>
-        <ProfileCard {...mockProfile} />
+        <ProfileCard nickname={nickname} badges={mockProfile.badges} />
         <StatsCard
           stats={[
-            { label: '남긴 자리', value: mockMyStats.leftCount },
-            { label: '연 자리', value: mockMyStats.openedCount },
+            { label: '남긴 자리', value: leftCount },
+            { label: '연 자리', value: openedCount },
             { label: '좋아요한 자리', value: mockMyStats.likedCount },
           ]}
         />

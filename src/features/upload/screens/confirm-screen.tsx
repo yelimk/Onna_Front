@@ -1,5 +1,4 @@
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
@@ -12,29 +11,44 @@ import { radius, spacing } from '@/constants/layout';
 import { DraftPhoto } from '@/features/upload/components/draft-photo';
 import { UploadChecklist } from '@/features/upload/components/upload-checklist';
 import { UploadStepHeader } from '@/features/upload/components/upload-step-header';
+import { useSubmitPost } from '@/features/upload/hooks/use-submit-post';
 import { useUploadDraft } from '@/features/upload/upload-draft';
+import { formatHashtag } from '@/utils/format-hashtag';
 
 const locationPin = require('@/assets/icons/location-pick.svg');
 
 /**
  * ② 기록 탭: 남기기 3/3 위치 확인.
  * 집 위치 같은 개인정보가 드러나지 않게 정확한 좌표 대신 장소 이름(반경)으로 저장한다.
- * 지도 API가 정해지면 회색 칸을 작은 지도로 바꾸고, 새로고침 버튼으로 위치를 다시 잡는다.
- * 업로드 API가 나오면 '기록 완료'에서 draft를 서버로 보낸다.
+ * 회색 칸은 나중에 작은 지도로 바꾼다. 새로고침 버튼은 서버가 위치가 부정확하다고 할 때 위치를 다시 잡는다.
+ * '기록 완료'에서 draft를 서버로 보낸다. 제목은 서버에 아직 칸이 없어서 보내지 않는다.
  */
 export function ConfirmScreen() {
   const { draft } = useUploadDraft();
+  const { canSubmit, isSubmitting, isLocating, relocate, submit } = useSubmitPost();
 
   return (
     <ScreenContainer
       header={<UploadStepHeader title="위치 확인" step={3} />}
-      footer={<Button label="기록 완료" variant="primary" onPress={() => router.dismissTo('/record')} />}>
+      footer={
+        <Button
+          label={isSubmitting ? '올리는 중…' : '기록 완료'}
+          variant="primary"
+          disabled={!canSubmit}
+          onPress={submit}
+        />
+      }>
       <AppText variant="heading03" style={styles.title}>
         이 자리에 남길게요
       </AppText>
 
       <View style={styles.mapBox}>
-        <Pressable accessibilityRole="button" accessibilityLabel="위치 다시 찾기" style={styles.reload}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="위치 다시 찾기"
+          disabled={isLocating}
+          onPress={relocate}
+          style={styles.reload}>
           <Icon name="reload" />
         </Pressable>
         <View style={styles.pin}>
@@ -53,7 +67,7 @@ export function ConfirmScreen() {
             {draft.oneLine || '한 줄을 아직 쓰지 않았어요'}
           </AppText>
           <AppText variant="caption04" color="textTertiary">
-            {draft.hashtags.join(' ')}
+            {draft.hashtags.map((tag) => formatHashtag(tag.name)).join(' ')}
           </AppText>
         </View>
       </View>

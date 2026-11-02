@@ -4,39 +4,41 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/app-text';
 import { Icon } from '@/components/icon';
 import { radius, spacing } from '@/constants/layout';
-import type { MyRecord } from '@/mock/my-records';
+import type { MyPost } from '@/types/api';
+import { formatDate } from '@/utils/format-date';
+import { formatHashtag } from '@/utils/format-hashtag';
 
 type RecordListItemProps = {
-  record: MyRecord;
+  post: MyPost;
   onPress: () => void;
 };
 
-/** 내 기록 한 줄 (Figma list): 사진, 제목, 한 줄, 해시태그, 날짜, 받은 좋아요 수 */
-export function RecordListItem({ record, onPress }: RecordListItemProps) {
+/**
+ * 내 기록 한 줄 (Figma list): 사진, 한 줄, 해시태그, 날짜, 받은 좋아요 수.
+ * Figma에는 제목이 있지만 서버에 아직 제목이 없어서, 한 줄 코멘트를 제목 자리에 두 줄까지 보여준다.
+ */
+export function RecordListItem({ post, onPress }: RecordListItemProps) {
   return (
     <Pressable accessibilityRole="button" onPress={onPress} style={styles.row}>
-      <Image source={record.photo} style={styles.photo} contentFit="cover" />
+      <Image source={{ uri: post.imageUrl }} style={styles.photo} contentFit="cover" />
       <View style={styles.body}>
         <View style={styles.top}>
           <View style={styles.texts}>
-            <AppText variant="subtitle02" numberOfLines={1}>
-              {record.title}
-            </AppText>
-            <AppText variant="body01" numberOfLines={1}>
-              {record.comment}
+            <AppText variant="subtitle02" numberOfLines={2}>
+              {post.oneLine}
             </AppText>
             <AppText variant="caption02" color="textTertiary" style={styles.hashtags}>
-              {record.hashtags.join(' ')}
+              {post.tags.map(formatHashtag).join(' ')}
             </AppText>
           </View>
           <AppText variant="caption02" color="textDeactivated" style={styles.date}>
-            {record.dateLabel}
+            {formatDate(post.createdAt)}
           </AppText>
         </View>
         <View style={styles.likes}>
           <Icon name="heartSmall" size={16} color="textDeactivated" />
           <AppText variant="caption02" color="textDeactivated">
-            {record.likeCount}
+            {post.likeCount}
           </AppText>
         </View>
       </View>
