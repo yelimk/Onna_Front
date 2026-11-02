@@ -9,7 +9,6 @@ import type { Tag } from '@/types/api';
  */
 export function useHashtagSuggestions() {
   const [suggestions, setSuggestions] = useState<Tag[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [hasFailed, setHasFailed] = useState(false);
   // 같은 한 줄로 다시 묻지 않으려고 마지막으로 보낸 내용을 기억한다
   const lastRequestedRef = useRef('');
@@ -22,7 +21,6 @@ export function useHashtagSuggestions() {
 
     lastRequestedRef.current = text;
     const requestId = ++requestIdRef.current;
-    setIsLoading(true);
     setHasFailed(false);
     try {
       const result = await getTagSuggestions(questionId, text);
@@ -32,8 +30,6 @@ export function useHashtagSuggestions() {
       // 실패한 한 줄로 다시 누를 수 있게 기억을 지운다
       lastRequestedRef.current = '';
       setHasFailed(true);
-    } finally {
-      if (requestId === requestIdRef.current) setIsLoading(false);
     }
   };
 
@@ -42,9 +38,8 @@ export function useHashtagSuggestions() {
     requestIdRef.current += 1;
     lastRequestedRef.current = '';
     setSuggestions([]);
-    setIsLoading(false);
     setHasFailed(false);
   };
 
-  return { suggestions, isLoading, hasFailed, requestSuggestions, clearSuggestions };
+  return { suggestions, hasFailed, requestSuggestions, clearSuggestions };
 }

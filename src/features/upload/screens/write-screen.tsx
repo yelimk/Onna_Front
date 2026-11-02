@@ -25,7 +25,7 @@ const maxOneLineLength = 40;
 export function WriteScreen() {
   const { draft, updateDraft } = useUploadDraft();
   const { question, questionId, hasFailed: questionFailed, reload: reloadQuestion } = useWriteQuestion();
-  const { suggestions, isLoading, hasFailed, requestSuggestions, clearSuggestions } = useHashtagSuggestions();
+  const { suggestions, hasFailed, requestSuggestions, clearSuggestions } = useHashtagSuggestions();
 
   // 한 줄을 고치면 그 한 줄로 고른 해시태그도 더는 맞지 않으니 함께 지운다
   const changeOneLine = (oneLine: string) => {
@@ -76,11 +76,6 @@ export function WriteScreen() {
           maxLength={maxOneLineLength}
           showCount
         />
-        {isLoading && (
-          <AppText variant="caption02" color="textTertiary">
-            AI가 한 줄을 읽고 있어요…
-          </AppText>
-        )}
         {hasFailed && (
           <Pressable onPress={() => requestSuggestions(questionId, draft.oneLine)} hitSlop={8}>
             <AppText variant="caption02" color="textTertiary">
