@@ -1,6 +1,7 @@
-import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { screenPaddingX, spacing } from '@/constants/layout';
@@ -12,6 +13,7 @@ import { MapActionButtons } from '@/features/map/components/map-action-buttons';
 import { MapSearchBar } from '@/features/map/components/map-search-bar';
 import { SelectedResultCard } from '@/features/map/components/selected-result-card';
 import { openRadiusMeters } from '@/features/map/constants/map-config';
+import { mapChromeFadeMs } from '@/features/map/constants/map-motion';
 import { useHomeMapMarkers } from '@/features/map/hooks/use-home-map-markers';
 import { useHomePlace } from '@/features/map/hooks/use-home-place';
 import { useMyLocation } from '@/features/map/hooks/use-my-location';
@@ -20,6 +22,7 @@ import { useResultsMap, type ResultsMapView } from '@/features/map/hooks/use-res
 import { KakaoMapView } from '@/features/map/kakao-map/kakao-map-view';
 import type { MapMarker } from '@/features/map/types/home-map-marker';
 import { openNavigation, openRecord } from '@/features/map/utils/open-search-result';
+import { useFadeStyle } from '@/hooks/use-fade-style';
 
 /** 장소를 고르지 않았을 때 useResultsMap에 넘기는 빈 상태 */
 const noPlaceView: ResultsMapView = { mode: 'list', items: [] };
@@ -34,6 +37,7 @@ function openMarker(marker: MapMarker) {
  * 탐색 모드를 켜면 내 위치 둘레에 열림 반경을 그리고, 아래 패널에서 가장 가까운 기록을 보여준다.
  * 해시태그 검색에서 장소를 넘겨받으면 그 장소 카드를 띄우고, 경로 추천을 받을 수 있다 (Figma '지도 해시태그 검색 시 경로 추천 UI').
  * 위치 권한이 없으면 지도 위에 권한 안내를 덮는다.
+ * 검색창을 누르면 Figma '지도 홈 화면 애니메이션'처럼 검색창·탐색 모드만 남기고 나머지를 흐리게 지운 뒤 검색 창을 띄운다.
  */
 export function MapScreen() {
   const insets = useSafeAreaInsets();
@@ -43,6 +47,16 @@ export function MapScreen() {
   // 탐색 모드를 켜면 바로 가장 가까운 기록이 보이도록 펼친 상태로 시작한다.
   const [isSheetExpanded, setIsSheetExpanded] = useState(true);
   const [isBrowsing, setIsBrowsing] = useState(false);
+  const [isOpeningSearch, setIsOpeningSearch] = useState(false);
+  const chromeStyle = useFadeStyle(!isOpeningSearch, mapChromeFadeMs);
+
+  // 검색을 닫고 지도 홈으로 돌아오면 지웠던 버튼과 이름표를 다시 보여준다.
+  useFocusEffect(useCallback(() => setIsOpeningSearch(false), []));
+
+  const openSearch = () => {
+    setIsOpeningSearch(true);
+    router.push('/map/search');
+  };
 
   const { place, clearPlace } = useHomePlace(location);
   const placeRoute = usePlaceRoute(place, location);
@@ -83,41 +97,48 @@ export function MapScreen() {
         openRadiusMeters={isExploring ? openRadiusMeters : null}
         focus={place ? placeMap.focus : undefined}
         routePath={placeMap.routePath}
+        isQuiet={isOpeningSearch}
         onMarkerPress={openMarker}
       />
 
       <View style={[styles.top, { paddingTop: insets.top + spacing.xs }]}>
-        <MapSearchBar />
+        <MapSearchBar onPress={openSearch} />
         <View style={styles.toggle}>
           <ExploreModeToggle value={isExploring} onChange={changeExploring} />
         </View>
-        {placeRoute.routePlan && <AiBadge label="AI 추천 경로" />}
+        {placeRoute.routePlan && (
+          <Animated.View style={chromeStyle}>
+            <AiBadge label="AI 추천 경로" />
+          </Animated.View>
+        )}
       </View>
 
-      {placeRoute.card ? (
-        <SelectedResultCard
-          state={placeRoute.card}
-          cardHeight={cardHeight}
-          onLayout={({ nativeEvent }) => setCardHeight(Math.round(nativeEvent.layout.height))}
-          onClose={closePlaceCard}
-          onRecommend={placeRoute.recommendRoute}
-          onRouteExpandedChange={placeRoute.setIsRouteExpanded}
-          onWalk={walkThisRoute}
-        />
-      ) : (
-        <View style={[styles.bottom, isExploring && styles.bottomWithSheet]}>
-          <View style={styles.actions}>
-            <MapActionButtons showCamera={!isRecordVisible} />
+      <Animated.View style={[styles.chrome, chromeStyle]}>
+        {placeRoute.card ? (
+          <SelectedResultCard
+            state={placeRoute.card}
+            cardHeight={cardHeight}
+            onLayout={({ nativeEvent }) => setCardHeight(Math.round(nativeEvent.layout.height))}
+            onClose={closePlaceCard}
+            onRecommend={placeRoute.recommendRoute}
+            onRouteExpandedChange={placeRoute.setIsRouteExpanded}
+            onWalk={walkThisRoute}
+          />
+        ) : (
+          <View style={[styles.bottom, isExploring && styles.bottomWithSheet]}>
+            <View style={styles.actions}>
+              <MapActionButtons showCamera={!isRecordVisible} />
+            </View>
+            {isExploring && (
+              <ExploreSheet
+                nearestPhoto={nearestPhoto}
+                isExpanded={isSheetExpanded}
+                onExpandedChange={setIsSheetExpanded}
+              />
+            )}
           </View>
-          {isExploring && (
-            <ExploreSheet
-              nearestPhoto={nearestPhoto}
-              isExpanded={isSheetExpanded}
-              onExpandedChange={setIsSheetExpanded}
-            />
-          )}
-        </View>
-      )}
+        )}
+      </Animated.View>
 
       {showPermissionCard && <LocationPermissionCard onRequest={request} onBrowse={() => setIsBrowsing(true)} />}
     </View>
@@ -135,6 +156,11 @@ const styles = StyleSheet.create({
     right: 0,
     paddingHorizontal: screenPaddingX,
     gap: spacing.sm,
+    pointerEvents: 'box-none',
+  },
+  // 아래쪽 버튼·패널을 한 번에 흐리게 하려고 덮는 층. 빈 곳의 터치는 지도로 넘긴다.
+  chrome: {
+    ...StyleSheet.absoluteFill,
     pointerEvents: 'box-none',
   },
   toggle: {

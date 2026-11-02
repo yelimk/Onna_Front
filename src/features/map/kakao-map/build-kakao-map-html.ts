@@ -131,6 +131,9 @@ export function buildKakaoMapHtml({ appKey, center, level }: KakaoMapHtmlOptions
         routeLine = drawLine(command.path, ${JSON.stringify(routeLineStyle)});
         walkedRouteLine = drawLine(command.walkedPath, ${JSON.stringify(walkedRouteLineStyle)});
       },
+      setQuiet: function (command) {
+        document.body.classList.toggle('quiet', command.isQuiet);
+      },
       moveTo: function (command) {
         map.panTo(toLatLng(command.coordinate));
       },

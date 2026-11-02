@@ -34,6 +34,8 @@ type KakaoMapViewProps<Marker extends MapMarker> = {
   routePath?: Coordinate[] | null;
   /** 길안내 중 이미 걸어온 길. 회색으로 그린다. */
   walkedPath?: Coordinate[] | null;
+  /** true면 마커 이름표와 내 위치를 흐리게 지운다 (검색을 여는 동안). */
+  isQuiet?: boolean;
   onMarkerPress: (marker: Marker) => void;
 };
 
@@ -76,6 +78,7 @@ export function KakaoMapView<Marker extends MapMarker>({
   focus,
   routePath = null,
   walkedPath = null,
+  isQuiet = false,
   onMarkerPress,
 }: KakaoMapViewProps<Marker>) {
   const webViewRef = useRef<MapWebView>(null);
@@ -109,6 +112,10 @@ export function KakaoMapView<Marker extends MapMarker>({
   useEffect(() => {
     if (isReady) sendCommand(webViewRef.current, { type: 'setRoute', path: routePath, walkedPath });
   }, [isReady, routePath, walkedPath]);
+
+  useEffect(() => {
+    if (isReady) sendCommand(webViewRef.current, { type: 'setQuiet', isQuiet });
+  }, [isReady, isQuiet]);
 
   useEffect(() => {
     if (!isReady) return;

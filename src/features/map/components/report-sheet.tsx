@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import Animated, { SlideInDown, SlideOutDown } from 'react-native-reanimated';
 
 import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
@@ -7,9 +8,14 @@ import { Icon } from '@/components/icon';
 import { Radio } from '@/components/radio';
 import { colors } from '@/constants/colors';
 import { screenPaddingX, spacing } from '@/constants/layout';
+import { duration } from '@/constants/motion';
 import { SheetHandle } from '@/features/map/components/sheet-handle';
 import { sheetCornerRadius } from '@/features/map/constants/map-layout';
 import { reportReasons, type ReportReasonId } from '@/features/map/constants/report-reasons';
+
+// Figma '기록 남기기 상세 애니메이션': 신고 창은 사진 카드 위로 아래에서 올라오고, 닫으면 내려간다.
+const sheetEntering = SlideInDown.duration(duration.normal);
+const sheetExiting = SlideOutDown.duration(duration.fast);
 
 type ReportSheetProps = {
   onClose: () => void;
@@ -31,7 +37,7 @@ export function ReportSheet({ onClose, onSubmit }: ReportSheetProps) {
   };
 
   return (
-    <View style={styles.sheet}>
+    <Animated.View entering={sheetEntering} exiting={sheetExiting} style={styles.sheet}>
       <SheetHandle />
       <View style={styles.titleRow}>
         <AppText variant="subtitle01">{isSubmitted ? '신고가 접수됐어요' : '어떤 점이 불편했나요?'}</AppText>
@@ -68,7 +74,7 @@ export function ReportSheet({ onClose, onSubmit }: ReportSheetProps) {
           <Button label="신고하기" variant="dark" disabled={!reason} onPress={submit} />
         </>
       )}
-    </View>
+    </Animated.View>
   );
 }
 

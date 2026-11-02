@@ -1,6 +1,7 @@
 import { colors, palette } from '@/constants/colors';
 import { floatingShadow, radius, spacing } from '@/constants/layout';
 import { typography, type TypographyVariant } from '@/constants/typography';
+import { mapChromeFadeMs } from '@/features/map/constants/map-motion';
 
 /**
  * 지도 위 마커는 WebView 안의 HTML이라 AppText나 StyleSheet를 쓸 수 없다.
@@ -110,4 +111,11 @@ export const kakaoMapCss = `
     width: ${myLocationSize / 2}px; height: ${myLocationSize / 2}px; border-radius: ${radius.full}px;
     background: ${palette.gray.black};
   }
+
+  /*
+   * 검색을 열 때(Figma '지도 홈 화면 애니메이션' 중간 장면) 사진만 남기고 이름표와 내 위치를 지운다.
+   * 마커는 지도에 붙어 있어 앱 쪽 애니메이션으로 움직일 수 없어서, 여기서 CSS로 흐리게 지운다.
+   */
+  .chip, .cluster-label, .cluster-more, .my-location { transition: opacity ${mapChromeFadeMs}ms ease-out; }
+  .quiet .chip, .quiet .cluster-label, .quiet .cluster-more, .quiet .my-location { opacity: 0; }
 `;

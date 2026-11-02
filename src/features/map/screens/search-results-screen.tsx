@@ -9,7 +9,8 @@ import { AiBadge } from '@/features/map/components/ai-badge';
 import { SearchQueryBar } from '@/features/map/components/search-query-bar';
 import { SearchResultsSheet } from '@/features/map/components/search-results-sheet';
 import { SearchTabs, type SearchTab } from '@/features/map/components/search-tabs';
-import { SelectedResultCard } from '@/features/map/components/selected-result-card';
+import { SelectedResultCard, type SelectedResultState } from '@/features/map/components/selected-result-card';
+import { SlidingPanel } from '@/features/map/components/sliding-panel';
 import type { SortOrder } from '@/features/map/components/sort-menu';
 import { useMyLocation } from '@/features/map/hooks/use-my-location';
 import { useRecentSearches } from '@/features/map/hooks/use-recent-searches';
@@ -38,6 +39,15 @@ function getSheetMessage(tab: SearchTab, items: SearchResultItem[], options: {
   if (tab === 'place' && options.errorMessage) return options.errorMessage;
   if (items.length === 0 && !options.isSearching) return '검색결과가 없어요';
   return null;
+}
+
+/**
+ * 아래 패널마다 다른 이름. 이름이 바뀌면 패널이 내려갔다 새로 올라온다 (SlidingPanel).
+ * 경로 카드를 접고 펼치거나 경로를 받는 중인 것은 같은 패널이라 이름에 넣지 않는다.
+ */
+function getPanelKey(tab: SearchTab, card: SelectedResultState | null) {
+  if (!card) return `list-${tab}`;
+  return card.mode === 'record' ? `record-${card.record.id}` : `${card.mode}-${card.item.key}`;
 }
 
 /**
@@ -103,33 +113,35 @@ export function SearchResultsScreen() {
         />
         {selection.routePlan && <AiBadge label="AI 추천 경로" style={styles.aiBadge} />}
 
-        {selection.card ? (
-          <SelectedResultCard
-            state={selection.card}
-            cardHeight={cardHeight}
-            onLayout={({ nativeEvent }: LayoutChangeEvent) => setCardHeight(Math.round(nativeEvent.layout.height))}
-            onClose={selection.close}
-            onRecommend={selection.recommendRoute}
-            onRouteExpandedChange={selection.setIsRouteExpanded}
-            onWalk={walkThisRoute}
-            onOpenRecord={openRecordOnHome}
-          />
-        ) : (
-          <SearchResultsSheet
-            height={sheetHeight}
-            items={items}
-            message={getSheetMessage(tab, items, {
-              isHashtagQuery: search.isHashtagQuery,
-              isSearching: search.isPlaceSearching,
-              errorMessage: search.placeErrorMessage,
-            })}
-            sortOrder={sortOrder}
-            onSortChange={setSortOrder}
-            isExpanded={isSheetExpanded}
-            onExpandedChange={setIsSheetExpanded}
-            onPressItem={selectItem}
-          />
-        )}
+        <SlidingPanel key={getPanelKey(tab, selection.card)}>
+          {selection.card ? (
+            <SelectedResultCard
+              state={selection.card}
+              cardHeight={cardHeight}
+              onLayout={({ nativeEvent }: LayoutChangeEvent) => setCardHeight(Math.round(nativeEvent.layout.height))}
+              onClose={selection.close}
+              onRecommend={selection.recommendRoute}
+              onRouteExpandedChange={selection.setIsRouteExpanded}
+              onWalk={walkThisRoute}
+              onOpenRecord={openRecordOnHome}
+            />
+          ) : (
+            <SearchResultsSheet
+              height={sheetHeight}
+              items={items}
+              message={getSheetMessage(tab, items, {
+                isHashtagQuery: search.isHashtagQuery,
+                isSearching: search.isPlaceSearching,
+                errorMessage: search.placeErrorMessage,
+              })}
+              sortOrder={sortOrder}
+              onSortChange={setSortOrder}
+              isExpanded={isSheetExpanded}
+              onExpandedChange={setIsSheetExpanded}
+              onPressItem={selectItem}
+            />
+          )}
+        </SlidingPanel>
       </View>
     </View>
   );

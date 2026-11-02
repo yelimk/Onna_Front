@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { AppText } from '@/components/app-text';
 import { Icon } from '@/components/icon';
@@ -6,6 +7,7 @@ import { PhotoPlaceholder } from '@/components/photo-placeholder';
 import { colors, palette } from '@/constants/colors';
 import { radius, spacing } from '@/constants/layout';
 import { sheetCornerRadius } from '@/features/map/constants/map-layout';
+import { usePopStyle } from '@/features/map/hooks/use-pop-style';
 import type { RecordDetail } from '@/features/map/hooks/use-record-detail';
 
 const headerButtonSize = 36;
@@ -25,6 +27,9 @@ type PhotoDetailCardProps = {
  * - 아직 안 열린 기록: 한 줄 대신 '가까이 가면 열려요' 안내만, 버튼 없음 (Figma '사진 신고' 화면)
  */
 export function PhotoDetailCard({ record, photoHeight, onClose, onReport, onLeaveMine, onToggleLike }: PhotoDetailCardProps) {
+  // Figma '기록 남기기 상세 애니메이션': 좋아요를 누르면 하트가 빨갛게 바뀌며 톡 튄다.
+  const heartStyle = usePopStyle(record.isLiked);
+
   return (
     <View style={styles.card}>
       <View style={styles.header}>
@@ -69,7 +74,9 @@ export function PhotoDetailCard({ record, photoHeight, onClose, onReport, onLeav
             accessibilityState={{ selected: record.isLiked }}
             onPress={onToggleLike}
             style={[styles.action, styles.like, record.isLiked && styles.liked]}>
-            <Icon name={record.isLiked ? 'heartFilled' : 'heart'} size={20} color={record.isLiked ? 'error' : 'textDeactivated'} />
+            <Animated.View style={heartStyle}>
+              <Icon name={record.isLiked ? 'heartFilled' : 'heart'} size={20} color={record.isLiked ? 'error' : 'textDeactivated'} />
+            </Animated.View>
             <AppText variant="button03" color={record.isLiked ? 'error' : 'textDeactivated'}>
               좋아요
             </AppText>

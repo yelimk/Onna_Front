@@ -8,6 +8,7 @@ import { CameraButton } from '@/features/map/components/map-action-buttons';
 import { NavigationBanner } from '@/features/map/components/navigation-banner';
 import { PhotoUnlockOverlay } from '@/features/map/components/photo-unlock-overlay';
 import { RecordsInRangeSheet } from '@/features/map/components/records-in-range-sheet';
+import { SlidingPanel } from '@/features/map/components/sliding-panel';
 import { openRadiusMeters } from '@/features/map/constants/map-config';
 import { useMyLocation } from '@/features/map/hooks/use-my-location';
 import { unlockRecord } from '@/features/map/hooks/use-record-memory';
@@ -33,7 +34,7 @@ function getBannerMessage(progress: ReturnType<typeof useWalkNavigation>['progre
  * Figma '지도 길안내 UI', '지도 목적지 도착 및 사진 해금 UI'. '이 길로 걷기'를 누르면 온다.
  * 지도에는 걸어온 길(회색)과 남은 길(주황), 내 열림 반경, 목적지를 그리고,
  * 위쪽 띠에 다음 자리까지 남은 시간을, 아래 패널에 열림 반경 안의 기록('범위 내 기록들')을 보여준다.
- * 목적지에 닿으면 패널을 내리고, 그 자리의 기록이 열렸다는 화면('열렸어요')을 띄운다.
+ * 목적지에 닿으면 패널을 아래로 내려 보내고(Figma '지도 경로 탐색 애니메이션'), 그 자리의 기록이 열렸다는 화면('열렸어요')을 띄운다.
  */
 export function NavigationScreen() {
   const insets = useSafeAreaInsets();
@@ -89,21 +90,22 @@ export function NavigationScreen() {
         <NavigationBanner message={getBannerMessage(navigation.progress)} onEnd={() => router.dismissTo('/map')} />
       </View>
 
-      {/* Figma: 목록을 접으면 카메라 버튼이 목록 위에 나온다. */}
-      {!hasArrived && !isSheetExpanded && (
-        <View style={[styles.camera, { bottom: collapsedSheetHeight + spacing.md }]}>
-          <CameraButton />
-        </View>
-      )}
-
       {!hasArrived && (
-        <RecordsInRangeSheet
-          height={sheetHeight}
-          records={navigation.recordsInRange}
-          isExpanded={isSheetExpanded}
-          onExpandedChange={setIsSheetExpanded}
-          onPressRecord={(record) => openRecord(record.id)}
-        />
+        <SlidingPanel>
+          {/* Figma: 목록을 접으면 카메라 버튼이 목록 위에 나온다. */}
+          {!isSheetExpanded && (
+            <View style={[styles.camera, { bottom: collapsedSheetHeight + spacing.md }]}>
+              <CameraButton />
+            </View>
+          )}
+          <RecordsInRangeSheet
+            height={sheetHeight}
+            records={navigation.recordsInRange}
+            isExpanded={isSheetExpanded}
+            onExpandedChange={setIsSheetExpanded}
+            onPressRecord={(record) => openRecord(record.id)}
+          />
+        </SlidingPanel>
       )}
 
       {navigation.unlockedRecord && !isUnlockDismissed && (
