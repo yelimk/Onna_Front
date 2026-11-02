@@ -286,7 +286,7 @@ GUI 디자인을 입힌 화면: 시작 화면(스플래시, 주황 배경), 소�
 - [x] 남기기: 셔터 순간 위치, 서버 질문, AI 해시태그 추천, 업로드(얼굴·위치 거절 안내) → `features/upload/`
 - [x] 내 기록 목록·상세, 마이 탭 닉네임·남긴 자리·연 자리 수 → `hooks/use-my-posts.ts`, `features/my/hooks/use-my-summary.ts`
 - [ ] 지도 구역, 구역 사진, 자리 열기, 좋아요, 해시태그 검색, 산책 경로 → `features/map/` 화면에 `src/api/map.ts` 붙이기
-- [ ] 서버에 API가 없어서 아직 가짜 데이터: 좋아요 내역, 연 자리 기록, 알림, 칭호, 좋아요한 자리 수, 회원 탈퇴, 기록 제목
+- [ ] 서버에 API가 없어서 아직 가짜 데이터: 좋아요 내역, 연 자리 기록, 알림, 좋아요한 자리 수, 회원 탈퇴, 기록 제목 (칭호는 서버 없이 `features/my/constants/profile-badges.ts`에 고정)
 - [x] 장소 검색 → 카카오 로컬 API (`features/map/api/search-places.ts`)
 - [x] 해시태그 검색 → `features/map/hooks/use-hashtag-search.ts` (지금은 가짜 기록에서 찾아요. 서버가 나오면 기록만 서버 데이터로 바꿔요)
 - [ ] 신고 보내기 (명세에 아직 없음) → `report-screen.tsx`
