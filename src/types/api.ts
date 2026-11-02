@@ -66,7 +66,7 @@ export type OpenedPost = {
 
 export type CreatedPost = {
   postId: number;
-  /** 다른 사람 지도에 보이기 시작하는 시각 (보통 2시간 뒤) */
+  /** 다른 사람 지도에 보이기 시작하는 시각 (올린 뒤 24시간, 내 기록에는 바로 보인다) */
   publishAt: string;
 };
 
