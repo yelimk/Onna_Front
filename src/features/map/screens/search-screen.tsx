@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import Animated, { FadeInUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/app-text';
@@ -9,6 +10,7 @@ import { floatingShadow, radius, screenPaddingX, spacing } from '@/constants/lay
 import { RecentSearchChips } from '@/features/map/components/recent-search-chips';
 import { SearchField } from '@/features/map/components/search-field';
 import { SearchResultList } from '@/features/map/components/search-result-list';
+import { mapChromeFadeMs, searchPanelEnterMs } from '@/features/map/constants/map-motion';
 import { useMyLocation } from '@/features/map/hooks/use-my-location';
 import { useRecentSearches } from '@/features/map/hooks/use-recent-searches';
 import { useSearchResults } from '@/features/map/hooks/use-search-results';
@@ -20,6 +22,7 @@ import { openSearchResults } from '@/features/map/utils/open-search-result';
  * 글자를 치는 동안 결과를 바로 보여주고 ('#'으로 시작하면 해시태그, 아니면 장소), 키보드의 검색을 누르면 검색결과 화면으로 간다.
  * 결과 하나를 누르면 검색결과 화면을 그 결과를 고른 상태(경로 추천 카드)로 연다.
  * 검색창 아래 빈 지도를 누르면 검색을 닫는다.
+ * Figma '지도 홈 화면 애니메이션': 지도 홈의 버튼·이름표가 먼저 사라진 뒤 검색 창이 위에서 내려온다.
  */
 export function SearchScreen() {
   const insets = useSafeAreaInsets();
@@ -45,7 +48,9 @@ export function SearchScreen() {
 
   return (
     <View style={styles.screen}>
-      <View style={[styles.panel, { paddingTop: insets.top + spacing.xs }]}>
+      <Animated.View
+        entering={panelEntering}
+        style={[styles.panel, { paddingTop: insets.top + spacing.xs }]}>
         <SearchField value={query} onChangeText={setQuery} onSubmit={submit} />
 
         <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
@@ -66,12 +71,14 @@ export function SearchScreen() {
             </View>
           )}
         </ScrollView>
-      </View>
+      </Animated.View>
 
       <Pressable accessibilityLabel="검색 닫기" style={styles.backdrop} onPress={() => router.back()} />
     </View>
   );
 }
+
+const panelEntering = FadeInUp.duration(searchPanelEnterMs).delay(mapChromeFadeMs);
 
 const styles = StyleSheet.create({
   screen: {

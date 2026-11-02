@@ -9,10 +9,12 @@ import { floatingShadow, radius, spacing } from '@/constants/layout';
 type MapSearchBarProps = {
   /** 검색한 장소 이름. 있으면 뒤로·닫기가 붙은 '검색 결과' 모양이 된다. */
   query?: string;
+  /** 검색창을 눌렀을 때. 없으면 바로 검색 화면으로 간다. */
+  onPress?: () => void;
 };
 
 /** 지도 맨 위 검색창. 누르면 검색 화면으로 간다. */
-export function MapSearchBar({ query }: MapSearchBarProps) {
+export function MapSearchBar({ query, onPress = () => router.push('/map/search') }: MapSearchBarProps) {
   if (query) {
     return (
       <View style={styles.bar}>
@@ -30,7 +32,7 @@ export function MapSearchBar({ query }: MapSearchBarProps) {
   }
 
   return (
-    <Pressable accessibilityRole="search" style={styles.bar} onPress={() => router.push('/map/search')}>
+    <Pressable accessibilityRole="search" style={styles.bar} onPress={onPress}>
       <Icon name="search" size={24} color="textPlaceholder" />
       <AppText variant="button03" color="textPlaceholder" style={styles.text}>
         장소나 #해시태그 검색

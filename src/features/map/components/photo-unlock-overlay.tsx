@@ -1,16 +1,25 @@
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
+import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 
 import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
 import { PhotoPlaceholder } from '@/components/photo-placeholder';
 import { colors, palette } from '@/constants/colors';
 import { radius, screenPaddingX, spacing } from '@/constants/layout';
+import { duration } from '@/constants/motion';
 
 /** Figma 사진 크기 280×362 */
 const photoWidth = 280;
 const photoHeight = 362;
 /** 사진을 두 겹(진한 주황 안쪽, 연한 주황 바깥)으로 감싸는 테두리 두께 */
 const frameWidth = spacing.xs;
+
+/*
+ * Figma '지도 최종 목적지 도착 애니메이션': 아래 패널이 내려간 뒤(duration.fast) 어두운 판이 깔리고,
+ * 열린 사진이 커지며 나타난 다음 글과 버튼이 아래에서 떠오른다. 한꺼번에 뜨면 '열렸다'는 순간이 묻혀서 순서를 둔다.
+ */
+const photoEntering = ZoomIn.duration(duration.normal).delay(duration.fast);
+const textEntering = FadeInDown.duration(duration.normal).delay(duration.fast + duration.normal);
 
 type PhotoUnlockOverlayProps = {
   onOpen: () => void;
@@ -22,6 +31,7 @@ type PhotoUnlockOverlayProps = {
  * 사진 해금은 다른 사람이 이 자리에서 남긴 사진과 한 줄을 볼 수 있게 되는 것이다.
  * 바깥 어두운 곳을 누르면 닫고 길안내 지도로 돌아간다.
  * Figma처럼 아래 탭 바까지 덮어야 해서, 화면 안의 View가 아니라 Modal로 띄운다.
+ * 어두운 판은 Modal의 fade로, 사진과 글은 photoEntering·textEntering 순서로 나타난다.
  */
 export function PhotoUnlockOverlay({ onOpen, onDismiss }: PhotoUnlockOverlayProps) {
   return (
@@ -31,22 +41,24 @@ export function PhotoUnlockOverlay({ onOpen, onDismiss }: PhotoUnlockOverlayProp
         <Pressable accessibilityRole="button" accessibilityLabel="닫기" onPress={onDismiss} style={styles.backdrop} />
 
         <View style={styles.content}>
-          <View style={styles.outerFrame}>
+          <Animated.View entering={photoEntering} style={styles.outerFrame}>
             <View style={styles.innerFrame}>
               <PhotoPlaceholder width="100%" height="100%" style={styles.photo} />
             </View>
-          </View>
+          </Animated.View>
 
-          <View style={styles.texts}>
+          <Animated.View entering={textEntering} style={styles.texts}>
             <AppText variant="heading01" color="textInverse">
               열렸어요
             </AppText>
             <AppText variant="button02" color="textInverse">
               다가와 준 덕분에 이 자리의 마음이 보여요
             </AppText>
-          </View>
+          </Animated.View>
 
-          <Button label="사진과 한 줄 보기" variant="primary" onPress={onOpen} style={styles.button} />
+          <Animated.View entering={textEntering} style={styles.button}>
+            <Button label="사진과 한 줄 보기" variant="primary" onPress={onOpen} />
+          </Animated.View>
         </View>
       </View>
     </Modal>

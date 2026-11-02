@@ -1,11 +1,14 @@
 import { useSegments } from 'expo-router';
 import type { BottomTabBarProps } from 'expo-router/tabs';
 import { Pressable, StyleSheet, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { AppText } from '@/components/app-text';
 import { Icon, type IconName } from '@/components/icon';
 import { colors } from '@/constants/colors';
 import { radius, spacing } from '@/constants/layout';
+import { duration } from '@/constants/motion';
+import { useFadeStyle } from '@/hooks/use-fade-style';
 
 /** 탭 이름(app/(tabs)의 폴더)마다 Figma 탭 아이콘 */
 const tabIcons: Record<string, IconName> = {
@@ -18,6 +21,10 @@ const tabIcons: Record<string, IconName> = {
 // 지도 탭은 GUI가 화면마다 달라서 지도 담당이 정한 뒤에 추가한다.
 const tabsHidingBarOnInnerScreens = ['my'];
 
+// Figma '지도 홈 화면 애니메이션'에서 검색을 열면 탭 바가 흐리게 사라진다.
+// 자리까지 없애면 아래 지도 크기가 바뀌어 지도가 출렁이므로, 자리는 두고 흐리게만 지운다.
+const fadingBarScreens = ['map/search'];
+
 const indicatorWidth = 32;
 const indicatorHeight = spacing.xxs;
 
@@ -29,12 +36,15 @@ export function AppTabBar({ state, descriptors, emitter, navigateToTab, insets }
   // 지금 주소를 조각으로 받는다. 예: /my → ['(tabs)', 'my'], /my/likes → ['(tabs)', 'my', 'likes']
   const segments = useSegments() as string[];
   const [, tabName, innerScreen] = segments;
+  const isFadedOut = fadingBarScreens.includes(`${tabName}/${innerScreen}`);
+  const fadeStyle = useFadeStyle(!isFadedOut, duration.fast);
   if (tabsHidingBarOnInnerScreens.includes(tabName) && innerScreen !== undefined) {
     return null;
   }
 
   return (
-    <View style={[styles.bar, { paddingBottom: insets.bottom }]}>
+    <Animated.View
+      style={[styles.bar, { paddingBottom: insets.bottom, pointerEvents: isFadedOut ? 'none' : 'auto' }, fadeStyle]}>
       {state.routes.map((route, index) => {
         const isFocused = state.index === index;
         const { options } = descriptors[route.key];
@@ -63,7 +73,7 @@ export function AppTabBar({ state, descriptors, emitter, navigateToTab, insets }
           </Pressable>
         );
       })}
-    </View>
+    </Animated.View>
   );
 }
 
