@@ -1,10 +1,8 @@
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import Animated, { SlideInDown } from 'react-native-reanimated';
 
 import { colors } from '@/constants/colors';
 import { radius, screenPaddingX, spacing } from '@/constants/layout';
-import { duration } from '@/constants/motion';
 import { SheetHandle } from '@/features/map/components/sheet-handle';
 import { useVerticalSwipe } from '@/features/map/hooks/use-vertical-swipe';
 
@@ -19,30 +17,17 @@ type MapBottomSheetProps = {
   header: ReactNode;
   /** 펼쳤을 때만 보이는 목록. 길면 패널 안에서 스크롤된다. */
   children: ReactNode;
-  /** true면 처음 나타날 때 화면 아래에서 미끄러져 올라온다. */
-  slidesIn?: boolean;
 };
-
-// 웹에서는 직접 만든 등장 애니메이션을 지원하지 않아서, 웹으로 확인하는 팀원도 같은 움직임을 보도록 기본 애니메이션을 쓴다.
-const slideUpFromBottom = SlideInDown.duration(duration.normal);
 
 /**
  * 지도 화면 아래에 붙는 흰 패널. 검색결과, 묶음 기록이 같이 쓴다.
  * 손잡이를 누르거나 위아래로 밀면 접고 펼친다. 접으면 header만 남아 지도가 넓어진다.
  */
-export function MapBottomSheet({
-  height,
-  isExpanded,
-  onExpandedChange,
-  label,
-  header,
-  children,
-  slidesIn = false,
-}: MapBottomSheetProps) {
+export function MapBottomSheet({ height, isExpanded, onExpandedChange, label, header, children }: MapBottomSheetProps) {
   const swipeHandlers = useVerticalSwipe(onExpandedChange);
 
   return (
-    <Animated.View entering={slidesIn ? slideUpFromBottom : undefined} style={[styles.sheet, isExpanded && { height }]}>
+    <View style={[styles.sheet, isExpanded && { height }]}>
       <View style={styles.top} {...swipeHandlers}>
         <Pressable
           accessibilityRole="button"
@@ -55,7 +40,7 @@ export function MapBottomSheet({
       </View>
 
       {isExpanded && <ScrollView contentContainerStyle={styles.content}>{children}</ScrollView>}
-    </Animated.View>
+    </View>
   );
 }
 
