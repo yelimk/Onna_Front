@@ -116,6 +116,8 @@ export function SearchResultsScreen() {
           />
         ) : (
           <SearchResultsSheet
+            // 탭을 바꾸면 패널을 새로 그려서, 다른 목록이 아래에서 다시 올라오게 한다 (Figma '지도 검색 애니메이션').
+            key={tab}
             height={sheetHeight}
             items={items}
             message={getSheetMessage(tab, items, {

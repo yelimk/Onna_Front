@@ -19,7 +19,10 @@ type SearchResultsSheetProps = {
   onPressItem: (item: SearchResultItem) => void;
 };
 
-/** 검색결과 화면 아래 패널: 정렬 버튼과 결과 목록. 접으면 정렬만 남고 지도가 넓어진다. */
+/**
+ * 검색결과 화면 아래 패널: 정렬 버튼과 결과 목록. 접으면 정렬만 남고 지도가 넓어진다.
+ * Figma '지도 검색 애니메이션'처럼 나타날 때 화면 아래에서 올라온다.
+ */
 export function SearchResultsSheet({
   height,
   items,
@@ -36,6 +39,7 @@ export function SearchResultsSheet({
       isExpanded={isExpanded}
       onExpandedChange={onExpandedChange}
       label="검색결과"
+      slidesIn
       header={<SortMenu value={sortOrder} onChange={onSortChange} />}>
       {message ? (
         <AppText variant="caption01" color="textTertiary" style={styles.message}>
