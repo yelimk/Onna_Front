@@ -1,20 +1,26 @@
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { spacing } from '@/constants/layout';
 import { OptionCard } from '@/features/auth/components/option-card';
 import { StepTitle } from '@/features/auth/components/step-title';
-import { minPlaceCount, placeOptions } from '@/features/auth/constants/survey-options';
+import { minPlaceCount, placeDescriptions } from '@/features/auth/constants/survey-options';
+import type { Tag } from '@/types/api';
+import { formatHashtag } from '@/utils/format-hashtag';
 
 type PlaceStepProps = {
-  value: string[];
-  onChange: (value: string[]) => void;
+  /** 서버 해시태그 사전. null이면 불러오는 중 */
+  tags: Tag[] | null;
+  hasFailed: boolean;
+  onRetry: () => void;
+  value: number[];
+  onChange: (value: number[]) => void;
 };
 
-/** 설문 2/3: 끌리는 자리 해시태그 (여러 개, 최소 3개) */
-export function PlaceStep({ value, onChange }: PlaceStepProps) {
-  const toggle = (hashtag: string) =>
-    onChange(value.includes(hashtag) ? value.filter((item) => item !== hashtag) : [...value, hashtag]);
+/** 설문 2/3: 끌리는 자리 해시태그 (여러 개, 최소 3개). 고른 태그 id를 서버에 저장한다. */
+export function PlaceStep({ tags, hasFailed, onRetry, value, onChange }: PlaceStepProps) {
+  const toggle = (tagId: number) =>
+    onChange(value.includes(tagId) ? value.filter((item) => item !== tagId) : [...value, tagId]);
 
   return (
     <View>
@@ -27,18 +33,30 @@ export function PlaceStep({ value, onChange }: PlaceStepProps) {
           </>
         }
       />
+
+      {hasFailed && (
+        <Pressable onPress={onRetry} hitSlop={8}>
+          <AppText variant="caption02" color="textTertiary">
+            해시태그를 불러오지 못했어요. 눌러서 다시 불러오기
+          </AppText>
+        </Pressable>
+      )}
+
       <View style={styles.grid}>
-        {placeOptions.map((option) => (
-          <OptionCard
-            key={option.hashtag}
-            title={option.hashtag}
-            description={option.description}
-            selected={value.includes(option.hashtag)}
-            onPress={() => toggle(option.hashtag)}
-            compact
-            style={styles.gridItem}
-          />
-        ))}
+        {tags?.map((tag) => {
+          const hashtag = formatHashtag(tag.name);
+          return (
+            <OptionCard
+              key={tag.id}
+              title={hashtag}
+              description={placeDescriptions[hashtag]}
+              selected={value.includes(tag.id)}
+              onPress={() => toggle(tag.id)}
+              compact
+              style={styles.gridItem}
+            />
+          );
+        })}
       </View>
     </View>
   );

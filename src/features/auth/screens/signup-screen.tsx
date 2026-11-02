@@ -1,5 +1,4 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
@@ -8,54 +7,30 @@ import { TextField } from '@/components/text-field';
 import { spacing } from '@/constants/layout';
 import { SignupHeader } from '@/features/auth/components/signup-header';
 import { StepTitle } from '@/features/auth/components/step-title';
-import { requiredTerms, TermsAgreement, type TermName } from '@/features/auth/components/terms-agreement';
-
-const totalSteps = 4;
-
-type SignupForm = {
-  email: string;
-  password: string;
-  passwordConfirm: string;
-  nickname: string;
-  agreedTerms: TermName[];
-};
+import { TermsAgreement } from '@/features/auth/components/terms-agreement';
+import { signupTotalSteps, useSignup } from '@/features/auth/hooks/use-signup';
+import { nicknameLength, passwordLength } from '@/features/auth/utils/signup-rules';
 
 /**
  * 시작: 회원가입 4단계 (이메일 → 비밀번호 → 닉네임 → 약관).
- * 입력 규칙(이메일 형식, 비밀번호 길이·일치, 이미 가입된 이메일, 닉네임 중복)은 백엔드 API와 같이 정하기로 해서,
- * 지금은 칸이 비어 있지 않으면 다음으로 넘어간다. 규칙이 생기면 TextField의 error·helper로 보여준다.
+ * 칸마다 규칙을 바로 검사해 빨간 문구로 알려주고, 마지막 단계에서 서버에 가입한 뒤 바로 로그인한다.
+ * 이미 가입된 이메일이면 1단계로 돌아가 이메일 칸에 알려준다.
  */
 export function SignupScreen() {
-  const [step, setStep] = useState(1);
-  const [form, setForm] = useState<SignupForm>({
-    email: '',
-    password: '',
-    passwordConfirm: '',
-    nickname: '',
-    agreedTerms: [],
-  });
-
-  const update = (patch: Partial<SignupForm>) => setForm({ ...form, ...patch });
+  const { step, setStep, form, update, errors, canGoNext, isSubmitting, goNext } = useSignup();
   const goBack = () => (step === 1 ? router.back() : setStep(step - 1));
-
-  const canGoNext =
-    (step === 1 && form.email.length > 0) ||
-    (step === 2 && form.password.length > 0 && form.passwordConfirm.length > 0) ||
-    (step === 3 && form.nickname.length > 0) ||
-    (step === 4 && form.agreedTerms.length === requiredTerms.length);
-
-  const handleNext = () => {
-    if (step === totalSteps) {
-      router.push('/permission');
-      return;
-    }
-    setStep(step + 1);
-  };
 
   return (
     <ScreenContainer
-      header={<SignupHeader step={step} totalSteps={totalSteps} onBack={goBack} />}
-      footer={<Button label="다음" variant="primary" disabled={!canGoNext} onPress={handleNext} />}>
+      header={<SignupHeader step={step} totalSteps={signupTotalSteps} onBack={goBack} />}
+      footer={
+        <Button
+          label={isSubmitting ? '가입하는 중…' : '다음'}
+          variant="primary"
+          disabled={!canGoNext}
+          onPress={goNext}
+        />
+      }>
       {step === 1 && (
         <>
           <StepTitle title="이메일을 알려주세요" />
@@ -64,6 +39,7 @@ export function SignupScreen() {
             placeholder="이메일을 입력해 주세요"
             value={form.email}
             onChangeText={(email) => update({ email })}
+            error={errors.email}
             keyboardType="email-address"
             autoCapitalize="none"
             autoComplete="email"
@@ -80,6 +56,8 @@ export function SignupScreen() {
               placeholder="비밀번호를 입력해 주세요"
               value={form.password}
               onChangeText={(password) => update({ password })}
+              error={errors.password}
+              helper={`${passwordLength.min}~${passwordLength.max}자`}
               isPassword
               autoComplete="new-password"
             />
@@ -88,6 +66,7 @@ export function SignupScreen() {
               placeholder="비밀번호를 한 번 더 입력해 주세요"
               value={form.passwordConfirm}
               onChangeText={(passwordConfirm) => update({ passwordConfirm })}
+              error={errors.passwordConfirm}
               isPassword
               autoComplete="new-password"
             />
@@ -106,6 +85,9 @@ export function SignupScreen() {
             placeholder="닉네임을 입력해 주세요"
             value={form.nickname}
             onChangeText={(nickname) => update({ nickname })}
+            error={errors.nickname}
+            maxLength={nicknameLength.max}
+            showCount
           />
         </>
       )}

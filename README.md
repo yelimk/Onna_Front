@@ -74,6 +74,7 @@ npx tsc --noEmit
 | 이미지 | expo-image |
 | 지도 | 카카오맵 JavaScript SDK (react-native-webview 안에 띄움) |
 | 위치 | expo-location |
+| 로그인 토큰 저장 | expo-secure-store |
 | 카메라 | expo-camera (카메라 권한만, 갤러리 권한 없음) |
 | 사진 자르기·줄이기 | expo-image-manipulator (모든 사진을 세로 3:4, 1080×1440으로) |
 | 알림 권한 | expo-notifications (권한 요청만. 푸시 알림은 아직 없음) |
@@ -149,9 +150,9 @@ src/
     notification/   알림 목록
   components/     두 개 이상의 기능이 같이 쓰는 부품
   constants/      디자인 시스템 (색상, 글꼴, 간격, 애니메이션 시간)
-  hooks/          같이 쓰는 훅 (흐려졌다 나타나는 애니메이션 등)
-  api/            서버 요청
-  mock/           백엔드 완성 전에 쓰는 가짜 데이터
+  hooks/          같이 쓰는 훅 (내 기록 불러오기, 흐려졌다 나타나는 애니메이션 등)
+  api/            서버 요청 (API 명세의 요청 함수 전부. 아래 '서버 연결' 참고)
+  mock/           서버에 아직 API가 없는 화면의 가짜 데이터
   utils/          거리 계산 같은 작은 함수
   types/          데이터 타입
 assets/
@@ -268,19 +269,27 @@ GUI 디자인을 입힌 화면: 시작 화면(스플래시, 주황 배경), 소�
 
 ### 서버 연결 (백엔드·AI API가 나오면)
 
-가짜 데이터는 `src/mock/`과 각 기능의 `constants/preview-*.ts`에 있어요. API 요청 코드는 `src/api/`에 모아요.
+서버 주소는 `src/api/config.ts`에 있어요 (`.env`의 `EXPO_PUBLIC_API_URL`이 있으면 그걸 써요). API 명세의 요청은 모두 `src/api/`에 함수로 만들어 두었어요.
 
-- [ ] 이메일 로그인, 회원가입 → `features/auth/screens/`. 틀렸을 때 빨간 칸과 오류 알림(Figma 로그인 오류 화면)도 이때 붙인다
-- [ ] 회원가입 입력 규칙: 이메일 형식·중복, 비밀번호 길이·일치, 닉네임 중복 → `signup-screen.tsx` (지금은 비어 있지만 않으면 통과)
-- [ ] 취향 설문 저장, 사용자 기호 수정 저장 → `survey-screen.tsx`, `preferences-screen.tsx`
-- [ ] 지도 주변 사진, 묶음, 자리 상세, 열린 자리 불러오기 → `features/map/`
+| 파일 | 요청 |
+| --- | --- |
+| `client.ts` | 모든 요청이 거치는 곳. 로그인 토큰을 붙이고, 토큰이 만료되면 한 번 새로 받아 다시 보내요. 서버 에러는 `ApiError`(`api-error.ts`)로 바꿔요 |
+| `token-storage.ts` | 로그인 토큰을 폰 안 보안 저장소에 저장 |
+| `auth.ts` | 회원가입, 로그인, 로그아웃 |
+| `users.ts` | 내 정보, 선호 태그 저장, 내 기록, 내 업적 |
+| `tags.ts` | 해시태그 목록, 남기기 질문 |
+| `posts.ts` | AI 해시태그 추천, 사진 남기기, 기록 삭제 |
+| `map.ts` | 지도 구역, 구역 사진 목록, 자리 열기, 좋아요, 해시태그 검색, 산책 경로 추천 (지도 화면에 붙일 차례) |
+
+- [x] 이메일 로그인, 회원가입, 앱 시작 시 로그인 확인 → `features/auth/` (틀리면 빨간 칸, 회원가입 입력 규칙은 `features/auth/utils/signup-rules.ts`)
+- [x] 취향 설문 저장, 사용자 기호 수정 저장 → `survey-screen.tsx`, `preferences-screen.tsx`
+- [x] 남기기: 셔터 순간 위치, 서버 질문, AI 해시태그 추천, 업로드(얼굴·위치 거절 안내) → `features/upload/`
+- [x] 내 기록 목록·상세, 마이 탭 닉네임·남긴 자리·연 자리 수 → `hooks/use-my-posts.ts`, `features/my/hooks/use-my-summary.ts`
+- [ ] 지도 구역, 구역 사진, 자리 열기, 좋아요, 해시태그 검색, 산책 경로 → `features/map/` 화면에 `src/api/map.ts` 붙이기
+- [ ] 서버에 API가 없어서 아직 가짜 데이터: 좋아요 내역, 연 자리 기록, 알림, 좋아요한 자리 수, 회원 탈퇴, 기록 제목 (칭호는 서버 없이 `features/my/constants/profile-badges.ts`에 고정)
 - [x] 장소 검색 → 카카오 로컬 API (`features/map/api/search-places.ts`)
 - [x] 해시태그 검색 → `features/map/hooks/use-hashtag-search.ts` (지금은 가짜 기록에서 찾아요. 서버가 나오면 기록만 서버 데이터로 바꿔요)
-- [ ] 좋아요, 신고 보내기 → `opened-spot-screen.tsx`, `report-screen.tsx`
-- [ ] 사진 업로드 (얼굴 감지 결과 포함) → `features/upload/screens/confirm-screen.tsx`
-- [ ] AI 해시태그 추천 → `src/api/hashtag-suggestions.ts` 안만 서버 요청으로 바꾸면 돼요. 한 줄 코멘트를 다 쓰고 입력칸을 벗어나면 요청하고, 받으면 해시태그 칸이 나타나요. 지금은 정해진 4개를 0.6초 뒤에 돌려줘요
-- [ ] AI '내 취향 순' 정렬, 다른 산책길 추천 → `cluster-screen.tsx`, `walk-screen.tsx`
-- [ ] 내 기록, 좋아요 내역, 연 자리 기록, 알림 목록 불러오기 → `features/record/`, `features/my/`, `features/notification/`
+- [ ] 신고 보내기 (명세에 아직 없음) → `report-screen.tsx`
 
 ### GUI 디자인이 나오면
 
@@ -377,7 +386,9 @@ Expo Go에 포함되지 않은 네이티브 라이브러리를 넣으면 Expo Go
 API 키, 서버 주소 같은 값은 `.env` 파일에 넣어요. `.env`는 GitHub에 올라가지 않아요.
 
 ```
-EXPO_PUBLIC_API_URL=https://...
+EXPO_PUBLIC_API_URL=http://서버주소/api/v1
 ```
+
+비워 두면 `src/api/config.ts`의 기본 서버 주소를 써요.
 
 `EXPO_PUBLIC_`로 시작하는 값은 앱 안에 포함되므로, 비밀 키는 넣지 말고 백엔드에 둬요.

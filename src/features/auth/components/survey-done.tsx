@@ -8,18 +8,20 @@ import { relationOptions, type SurveyAnswers } from '@/features/auth/constants/s
 
 type SurveyDoneProps = {
   answers: SurveyAnswers;
+  /** 고른 자리 해시태그 이름 (서버 태그 id를 이름으로 바꾼 것) */
+  placeNames: string[];
   nickname: string;
   nearbySpotCount: number;
 };
 
 /** 설문 완료: 고른 취향을 요약하고 지도로 보낸다 */
-export function SurveyDone({ answers, nickname, nearbySpotCount }: SurveyDoneProps) {
+export function SurveyDone({ answers, placeNames, nickname, nearbySpotCount }: SurveyDoneProps) {
   const relationTitle = relationOptions.find((option) => option.id === answers.relation)?.title ?? '-';
   const walkSummary = [...answers.walkTimes, answers.walkDuration].filter(Boolean).join(' · ') || '-';
 
   const rows = [
     { label: '나와 대구·경북', value: relationTitle },
-    { label: '끌리는 자리', value: answers.places.join(' ') || '-' },
+    { label: '끌리는 자리', value: placeNames.join(' ') || '-' },
     { label: '걷는 때', value: walkSummary },
   ];
 
@@ -33,7 +35,7 @@ export function SurveyDone({ answers, nickname, nearbySpotCount }: SurveyDonePro
 
         <View style={styles.texts}>
           <AppText variant="heading01" style={styles.center}>
-            {`${nickname}님 근처에\n흐릿한 자리 ${nearbySpotCount}곳이 있어요`}
+            {`${nickname ? `${nickname}님 ` : ''}근처에\n흐릿한 자리 ${nearbySpotCount}곳이 있어요`}
           </AppText>
           <AppText variant="subtitle03" color="textSecondary" style={styles.center}>
             고른 취향에 맞는 자리부터 먼저 띄워둘게요

@@ -9,7 +9,9 @@ import { Icon } from '@/components/icon';
 import { colors } from '@/constants/colors';
 import { radius, screenPaddingX, spacing } from '@/constants/layout';
 import { CameraViewfinder } from '@/features/upload/components/camera-viewfinder';
+import { getRegionName } from '@/features/map/api/get-region-name';
 import { useUploadDraft } from '@/features/upload/upload-draft';
+import { getPhotoLocation } from '@/features/upload/utils/get-photo-location';
 import { normalizePhoto } from '@/features/upload/utils/normalize-photo';
 
 // Figma Shutter: 바깥 주황 고리 72, 안쪽 흰 원 사이에 검은 틈
@@ -23,6 +25,7 @@ const flipButtonSize = 48;
  * 갤러리는 일부러 막는다. 그 자리에서 앱 카메라로 찍은 사진만 남길 수 있어야 '가야 보이는' 지도가 된다.
  * 그래서 카메라 권한만 받고, 갤러리(사진 보관함) 권한은 받지 않는다.
  * 찍은 사진은 세로 3:4, 1080×1440으로 맞춘 뒤 draft에 넣어 다음 단계에서 보여준다.
+ * 셔터를 누른 순간의 위치도 같이 잡는다. 위치는 몇 초 걸릴 수 있어서 기다리지 않고 다음 화면으로 넘어간 뒤 채운다.
  */
 export function CameraScreen() {
   const { updateDraft } = useUploadDraft();
@@ -41,9 +44,19 @@ export function CameraScreen() {
     else requestPermission();
   };
 
+  // 셔터를 누른 순간의 위치와, 위치 확인 화면에 보여줄 동네 이름(지도 담당의 카카오 동네 이름 함수)을 채운다
+  const recordPhotoLocation = async () => {
+    const location = await getPhotoLocation();
+    updateDraft({ location: location ?? undefined });
+    if (!location) return;
+    const regionName = await getRegionName({ latitude: location.lat, longitude: location.lng }).catch(() => '');
+    if (regionName) updateDraft({ placeLabel: regionName });
+  };
+
   const takePhoto = async () => {
     // 카메라가 준비되기 전에 찍으면 실패하고, 두 번 누르면 두 장이 찍혀서 막는다.
     if (!cameraRef.current || !isReady || isTakingRef.current) return;
+    recordPhotoLocation();
     isTakingRef.current = true;
     setIsTaking(true);
     setHasFailed(false);

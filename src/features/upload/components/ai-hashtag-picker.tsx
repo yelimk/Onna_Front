@@ -3,13 +3,15 @@ import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/app-text';
 import { Chip } from '@/components/chip';
 import { spacing } from '@/constants/layout';
+import type { Tag } from '@/types/api';
+import { formatHashtag } from '@/utils/format-hashtag';
 
 export const maxHashtagCount = 3;
 
 type AiHashtagPickerProps = {
-  suggestions: string[];
-  selected: string[];
-  onChange: (selected: string[]) => void;
+  suggestions: Tag[];
+  selected: Tag[];
+  onChange: (selected: Tag[]) => void;
 };
 
 /**
@@ -17,13 +19,15 @@ type AiHashtagPickerProps = {
  * 직접 쓰지 않고 AI 추천 안에서만 고르게 해서 한 줄과 상관없는 해시태그가 붙는 것을 막는다.
  */
 export function AiHashtagPicker({ suggestions, selected, onChange }: AiHashtagPickerProps) {
-  const toggle = (hashtag: string) => {
-    if (selected.includes(hashtag)) {
-      onChange(selected.filter((item) => item !== hashtag));
+  const isSelected = (tag: Tag) => selected.some((item) => item.id === tag.id);
+
+  const toggle = (tag: Tag) => {
+    if (isSelected(tag)) {
+      onChange(selected.filter((item) => item.id !== tag.id));
       return;
     }
     if (selected.length < maxHashtagCount) {
-      onChange([...selected, hashtag]);
+      onChange([...selected, tag]);
     }
   };
 
@@ -36,8 +40,8 @@ export function AiHashtagPicker({ suggestions, selected, onChange }: AiHashtagPi
         </AppText>
       </View>
       <View style={styles.chips}>
-        {suggestions.map((hashtag) => (
-          <Chip key={hashtag} label={hashtag} selected={selected.includes(hashtag)} onPress={() => toggle(hashtag)} />
+        {suggestions.map((tag) => (
+          <Chip key={tag.id} label={formatHashtag(tag.name)} selected={isSelected(tag)} onPress={() => toggle(tag)} />
         ))}
       </View>
     </View>
