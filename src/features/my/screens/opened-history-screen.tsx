@@ -24,6 +24,7 @@ export function OpenedHistoryScreen() {
 
   return (
     <ScreenContainer
+      glassHeader
       contentTopGap={spacing.xs}
       header={
         <ScreenHeader

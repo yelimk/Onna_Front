@@ -40,6 +40,7 @@ export function PreferencesScreen() {
 
   return (
     <ScreenContainer
+      glassHeader
       contentTopGap={spacing.xs}
       header={<ScreenHeader title="사용자 기호 설정" />}
       footer={

@@ -74,6 +74,7 @@ npx tsc --noEmit
 | 이미지 | expo-image |
 | 지도 | 카카오맵 JavaScript SDK (react-native-webview 안에 띄움) |
 | 위치 | expo-location |
+| 반투명 상단 바 흐림 | expo-blur |
 | 로그인 토큰 저장 | expo-secure-store |
 | 카메라 | expo-camera (카메라 권한만, 갤러리 권한 없음) |
 | 사진 자르기·줄이기 | expo-image-manipulator (모든 사진을 세로 3:4, 1080×1440으로) |
@@ -322,7 +323,7 @@ Figma `디자인 시스템` 페이지의 값을 코드로 옮겨 두었어요.
 
 | 부품 | 용도 |
 |---|---|
-| `ScreenContainer` | 모든 화면의 바깥 틀 (여백, 안전 영역, 위·아래 고정 영역) |
+| `ScreenContainer` | 모든 화면의 바깥 틀 (여백, 안전 영역, 위·아래 고정 영역). `glassHeader`를 켜면 스크롤할 때 내용이 비치는 반투명 상단 바(Figma 배경 40% + 흐림)가 된다 |
 | `ScreenHeader` | 뒤로가기, 제목, 오른쪽 버튼 |
 | `Button` | 큰 버튼 (`primary` 강조 / `dark` 기본 / `outline` 보조). 비활성이면 모두 회색 |
 | `TextField` | 라벨이 있는 입력창 |

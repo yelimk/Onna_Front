@@ -28,7 +28,8 @@ export function SettingsScreen() {
   };
 
   return (
-    <ScreenContainer background="gray" contentTopGap={spacing.xs} header={<ScreenHeader title="설정" />}>
+    <ScreenContainer
+      glassHeader background="gray" contentTopGap={spacing.xs} header={<ScreenHeader title="설정" />}>
       <View style={styles.groups}>
         <MenuGroup title="권한">
           <MenuRow

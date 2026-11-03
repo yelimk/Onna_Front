@@ -48,6 +48,7 @@ export function RecordDetailScreen() {
 
   return (
     <ScreenContainer
+      glassHeader
       contentTopGap={0}
       header={
         <ScreenHeader

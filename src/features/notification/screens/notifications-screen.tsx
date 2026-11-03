@@ -16,7 +16,8 @@ import { mockNotificationGroups } from '@/mock/notifications';
  */
 export function NotificationsScreen() {
   return (
-    <ScreenContainer contentTopGap={spacing.xs} header={<ScreenHeader title="알림" />}>
+    <ScreenContainer
+      glassHeader contentTopGap={spacing.xs} header={<ScreenHeader title="알림" />}>
       <View style={styles.groups}>
         {mockNotificationGroups.map((group) => (
           <View key={group.label} style={styles.group}>
