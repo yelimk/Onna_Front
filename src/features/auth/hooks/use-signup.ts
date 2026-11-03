@@ -10,7 +10,7 @@ import {
   getPasswordConfirmError,
   getPasswordError,
 } from '@/features/auth/utils/signup-rules';
-import { showApiErrorToast } from '@/utils/show-api-error';
+import { showApiError } from '@/utils/show-api-error';
 
 export const signupTotalSteps = 4;
 
@@ -76,7 +76,7 @@ export function useSignup() {
         setDuplicatedEmail(form.email);
         setStep(1);
       } else {
-        showApiErrorToast(error);
+        showApiError(error);
       }
     } finally {
       setIsSubmitting(false);

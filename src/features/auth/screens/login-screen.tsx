@@ -11,7 +11,7 @@ import { TextField } from '@/components/text-field';
 import { showToast } from '@/components/toast';
 import { sectionGap, spacing } from '@/constants/layout';
 import { goAfterLogin } from '@/features/auth/utils/go-after-login';
-import { showApiErrorToast } from '@/utils/show-api-error';
+import { showApiError } from '@/utils/show-api-error';
 
 /**
  * 시작: 이메일 로그인. 서버에서 받은 출입증을 저장하고, 설문 여부에 따라 지도나 권한 안내로 보낸다.
@@ -52,7 +52,7 @@ export function LoginScreen() {
     } catch (error) {
       // 이메일 모양이 틀린 것(INVALID_INPUT)도 Figma에 따로 화면이 없어서 '일치하지 않습니다'로 같이 보여준다
       if (isApiError(error, 'LOGIN_FAILED') || isApiError(error, 'INVALID_INPUT')) failLogin('이메일 또는 비밀번호가 일치하지 않습니다');
-      else showApiErrorToast(error);
+      else showApiError(error);
     } finally {
       setIsSubmitting(false);
     }
