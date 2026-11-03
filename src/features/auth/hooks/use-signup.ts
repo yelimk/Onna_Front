@@ -10,7 +10,7 @@ import {
   getPasswordConfirmError,
   getPasswordError,
 } from '@/features/auth/utils/signup-rules';
-import { showApiError } from '@/utils/show-api-error';
+import { showApiErrorToast } from '@/utils/show-api-error';
 
 export const signupTotalSteps = 4;
 
@@ -63,6 +63,8 @@ export function useSignup() {
   const update = (patch: Partial<SignupForm>) => setForm((prev) => ({ ...prev, ...patch }));
 
   const submit = async () => {
+    // 기다리는 동안 버튼 모양은 그대로 두고, 두 번 눌러도 한 번만 보낸다
+    if (isSubmitting) return;
     setIsSubmitting(true);
     try {
       const email = form.email.trim();
@@ -74,7 +76,7 @@ export function useSignup() {
         setDuplicatedEmail(form.email);
         setStep(1);
       } else {
-        showApiError(error);
+        showApiErrorToast(error);
       }
     } finally {
       setIsSubmitting(false);
@@ -90,8 +92,7 @@ export function useSignup() {
     update,
     errors,
     successes,
-    canGoNext: isStepDone && !isSubmitting,
-    isSubmitting,
+    canGoNext: isStepDone,
     goNext,
   };
 }

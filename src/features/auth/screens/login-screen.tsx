@@ -11,7 +11,7 @@ import { TextField } from '@/components/text-field';
 import { showToast } from '@/components/toast';
 import { sectionGap, spacing } from '@/constants/layout';
 import { goAfterLogin } from '@/features/auth/utils/go-after-login';
-import { showApiError } from '@/utils/show-api-error';
+import { showApiErrorToast } from '@/utils/show-api-error';
 
 /**
  * 시작: 이메일 로그인. 서버에서 받은 출입증을 저장하고, 설문 여부에 따라 지도나 권한 안내로 보낸다.
@@ -23,8 +23,6 @@ export function LoginScreen() {
   const [hasLoginFailed, setHasLoginFailed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const canSubmit = email.trim().length > 0 && password.length > 0 && !isSubmitting;
-
   // 다시 고치기 시작하면 빨간 표시를 지운다
   const changeEmail = (value: string) => {
     setEmail(value);
@@ -35,18 +33,26 @@ export function LoginScreen() {
     setHasLoginFailed(false);
   };
 
+  const failLogin = () => {
+    setHasLoginFailed(true);
+    showToast('이메일 또는 비밀번호가 일치하지 않습니다', 'error');
+  };
+
+  // Figma처럼 로그인 버튼은 늘 눌린다. 빈 칸으로 누르면 서버에 보내지 않고 틀렸을 때와 똑같이 알려준다.
   const submit = async () => {
+    if (isSubmitting) return;
+    if (email.trim().length === 0 || password.length === 0) {
+      failLogin();
+      return;
+    }
     setIsSubmitting(true);
     try {
       await login(email.trim(), password);
       await goAfterLogin();
     } catch (error) {
-      if (isApiError(error, 'LOGIN_FAILED')) {
-        setHasLoginFailed(true);
-        showToast('이메일 또는 비밀번호가 일치하지 않습니다', 'error');
-      } else {
-        showApiError(error);
-      }
+      // 이메일 모양이 틀린 것(INVALID_INPUT)도 Figma에 따로 화면이 없어서 '일치하지 않습니다'로 같이 보여준다
+      if (isApiError(error, 'LOGIN_FAILED') || isApiError(error, 'INVALID_INPUT')) failLogin();
+      else showApiErrorToast(error);
     } finally {
       setIsSubmitting(false);
     }
@@ -87,9 +93,8 @@ export function LoginScreen() {
 
       {/* 키보드가 올라와도 가려지지 않게 GUI처럼 버튼을 입력칸 바로 아래에 둔다 */}
       <Button
-        label={isSubmitting ? '로그인 중…' : '로그인'}
+        label="로그인"
         variant="primary"
-        disabled={!canSubmit}
         onPress={submit}
         style={styles.loginButton}
       />

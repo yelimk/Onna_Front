@@ -17,20 +17,13 @@ import { nicknameLength } from '@/features/auth/utils/signup-rules';
  * 이미 가입된 이메일이면 1단계로 돌아가 이메일 칸에 알려준다.
  */
 export function SignupScreen() {
-  const { step, setStep, form, update, errors, successes, canGoNext, isSubmitting, goNext } = useSignup();
+  const { step, setStep, form, update, errors, successes, canGoNext, goNext } = useSignup();
   const goBack = () => (step === 1 ? router.back() : setStep(step - 1));
 
   return (
     <ScreenContainer
       header={<SignupHeader step={step} totalSteps={signupTotalSteps} onBack={goBack} />}
-      footer={
-        <Button
-          label={isSubmitting ? '가입하는 중…' : '다음'}
-          variant="primary"
-          disabled={!canGoNext}
-          onPress={goNext}
-        />
-      }>
+      footer={<Button label="다음" variant="primary" disabled={!canGoNext} onPress={goNext} />}>
       {step === 1 && (
         <>
           <StepTitle title="이메일을 알려주세요" />
