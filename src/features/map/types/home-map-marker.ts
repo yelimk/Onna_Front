@@ -5,12 +5,14 @@ export type Coordinate = {
 };
 
 /** 가까운 사진끼리 묶인 표시. 누르면 묶음 목록으로 간다. */
-type ClusterMarker = {
+export type ClusterMarker = {
   kind: 'cluster';
   id: string;
   coordinate: Coordinate;
   label: string;
   moreCount: number;
+  /** 겹쳐 보여줄 대표 사진 주소 (앞에서부터). 서버가 흐림 단계에 맞춰 흐리게 만든 사진이다. */
+  imageUrls?: string[];
   /** 묶음 화면에서 지금 열어 본 묶음. 연한 주황 원으로 감싼다. */
   isSelected?: boolean;
 };
@@ -23,6 +25,8 @@ export type PhotoMarker = {
   hashtags: string[];
   /** 열림 반경 안에 들어와서 흐리지 않게 보이는 사진 */
   isOpen: boolean;
+  /** 사진 주소. 서버가 흐림 단계에 맞춰 흐리게 만들어 주고, 5분 뒤 만료된다. 없으면 회색으로 가린다. */
+  imageUrl?: string;
   /** 기록이 남겨진 장소 이름 ('영남대학교 정문'). 서버가 주는 값이다. */
   placeName?: string;
   /** 남긴 사람의 한 줄. 열린 기록에서만 보여준다. */

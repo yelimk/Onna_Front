@@ -2,9 +2,9 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { Icon } from '@/components/icon';
-import { PhotoPlaceholder } from '@/components/photo-placeholder';
 import { colors } from '@/constants/colors';
 import { floatingShadow, radius, spacing } from '@/constants/layout';
+import { RecordPhoto } from '@/features/map/components/record-photo';
 import { SheetHandle } from '@/features/map/components/sheet-handle';
 import { useVerticalSwipe } from '@/features/map/hooks/use-vertical-swipe';
 import type { PhotoMarker } from '@/features/map/types/home-map-marker';
@@ -53,7 +53,7 @@ function NearestRecord({ photo }: { photo: PhotoMarker | null }) {
       accessibilityLabel={`가장 가까운 기록 ${photo.hashtags.join(' ')}`}
       onPress={() => openRecord(photo.id)}
       style={styles.record}>
-      <PhotoPlaceholder width={60} height={60} />
+      <RecordPhoto imageUrl={photo.imageUrl} width={60} height={60} />
       <View style={styles.texts}>
         <AppText variant="caption01" color="textTertiary">
           가장 가까운 기록
