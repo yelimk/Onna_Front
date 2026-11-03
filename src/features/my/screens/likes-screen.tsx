@@ -46,7 +46,7 @@ export function LikesScreen() {
               {index > 0 && <ListDivider />}
               <PhotoListRow
                 item={spot}
-                onPress={() => router.push(`/map/opened/${spot.spotId}`)}
+                onPress={() => router.push({ pathname: '/my/spot/[id]', params: { id: spot.spotId } })}
                 right={<Icon name="heartFilled" />}
               />
             </Fragment>

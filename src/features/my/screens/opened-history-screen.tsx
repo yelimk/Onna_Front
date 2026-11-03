@@ -42,7 +42,7 @@ export function OpenedHistoryScreen() {
                 {group.items.map((item, index) => (
                   <Fragment key={item.spotId}>
                     {index > 0 && <ListDivider />}
-                    <PhotoListRow item={item} onPress={() => router.push(`/map/opened/${item.spotId}`)} />
+                    <PhotoListRow item={item} onPress={() => router.push({ pathname: '/my/spot/[id]', params: { id: item.spotId } })} />
                   </Fragment>
                 ))}
               </View>
