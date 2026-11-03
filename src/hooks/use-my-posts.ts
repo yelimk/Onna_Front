@@ -18,9 +18,9 @@ export function useMyPosts() {
     () =>
       getMyPosts()
         .then((result) => {
-          // 개발 모드(Expo Go)에서 내 기록이 비어 있으면 예시 기록을 대신 보여준다. 출시용 앱(__DEV__ false)에는 안 나온다.
-          // 서버 사진 올리기가 되는 것을 확인하면 이 줄과 mock/my-posts.ts를 지운다.
-          setPosts(__DEV__ && result.length === 0 ? mockMyPosts : result);
+          // 내 기록이 비어 있으면 예시 기록을 대신 보여준다. 팀원 공유용(EAS 업데이트)에서도 화면을 확인하려고 개발 모드로 막지 않았다.
+          // 서버 사진 올리기가 되는 것을 확인하면, 시연 전에 꼭 이 줄과 mock/my-posts.ts를 지운다.
+          setPosts(result.length === 0 ? mockMyPosts : result);
           setHasFailed(false);
         })
         .catch(() => setHasFailed(true)),
