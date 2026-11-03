@@ -59,6 +59,8 @@ export function SettingsScreen() {
         </MenuGroup>
 
         <MenuGroup title="계정 · 안전">
+          {/* Figma 값은 '카카오'지만 앱은 이메일로만 로그인해서 '이메일'로 둔다 */}
+          <MenuRow label="로그인 계정" trailing="이메일" />
           <MenuRow label="이용약관 · 개인정보 처리방침" onPress={() => router.push('/terms')} />
           <MenuRow label="버전" trailing={Constants.expoConfig?.version ?? '-'} />
         </MenuGroup>

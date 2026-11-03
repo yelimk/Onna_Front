@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { Fragment, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { AreaMapView } from '@/components/area-map-view';
@@ -22,6 +22,10 @@ type ViewMode = (typeof viewModes)[number];
 export function LikesScreen() {
   const [viewMode, setViewMode] = useState<ViewMode>('리스트');
   const [selectedAreaId, setSelectedAreaId] = useState<string | null>(null);
+  // 좋아요 API가 아직 없어서 하트를 눌러 취소한 자리를 화면 안에서만 기억한다
+  const [unlikedIds, setUnlikedIds] = useState<string[]>([]);
+  const toggleLike = (spotId: string) =>
+    setUnlikedIds((ids) => (ids.includes(spotId) ? ids.filter((id) => id !== spotId) : [...ids, spotId]));
 
   return (
     <ScreenContainer
@@ -47,7 +51,16 @@ export function LikesScreen() {
               <PhotoListRow
                 item={spot}
                 onPress={() => router.push({ pathname: '/my/spot/[id]', params: { id: spot.spotId } })}
-                right={<Icon name="heartFilled" />}
+                right={
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="좋아요"
+                    accessibilityState={{ selected: !unlikedIds.includes(spot.spotId) }}
+                    hitSlop={8}
+                    onPress={() => toggleLike(spot.spotId)}>
+                    <Icon name={unlikedIds.includes(spot.spotId) ? 'heart' : 'heartFilled'} />
+                  </Pressable>
+                }
               />
             </Fragment>
           ))}

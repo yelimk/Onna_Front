@@ -20,7 +20,7 @@ const reportButtonSize = 36;
 /**
  * ③ 마이 탭: 좋아요 내역·연 자리 기록에서 사진을 누르면 보이는 상세 (Figma 좋아요 내역 상세).
  * 두 목록이 같은 상세 화면을 쓴다. 좋아요·신고 API가 아직 없어서 화면 안에서만 바뀐다.
- * 신고는 서버 없이 화면만 두기로 해서(팀 결정) 누르면 바로 접수 토스트를 띄우고 사이렌을 빨갛게 바꾼다.
+ * 신고는 서버 없이 화면만 두기로 해서(팀 결정) 빨간 사이렌을 누르면 접수 토스트만 띄운다. 한 번 신고하면 다시 띄우지 않는다.
  */
 export function MySpotDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -54,10 +54,10 @@ export function MySpotDetailScreen() {
           right={
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={isReported ? '신고 완료' : '신고하기'}
+              accessibilityLabel="신고하기"
               onPress={report}
               style={styles.reportButton}>
-              <Icon name={isReported ? 'reported' : 'report'} />
+              <Icon name="reportRed" />
             </Pressable>
           }
         />

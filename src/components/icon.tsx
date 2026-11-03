@@ -50,8 +50,8 @@ const figmaIcons = {
   bell: { default: require('@/assets/icons/bell.svg') },
   check: { default: require('@/assets/icons/check-white.svg') },
   report: { default: require('@/assets/icons/siren-inner.svg') },
-  // 신고를 마친 뒤의 빨간 사이렌 (Figma 좋아요 내역 상세)
-  reported: { default: require('@/assets/icons/siren-red.svg') },
+  // 좋아요 내역 상세 오른쪽 위 빨간 사이렌 (Figma)
+  reportRed: { default: require('@/assets/icons/siren-red.svg') },
   hashtag: { default: require('@/assets/icons/hashtag-m-inner.svg') },
   hashtagSmall: { default: require('@/assets/icons/hashtag-s-inner.svg') },
   heart: { default: require('@/assets/icons/heart-empty.svg') },
@@ -85,7 +85,7 @@ const figmaIcons = {
 const innerPadding: Partial<Record<keyof typeof figmaIcons, number>> = {
   toastError: 2 / 24,
   report: 2 / 24,
-  reported: 2 / 24,
+  reportRed: 2 / 24,
   hashtag: 3 / 24,
   hashtagSmall: 1 / 16,
 };
