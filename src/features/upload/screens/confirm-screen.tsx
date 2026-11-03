@@ -120,7 +120,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.borderDeactivated,
   },
+  // Figma 미리보기 카드: 글 묶음 위아래 4
   previewTexts: {
     flex: 1,
+    paddingVertical: spacing.xxs,
   },
 });
