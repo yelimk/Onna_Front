@@ -59,7 +59,7 @@ export function LoginScreen() {
   };
 
   return (
-    <ScreenContainer>
+    <ScreenContainer contentTopGap={spacing.lg}>
       <AppText variant="heading01">로그인</AppText>
 
       <View style={styles.form}>

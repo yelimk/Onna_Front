@@ -22,11 +22,12 @@ export function SignupScreen() {
 
   return (
     <ScreenContainer
+      contentTopGap={spacing.xxl}
       header={<SignupHeader step={step} totalSteps={signupTotalSteps} onBack={goBack} />}
       footer={<Button label="다음" variant="primary" disabled={!canGoNext} onPress={goNext} />}>
       {step === 1 && (
         <>
-          <StepTitle title="이메일을 알려주세요" />
+          <StepTitle gapBelow={spacing.xl} title="이메일을 알려주세요" />
           <TextField
             label="이메일"
             placeholder="이메일을 입력해 주세요"
@@ -42,7 +43,7 @@ export function SignupScreen() {
 
       {step === 2 && (
         <>
-          <StepTitle title="비밀번호를 만들어 주세요" />
+          <StepTitle gapBelow={spacing.xl} title="비밀번호를 만들어 주세요" />
           <View style={styles.fields}>
             <TextField
               label="비밀번호"
@@ -69,7 +70,7 @@ export function SignupScreen() {
 
       {step === 3 && (
         <>
-          <StepTitle
+          <StepTitle gapBelow={spacing.xl}
             title="어떻게 불러드릴까요?"
             description={'닉네임은 내 화면에서만 보여요.\n남긴 사진은 늘 익명으로 건네져요.'}
           />
@@ -87,7 +88,7 @@ export function SignupScreen() {
 
       {step === 4 && (
         <>
-          <StepTitle title="약관에 동의해 주세요" description="위치 기반 서비스라 꼭 필요한 동의가 있어요" />
+          <StepTitle gapBelow={spacing.xl} title="약관에 동의해 주세요" description="위치 기반 서비스라 꼭 필요한 동의가 있어요" />
           <TermsAgreement agreed={form.agreedTerms} onChange={(agreedTerms) => update({ agreedTerms })} />
         </>
       )}
