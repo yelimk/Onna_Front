@@ -22,10 +22,10 @@ export const defaultMapCenter: Coordinate = { latitude: 35.8306, longitude: 128.
 export const defaultMapLevel = 3;
 
 /**
- * 이 거리 안에 들어온 사진은 흐리지 않게 열린다.
- * 기본 확대 단계에서 Figma 탐색 모드의 원 크기와 비슷해지는 값이고, 실제 값은 캠퍼스를 걸어보며 정한다.
+ * 이 거리 안에 들어온 사진은 열린다. 서버가 사진 열기(POST /posts/{id}/open)를 25m 안에서만 허락해서 같은 값을 쓴다.
+ * 탐색 모드의 원, 길안내 '범위 내 기록들', 사진 카드의 '가까우면 열어 보기'가 모두 이 값을 따른다.
  */
-export const openRadiusMeters = 100;
+export const openRadiusMeters = 25;
 
 /** 고른 장소에서 이 거리 안의 기록을 '이 근처 남겨진 기록'으로 센다. 걸어서 5분 안쪽이다. */
 export const nearbyRecordRadiusMeters = 300;
