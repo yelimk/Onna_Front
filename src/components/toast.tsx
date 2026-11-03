@@ -59,7 +59,8 @@ export function ToastHost() {
   if (!toast) return null;
 
   return (
-    <View pointerEvents="none" style={[styles.host, { top: insets.top + spacing.xs }]}>
+    // Figma 로그인 오류 화면처럼 상태 표시줄 바로 아래에 붙인다
+    <View pointerEvents="none" style={[styles.host, { top: insets.top }]}>
       <Animated.View style={[styles.toast, fadeStyle]} accessibilityLiveRegion="polite">
         {toast.type === 'error' && <Icon name="toastError" />}
         {toast.type === 'success' && <Icon name="toastSuccess" />}
