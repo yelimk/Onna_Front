@@ -27,7 +27,7 @@ export function RecordScreen() {
   return (
     <ScreenContainer
       withBottomInset={false}
-      flushTop
+      contentTopGap={0}
       header={
         <ScreenHeader
           title="내 기록"

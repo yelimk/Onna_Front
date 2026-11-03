@@ -48,7 +48,7 @@ export function RecordDetailScreen() {
 
   return (
     <ScreenContainer
-      withBottomInset={false}
+      contentTopGap={0}
       header={
         <ScreenHeader
           center={

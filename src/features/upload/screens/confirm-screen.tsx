@@ -29,6 +29,7 @@ export function ConfirmScreen() {
 
   return (
     <ScreenContainer
+      contentTopGap={spacing.sm}
       header={<UploadStepHeader title="위치 확인" step={3} />}
       footer={
         <Button
@@ -85,7 +86,7 @@ const styles = StyleSheet.create({
   mapBox: {
     height: 145,
     borderRadius: radius.lg,
-    backgroundColor: colors.mapBackground,
+    backgroundColor: colors.uploadMapBackground,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -115,7 +116,7 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     marginVertical: spacing.xl,
     padding: spacing.sm,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.borderDeactivated,
   },

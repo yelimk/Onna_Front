@@ -91,6 +91,8 @@ export const colors = {
   pressedCircleButton: palette.gray[100],
   // 확인 창 뒤를 어둡게 덮는 막 (Figma 삭제 확인, Gray/800 80%)
   dialogDim: 'rgba(49, 49, 49, 0.8)',
+  // 위치 확인 화면의 회색 지도 칸 (Figma 위치 확인 #ECECEA, 디자인 시스템 회색과 달리 살짝 누런 회색)
+  uploadMapBackground: '#ECECEA',
   // 토스트 알림 배경 (Figma Gray/800)
   toastBackground: palette.gray[800],
   // 좋아요를 누른 버튼 테두리 (Figma like activated, Error/03)

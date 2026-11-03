@@ -43,6 +43,7 @@ export function WriteScreen() {
 
   return (
     <ScreenContainer
+      contentTopGap={spacing.sm}
       header={<UploadStepHeader title="한 줄 남기기" step={2} />}
       // Figma처럼 다 채우기 전(글자수 초과, 해시태그 안 고름 등)에는 '다음' 버튼을 아예 보여주지 않는다
       footer={canGoNext && <Button label="다음" variant="primary" onPress={() => router.push('/upload/confirm')} />}>

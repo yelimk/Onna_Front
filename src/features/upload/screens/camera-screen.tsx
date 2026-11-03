@@ -18,6 +18,8 @@ import { normalizePhoto } from '@/features/upload/utils/normalize-photo';
 const shutterSize = 72;
 const shutterRingWidth = 4;
 const shutterGap = 4;
+// Figma 촬영: 사진 칸 아래 끝에서 셔터 위까지 52
+const shutterTopGap = 52;
 
 /**
  * ② 기록 탭: 남기기 1/3 촬영.
@@ -120,8 +122,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.textPrimary,
   },
+  // Figma 화면 머리 높이 56 (다른 화면의 ScreenHeader와 같게)
   header: {
-    height: 60,
+    height: 56,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -135,11 +138,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     pointerEvents: 'none',
   },
-  // 셔터를 카메라 칸 바로 아래(Figma 간격 48)에 붙여서 사진과 한 덩어리로 보이게 한다.
+  // 셔터를 카메라 칸 바로 아래(Figma 간격 52)에 붙여서 사진과 한 덩어리로 보이게 한다.
   // 화면이 긴 폰은 남는 공간이 셔터 아래 검은 부분으로 간다.
   controls: {
     height: shutterSize,
-    marginTop: spacing.xxxl,
+    marginTop: shutterTopGap,
     alignItems: 'center',
     justifyContent: 'center',
   },
