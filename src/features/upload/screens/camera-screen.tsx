@@ -1,5 +1,6 @@
 import { useCameraPermissions, type CameraView } from 'expo-camera';
 import { router } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { useRef, useState } from 'react';
 import { Linking, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -78,6 +79,8 @@ export function CameraScreen() {
 
   return (
     <SafeAreaView style={styles.screen}>
+      {/* 검은 배경 위라 시계·배터리를 흰색으로 (Figma 촬영 화면) */}
+      <StatusBar style="light" />
       <View style={styles.header}>
         <Pressable accessibilityLabel="뒤로" hitSlop={12} onPress={() => router.back()}>
           <Icon name="back" color="textInverse" />
