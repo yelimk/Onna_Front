@@ -33,16 +33,16 @@ export function LoginScreen() {
     setHasLoginFailed(false);
   };
 
-  const failLogin = () => {
+  const failLogin = (message: string) => {
     setHasLoginFailed(true);
-    showToast('이메일 또는 비밀번호가 일치하지 않습니다', 'error');
+    showToast(message, 'error');
   };
 
-  // Figma처럼 로그인 버튼은 늘 눌린다. 빈 칸으로 누르면 서버에 보내지 않고 틀렸을 때와 똑같이 알려준다.
+  // Figma처럼 로그인 버튼은 늘 눌린다. 빈 칸으로 누르면 서버에 보내지 않고 바로 알려준다.
   const submit = async () => {
     if (isSubmitting) return;
     if (email.trim().length === 0 || password.length === 0) {
-      failLogin();
+      failLogin('이메일과 비밀번호를 입력해 주세요');
       return;
     }
     setIsSubmitting(true);
@@ -51,7 +51,7 @@ export function LoginScreen() {
       await goAfterLogin();
     } catch (error) {
       // 이메일 모양이 틀린 것(INVALID_INPUT)도 Figma에 따로 화면이 없어서 '일치하지 않습니다'로 같이 보여준다
-      if (isApiError(error, 'LOGIN_FAILED') || isApiError(error, 'INVALID_INPUT')) failLogin();
+      if (isApiError(error, 'LOGIN_FAILED') || isApiError(error, 'INVALID_INPUT')) failLogin('이메일 또는 비밀번호가 일치하지 않습니다');
       else showApiErrorToast(error);
     } finally {
       setIsSubmitting(false);
