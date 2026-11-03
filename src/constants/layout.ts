@@ -58,12 +58,6 @@ export const toastShadow = {
   elevation: 6,
 } as const;
 
-/**
- * 사진 목록 한 줄을 누르고 있을 때 줄이 살짝 작아지는 비율 (Figma list pressed: 350 → 342 칸에 회색 배경).
- * Figma는 사진·글자를 하나씩 줄였지만, 같은 느낌을 줄 전체를 한 번에 줄여서 낸다.
- */
-export const pressedListScale = 0.97;
-
 /** 리스트/지도 토글에서 고른 칸이 살짝 떠 보이게 (Figma drop shadow 0 0 8, 검정 8%) */
 export const toggleShadow = {
   shadowColor: palette.gray.black,
