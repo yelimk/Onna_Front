@@ -25,7 +25,7 @@ const locationPin = require('@/assets/icons/location-pick.svg');
  */
 export function ConfirmScreen() {
   const { draft } = useUploadDraft();
-  const { canSubmit, isSubmitting, isLocating, relocate, submit } = useSubmitPost();
+  const { canSubmit, isLocating, relocate, submit } = useSubmitPost();
 
   return (
     <ScreenContainer
@@ -33,7 +33,7 @@ export function ConfirmScreen() {
       header={<UploadStepHeader title="위치 확인" step={3} />}
       footer={
         <Button
-          label={isSubmitting ? '올리는 중…' : '기록 완료'}
+          label="기록 완료"
           variant="primary"
           disabled={!canSubmit}
           onPress={submit}
