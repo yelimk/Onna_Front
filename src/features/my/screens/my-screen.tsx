@@ -24,7 +24,7 @@ export function MyScreen() {
         <AppText variant="heading02" style={styles.title}>
           마이
         </AppText>
-        <IconButton icon="bell" size={48} accessibilityLabel="알림" onPress={() => router.push('/my/notifications')} />
+        <IconButton icon="bell" size={48} showPressed accessibilityLabel="알림" onPress={() => router.push('/my/notifications')} />
       </View>
 
       <View style={styles.sections}>

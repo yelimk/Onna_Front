@@ -49,6 +49,15 @@ export const photoShadow = {
   elevation: 4,
 } as const;
 
+/** 화면 위에 잠깐 뜨는 토스트 알림 (Figma drop shadow 0 4 10, 검정 25%) */
+export const toastShadow = {
+  shadowColor: palette.gray.black,
+  shadowOpacity: 0.25,
+  shadowRadius: 10,
+  shadowOffset: { width: 0, height: 4 },
+  elevation: 6,
+} as const;
+
 /** 리스트/지도 토글에서 고른 칸이 살짝 떠 보이게 (Figma drop shadow 0 0 8, 검정 8%) */
 export const toggleShadow = {
   shadowColor: palette.gray.black,

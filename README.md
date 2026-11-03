@@ -324,7 +324,7 @@ Figma `디자인 시스템` 페이지의 값을 코드로 옮겨 두었어요.
 |---|---|
 | `ScreenContainer` | 모든 화면의 바깥 틀 (여백, 안전 영역, 위·아래 고정 영역) |
 | `ScreenHeader` | 뒤로가기, 제목, 오른쪽 버튼 |
-| `Button` | 큰 버튼 (`primary` 강조 / `dark` 기본 / `outline` 보조) |
+| `Button` | 큰 버튼 (`primary` 강조 / `dark` 기본 / `outline` 보조). 비활성이면 모두 회색 |
 | `TextField` | 라벨이 있는 입력창 |
 | `Checkbox` | 체크박스 |
 | `Icon` | Figma 아이콘 (`assets/icons`). Figma에 없는 몇 개만 기기 기본 아이콘 (iOS·Android 이름 차이를 맞춰 둠) |
@@ -337,6 +337,8 @@ Figma `디자인 시스템` 페이지의 값을 코드로 옮겨 두었어요.
 | `MapPlaceholder` | 진짜 지도를 붙이기 전 회색 지도 |
 | `Toggle` | 켜고 끄는 주황 스위치 (설정 등) |
 | `AppTabBar` | 아래 탭 바 (지도·기록·마이, 고른 탭 위 주황 막대). 마이 탭 안쪽 화면에서는 숨김, 지도 검색 화면에서는 흐리게 사라짐 |
+| `Toast` | 화면 위에 잠깐 뜨는 알림. `showToast('신고가 접수되었습니다', 'success')`로 부른다 (`error` / `success` / `plain`). 루트 레이아웃에 `ToastHost`가 있음 |
+| `LikeButton` | 사진 상세 아래 '좋아요' 버튼 (누르면 빨간 하트·테두리) |
 
 ### 사용법
 

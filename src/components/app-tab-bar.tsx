@@ -78,8 +78,11 @@ export function AppTabBar({ state, descriptors, emitter, navigateToTab, insets }
 }
 
 const styles = StyleSheet.create({
+  // 탭 바와 위 화면을 나누는 얇은 선 (Figma navigation_bar 상단 stroke 0.5)
   bar: {
     flexDirection: 'row',
+    borderTopWidth: 0.5,
+    borderTopColor: colors.borderDeactivated,
     backgroundColor: colors.background01,
   },
   tab: {
@@ -92,9 +95,9 @@ const styles = StyleSheet.create({
   indicator: {
     width: indicatorWidth,
     height: indicatorHeight,
-    marginBottom: spacing.xxs,
-    borderBottomLeftRadius: radius.xs / 2,
-    borderBottomRightRadius: radius.xs / 2,
+    marginBottom: spacing.xs,
+    // 네 모서리를 모두 둥글게 한다 (Figma 선택 탭 주황 line, 모서리 4)
+    borderRadius: radius.xs,
   },
   indicatorOn: {
     backgroundColor: colors.primary,

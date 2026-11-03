@@ -65,13 +65,16 @@ const figmaIcons = {
   },
   eyeClosed: { default: require('@/assets/icons/eye-closed.svg') },
   reload: { default: require('@/assets/icons/reload.svg') },
+  toastError: { default: require('@/assets/icons/toast-error.svg') },
+  toastSuccess: { default: require('@/assets/icons/toast-success.svg') },
 } satisfies Record<string, ColorVariants>;
 
 /**
  * Figma에서 아이콘 그림만 따로 내보내져 상자보다 작은 것들. 상자 크기 대비 안쪽 여백 비율.
- * (siren은 24 상자 안의 20, hashtag_m은 24 안의 18, hashtag_s는 16 안의 14)
+ * (siren과 토스트 실패 아이콘은 24 상자 안의 20, hashtag_m은 24 안의 18, hashtag_s는 16 안의 14)
  */
 const innerPadding: Partial<Record<keyof typeof figmaIcons, number>> = {
+  toastError: 2 / 24,
   report: 2 / 24,
   hashtag: 3 / 24,
   hashtagSmall: 1 / 16,

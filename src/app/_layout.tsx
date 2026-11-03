@@ -1,8 +1,9 @@
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { Fragment, useEffect } from 'react';
 
+import { ToastHost } from '@/components/toast';
 import { colors } from '@/constants/colors';
 import { fontFiles } from '@/constants/typography';
 
@@ -22,16 +23,20 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background01 } }}>
-      {/* 남기기와 열림 순간은 탭 바 없이 전체 화면, 신고는 아래에서 올라오는 모달 */}
-      <Stack.Screen name="upload" options={{ presentation: 'fullScreenModal' }} />
-      <Stack.Screen name="opening/[id]" options={{ presentation: 'fullScreenModal', animation: 'fade' }} />
-      <Stack.Screen name="report/[id]" options={{ presentation: 'modal' }} />
-      {/* 사진 카드는 지도 위를 어둡게 덮고 탭 바까지 가리는 투명 모달 */}
-      <Stack.Screen
-        name="photo/[id]"
-        options={{ presentation: 'transparentModal', animation: 'fade', contentStyle: { backgroundColor: 'transparent' } }}
-      />
-    </Stack>
+    <Fragment>
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background01 } }}>
+        {/* 남기기와 열림 순간은 탭 바 없이 전체 화면, 신고는 아래에서 올라오는 모달 */}
+        <Stack.Screen name="upload" options={{ presentation: 'fullScreenModal' }} />
+        <Stack.Screen name="opening/[id]" options={{ presentation: 'fullScreenModal', animation: 'fade' }} />
+        <Stack.Screen name="report/[id]" options={{ presentation: 'modal' }} />
+        {/* 사진 카드는 지도 위를 어둡게 덮고 탭 바까지 가리는 투명 모달 */}
+        <Stack.Screen
+          name="photo/[id]"
+          options={{ presentation: 'transparentModal', animation: 'fade', contentStyle: { backgroundColor: 'transparent' } }}
+        />
+      </Stack>
+      {/* 모든 화면 위에 토스트를 띄우려고 화면 묶음(Stack) 바깥 맨 위에 둔다 */}
+      <ToastHost />
+    </Fragment>
   );
 }
