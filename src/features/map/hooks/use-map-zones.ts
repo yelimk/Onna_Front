@@ -1,4 +1,5 @@
 import { useEffect, useSyncExternalStore } from 'react';
+import { AppState } from 'react-native';
 
 import { isApiError } from '@/api/api-error';
 import { getMapZones } from '@/api/map';
@@ -31,6 +32,8 @@ let isFetching = false;
 /** 가장 최근에 화면이 알려 준 위치. 받는 중에 위치가 바뀌면, 끝난 뒤 이 위치로 다시 볼 수 있게 남겨 둔다. */
 let latest: { origin: Coordinate | null; accuracy: number | null } = { origin: null, accuracy: null };
 const listeners = new Set<() => void>();
+/** 오래됐는지 보는 간격 */
+const staleCheckMs = 30 * 1000;
 
 function setState(next: ZonesState) {
   state = next;
@@ -85,8 +88,16 @@ export function useMapZones(myLocation: Coordinate | null, accuracy: number | nu
 
   useEffect(() => {
     requestZones(myLocation, accuracy);
-    const timer = setInterval(() => requestZones(myLocation, accuracy), zonesRefreshMs);
-    return () => clearInterval(timer);
+    // 받은 지 zonesRefreshMs가 지났는지 자주 확인한다. 간격을 그 시간과 똑같이 두면 몇 ms 차이로 한 번 건너뛰어 사진 주소가 만료될 수 있다.
+    const timer = setInterval(() => requestZones(myLocation, accuracy), staleCheckMs);
+    // 앱이 뒤에 있는 동안은 타이머가 멈추므로, 다시 앞으로 오면 바로 확인한다.
+    const subscription = AppState.addEventListener('change', (appState) => {
+      if (appState === 'active') requestZones(myLocation, accuracy);
+    });
+    return () => {
+      clearInterval(timer);
+      subscription.remove();
+    };
   }, [myLocation, accuracy]);
 
   return zonesState;

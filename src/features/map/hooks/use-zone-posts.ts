@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { AppState } from 'react-native';
 
 import { isApiError } from '@/api/api-error';
 import { getZonePosts } from '@/api/map';
@@ -61,7 +62,14 @@ export function useZonePosts(zone: Zone | undefined, myLocation: Coordinate | nu
     const timer = setInterval(() => {
       if (isStale(lastRequest.current, zone.zoneId, myLocation)) fetchPosts();
     }, staleCheckMs);
-    return () => clearInterval(timer);
+    // 앱이 뒤에 있는 동안은 타이머가 멈추므로, 다시 앞으로 오면 바로 확인한다.
+    const subscription = AppState.addEventListener('change', (appState) => {
+      if (appState === 'active' && isStale(lastRequest.current, zone.zoneId, myLocation)) fetchPosts();
+    });
+    return () => {
+      clearInterval(timer);
+      subscription.remove();
+    };
   }, [zone, myLocation, accuracy]);
 
   // 맛보기만 보여줄지(isNearMe)는 지도 구역을 다시 받으면 바뀔 수 있어서, 받은 값과 따로 그때그때 적용한다.

@@ -32,7 +32,7 @@ export function SearchScreen() {
   const { recentSearches, addRecentSearch, removeRecentSearch } = useRecentSearches();
 
   const items = search.isHashtagQuery ? search.hashtagItems : search.placeItems;
-  const errorMessage = search.isHashtagQuery ? null : search.placeErrorMessage;
+  const errorMessage = search.isHashtagQuery ? search.hashtagErrorMessage : search.placeErrorMessage;
 
   const submit = () => {
     const keyword = query.trim();

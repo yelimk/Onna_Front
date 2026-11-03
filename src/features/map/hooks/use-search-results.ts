@@ -12,7 +12,7 @@ import { toHashtagItems, toPlaceItems } from '@/features/map/utils/to-search-res
 export function useSearchResults(query: string, myLocation: Coordinate | null) {
   const isHashtagQuery = query.trim().startsWith('#');
   const { places, isSearching, errorMessage } = usePlaceSearch(query, myLocation);
-  const hashtagResults = useHashtagSearch(query, myLocation);
+  const { results: hashtagResults, errorMessage: hashtagErrorMessage } = useHashtagSearch(query, myLocation);
 
   const placeItems = useMemo(() => toPlaceItems(places), [places]);
   // 내 위치를 모르면 거리는 기본 위치 기준이라 보여주지 않는다 (장소 결과와 같은 규칙).
@@ -27,5 +27,6 @@ export function useSearchResults(query: string, myLocation: Coordinate | null) {
     hashtagItems,
     isPlaceSearching: isSearching,
     placeErrorMessage: errorMessage,
+    hashtagErrorMessage,
   };
 }
