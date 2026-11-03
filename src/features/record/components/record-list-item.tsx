@@ -40,7 +40,7 @@ export function RecordListItem({ post, onPress, showMeta = true }: RecordListIte
               style={[styles.photo, { width: size.photo, height: size.photo }]}
               contentFit="cover"
             />
-            <View style={styles.body}>
+            <View style={[styles.body, { height: size.photo }]}>
               <View style={styles.top}>
                 <View style={styles.texts}>
                   {post.title && (
@@ -97,10 +97,9 @@ const styles = StyleSheet.create({
   photo: {
     borderRadius: radius.md,
   },
-  // 좋아요 수를 사진 아래쪽 끝에 맞추려고 위·아래로 벌린다
+  // 글 칸 높이를 사진과 똑같이 고정해서, 글이 길든 짧든 줄마다 높이와 좋아요 위치가 같게 한다
   body: {
     flex: 1,
-    justifyContent: 'space-between',
     paddingTop: spacing.xxs,
   },
   top: {
@@ -116,10 +115,13 @@ const styles = StyleSheet.create({
   date: {
     paddingLeft: spacing.xs,
   },
+  // 좋아요 수는 글 길이와 상관없이 늘 사진 아래쪽 끝, 오른쪽에 붙인다 (Figma list)
   likes: {
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
     flexDirection: 'row',
     alignItems: 'center',
-    alignSelf: 'flex-end',
     gap: spacing.xxs,
   },
 });
