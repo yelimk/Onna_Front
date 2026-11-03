@@ -10,8 +10,8 @@ import { PhotoUnlockOverlay } from '@/features/map/components/photo-unlock-overl
 import { RecordsInRangeSheet } from '@/features/map/components/records-in-range-sheet';
 import { SlidingPanel } from '@/features/map/components/sliding-panel';
 import { openRadiusMeters } from '@/features/map/constants/map-config';
-import { useMyLocation } from '@/features/map/hooks/use-my-location';
-import { unlockRecord } from '@/features/map/hooks/use-record-memory';
+import { useLocationAccuracy, useMyLocation } from '@/features/map/hooks/use-my-location';
+import { openNearbyPost, useOpenedPost } from '@/features/map/hooks/use-opened-posts';
 import { useWalkNavigation } from '@/features/map/hooks/use-walk-navigation';
 import { KakaoMapView } from '@/features/map/kakao-map/kakao-map-view';
 import type { MapMarker } from '@/features/map/types/home-map-marker';
@@ -46,10 +46,13 @@ export function NavigationScreen() {
   const hasArrived = navigation.progress?.hasArrived ?? false;
   const unlockedRecordId = navigation.unlockedRecord?.id;
 
-  // 한 번 연 기록은 멀어져도 다시 잠기지 않게 이 폰에 기억해 둔다.
+  const accuracy = useLocationAccuracy();
+  const { opened } = useOpenedPost(unlockedRecordId ?? '');
+
+  // 도착하면 그 자리의 기록을 서버에 열어 달라고 한다. 연 사진을 '열렸어요' 화면과 사진 카드가 같이 쓴다.
   useEffect(() => {
-    if (unlockedRecordId) unlockRecord(unlockedRecordId);
-  }, [unlockedRecordId]);
+    if (unlockedRecordId && location) openNearbyPost(unlockedRecordId, location, accuracy);
+  }, [unlockedRecordId, location, accuracy]);
 
   const sheetHeight = Math.round(windowHeight * expandedSheetRatio);
   // Figma '목적지 도착 UI'에는 아래 패널이 없다.
@@ -108,8 +111,10 @@ export function NavigationScreen() {
         </SlidingPanel>
       )}
 
-      {navigation.unlockedRecord && !isUnlockDismissed && (
+      {/* 서버가 실제로 열어 준 뒤에만 '열렸어요'를 띄운다. 도착 판정은 앱이 하지만, 열지는 서버가 정한다. */}
+      {navigation.unlockedRecord && opened && !isUnlockDismissed && (
         <PhotoUnlockOverlay
+          imageUrl={opened.imageUrl}
           onOpen={() => {
             // 해금 화면은 Modal이라 닫지 않고 넘어가면 다음 화면 위에 남는다.
             setIsUnlockDismissed(true);

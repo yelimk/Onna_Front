@@ -3,10 +3,10 @@ import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 
 import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
-import { PhotoPlaceholder } from '@/components/photo-placeholder';
 import { colors, palette } from '@/constants/colors';
 import { radius, screenPaddingX, spacing } from '@/constants/layout';
 import { duration } from '@/constants/motion';
+import { RecordPhoto } from '@/features/map/components/record-photo';
 
 /** Figma 사진 크기 280×362 */
 const photoWidth = 280;
@@ -22,6 +22,8 @@ const photoEntering = ZoomIn.duration(duration.normal).delay(duration.fast);
 const textEntering = FadeInDown.duration(duration.normal).delay(duration.fast + duration.normal);
 
 type PhotoUnlockOverlayProps = {
+  /** 서버가 열어 준 선명한 사진 */
+  imageUrl: string;
   onOpen: () => void;
   onDismiss: () => void;
 };
@@ -33,7 +35,7 @@ type PhotoUnlockOverlayProps = {
  * Figma처럼 아래 탭 바까지 덮어야 해서, 화면 안의 View가 아니라 Modal로 띄운다.
  * 어두운 판은 Modal의 fade로, 사진과 글은 photoEntering·textEntering 순서로 나타난다.
  */
-export function PhotoUnlockOverlay({ onOpen, onDismiss }: PhotoUnlockOverlayProps) {
+export function PhotoUnlockOverlay({ imageUrl, onOpen, onDismiss }: PhotoUnlockOverlayProps) {
   return (
     <Modal transparent animationType="fade" statusBarTranslucent onRequestClose={onDismiss}>
       <View style={styles.overlay}>
@@ -43,7 +45,7 @@ export function PhotoUnlockOverlay({ onOpen, onDismiss }: PhotoUnlockOverlayProp
         <View style={styles.content}>
           <Animated.View entering={photoEntering} style={styles.outerFrame}>
             <View style={styles.innerFrame}>
-              <PhotoPlaceholder width="100%" height="100%" style={styles.photo} />
+              <RecordPhoto imageUrl={imageUrl} width="100%" height="100%" style={styles.photo} />
             </View>
           </Animated.View>
 
