@@ -22,7 +22,7 @@ const deleteButtonSize = 36;
 /**
  * ② 기록 탭: 내 기록 상세. 사진은 앱 카메라 비율(세로 3:4) 그대로 크게 보여준다.
  * 기록 하나만 받는 API가 없어서 내 기록 목록을 다시 받아 id로 찾는다 (사진 주소도 새로 받게 된다).
- * 머리글 가운데는 Figma에서 제목 자리인데, 서버에 아직 제목이 없어서 비워 둔다.
+ * 머리글 가운데는 기록 제목이다. 서버에 아직 제목이 없어서 제목이 없는 기록은 비워 둔다.
  * 오른쪽 위 휴지통으로 한 번 더 물은 뒤 지운다.
  */
 export function RecordDetailScreen() {
@@ -51,6 +51,13 @@ export function RecordDetailScreen() {
       withBottomInset={false}
       header={
         <ScreenHeader
+          center={
+            post.title ? (
+              <AppText variant="subtitle02" numberOfLines={1}>
+                {post.title}
+              </AppText>
+            ) : undefined
+          }
           right={
             <Pressable
               accessibilityRole="button"

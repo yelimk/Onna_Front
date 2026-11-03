@@ -16,6 +16,7 @@ export const mockMyPosts: MyPost[] = [
   {
     postId: -1,
     questionId: 1,
+    title: '하버브릿지',
     oneLine: '사람들의 행복한 표정을 보며 한참을 앉아 있었다, 노을이 질 때까지 아무도 일어나지 않았다',
     imageUrl: toUri(samplePhotos.harbourBridge),
     lat: 35.8326,
@@ -27,6 +28,7 @@ export const mockMyPosts: MyPost[] = [
   {
     postId: -2,
     questionId: 1,
+    title: '오페라하우스',
     oneLine: '노을 질 때 다 같이 사진 찍어주던 사람들',
     imageUrl: toUri(samplePhotos.operaHouse),
     lat: 35.8326,
@@ -38,6 +40,7 @@ export const mockMyPosts: MyPost[] = [
   {
     postId: -3,
     questionId: 1,
+    title: '아침 창문',
     oneLine: '아름다운 풍경',
     imageUrl: toUri(samplePhotos.morningWindow),
     lat: 35.8326,
@@ -49,6 +52,7 @@ export const mockMyPosts: MyPost[] = [
   {
     postId: -4,
     questionId: 1,
+    title: '비둘기',
     oneLine: '뚱뚱한 비둘기 앉아서 쉬는중',
     imageUrl: toUri(samplePhotos.pigeon),
     lat: 35.8326,

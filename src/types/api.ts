@@ -73,6 +73,8 @@ export type CreatedPost = {
 export type MyPost = Coordinate & {
   postId: number;
   questionId: number;
+  /** 기록 제목. Figma에는 있지만 서버에 아직 없어서 백엔드에 추가를 요청해 두었다. 서버가 주기 전까지는 비어 있다. */
+  title?: string;
   oneLine: string;
   imageUrl: string;
   tags: string[];

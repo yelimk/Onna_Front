@@ -19,13 +19,13 @@ type RecordListItemProps = {
 
 // 누르고 있으면 사진과 글자가 한 단계씩 작아진다 (Figma list default → pressed)
 const sizes = {
-  default: { photo: 120, comment: 'body01', meta: 'caption02' },
-  pressed: { photo: 100, comment: 'body02', meta: 'caption04' },
-} satisfies Record<string, { photo: number; comment: TypographyVariant; meta: TypographyVariant }>;
+  default: { photo: 120, title: 'subtitle02', comment: 'body01', meta: 'caption02' },
+  pressed: { photo: 100, title: 'subtitle03', comment: 'body02', meta: 'caption04' },
+} satisfies Record<string, { photo: number; title: TypographyVariant; comment: TypographyVariant; meta: TypographyVariant }>;
 
 /**
- * 내 기록 한 줄 (Figma list): 사진, 한 줄, 해시태그, 날짜, 받은 좋아요 수.
- * Figma에는 제목이 있지만 서버에 아직 제목이 없어서 제목 줄은 비우고, 한 줄 코멘트는 두 줄까지 보여주고 넘치면 '…'로 자른다 (팀 결정).
+ * 내 기록 한 줄 (Figma list): 사진, 굵은 제목(한 줄), 한 줄 코멘트(두 줄까지, 넘치면 '…'), 해시태그, 날짜, 받은 좋아요 수.
+ * 서버에 아직 제목이 없어서 제목이 없는 기록은 제목 줄 없이 코멘트부터 보여준다.
  * 누르고 있으면 회색 칸 안으로 줄어든다. 줄 높이는 그대로라 아래 목록이 흔들리지 않는다.
  */
 export function RecordListItem({ post, onPress, showMeta = true }: RecordListItemProps) {
@@ -43,6 +43,11 @@ export function RecordListItem({ post, onPress, showMeta = true }: RecordListIte
             <View style={styles.body}>
               <View style={styles.top}>
                 <View style={styles.texts}>
+                  {post.title && (
+                    <AppText variant={size.title} numberOfLines={1}>
+                      {post.title}
+                    </AppText>
+                  )}
                   <AppText variant={size.comment} numberOfLines={2}>
                     {post.oneLine}
                   </AppText>
