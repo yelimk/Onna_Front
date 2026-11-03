@@ -47,7 +47,6 @@ const figmaIcons = {
     textInverse: require('@/assets/icons/camera-white.svg'),
     primary: require('@/assets/icons/camera-orange.svg'),
   },
-  cameraSwitch: { default: require('@/assets/icons/camera-switch-white.svg') },
   bell: { default: require('@/assets/icons/bell.svg') },
   check: { default: require('@/assets/icons/check-white.svg') },
   report: { default: require('@/assets/icons/siren-inner.svg') },
@@ -68,6 +67,7 @@ const figmaIcons = {
   eyeClosed: { default: require('@/assets/icons/eye-closed.svg') },
   reload: { default: require('@/assets/icons/reload.svg') },
   toastError: { default: require('@/assets/icons/toast-error.svg') },
+  trash: { default: require('@/assets/icons/trash-red.svg') },
   toastSuccess: { default: require('@/assets/icons/toast-success.svg') },
 } satisfies Record<string, ColorVariants>;
 

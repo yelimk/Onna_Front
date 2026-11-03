@@ -24,6 +24,11 @@ type TextFieldProps = Omit<TextInputProps, 'secureTextEntry'> & {
   showCount?: boolean;
   /** 비밀번호 칸. 오른쪽 눈 아이콘으로 보이기·숨기기를 바꾼다. */
   isPassword?: boolean;
+  /**
+   * 글자 수 한도. maxLength처럼 막지 않고 넘겨서 쓸 수 있게 두되, 넘으면 빨간 테두리와 오른쪽 '글자수 초과'로 알린다 (Figma 한 줄 남기기 오류).
+   * 오른쪽 아래에 '7/15'처럼 글자 수도 보여준다.
+   */
+  limit?: number;
 };
 
 /**
@@ -39,6 +44,7 @@ export function TextField({
   accessory,
   showCount = false,
   isPassword = false,
+  limit,
   style,
   onFocus,
   onBlur,
@@ -46,7 +52,11 @@ export function TextField({
 }: TextFieldProps) {
   const [isFocused, setIsFocused] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const count = showCount && rest.maxLength ? `${rest.value?.length ?? 0}/${rest.maxLength}` : undefined;
+  const length = rest.value?.length ?? 0;
+  const countLimit = limit ?? (showCount ? rest.maxLength : undefined);
+  const count = countLimit ? `${length}/${countLimit}` : undefined;
+  const isOverLimit = limit !== undefined && length > limit;
+  const hasError = error !== undefined || isOverLimit;
   const bottomText = error ?? success ?? helper;
 
   return (
@@ -58,7 +68,7 @@ export function TextField({
         </AppText>
       )}
       <View style={styles.row}>
-        <View style={[styles.box, isFocused && styles.focusedBox, error !== undefined && styles.errorBox]}>
+        <View style={[styles.box, isFocused && styles.focusedBox, hasError && styles.errorBox]}>
           <TextInput
             placeholderTextColor={colors.textPlaceholder}
             secureTextEntry={isPassword && !isPasswordVisible}
@@ -70,7 +80,7 @@ export function TextField({
               setIsFocused(false);
               onBlur?.(event);
             }}
-            style={[styles.input, error !== undefined && styles.errorText, style]}
+            style={[styles.input, hasError && styles.errorText, style]}
             {...rest}
           />
           {isPassword && (
@@ -90,8 +100,8 @@ export function TextField({
             {bottomText}
           </AppText>
           {count && (
-            <AppText variant="caption04" color="textDeactivated">
-              {count}
+            <AppText variant="caption04" color={isOverLimit ? 'error' : 'textDeactivated'}>
+              {isOverLimit ? '글자수 초과' : count}
             </AppText>
           )}
         </View>

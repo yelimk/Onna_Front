@@ -1,4 +1,4 @@
-import { useCameraPermissions, type CameraType, type CameraView } from 'expo-camera';
+import { useCameraPermissions, type CameraView } from 'expo-camera';
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
 import { Linking, Pressable, StyleSheet, View } from 'react-native';
@@ -18,7 +18,6 @@ import { normalizePhoto } from '@/features/upload/utils/normalize-photo';
 const shutterSize = 72;
 const shutterRingWidth = 4;
 const shutterGap = 4;
-const flipButtonSize = 48;
 
 /**
  * ② 기록 탭: 남기기 1/3 촬영.
@@ -26,12 +25,12 @@ const flipButtonSize = 48;
  * 그래서 카메라 권한만 받고, 갤러리(사진 보관함) 권한은 받지 않는다.
  * 찍은 사진은 세로 3:4, 1080×1440으로 맞춘 뒤 draft에 넣어 다음 단계에서 보여준다.
  * 셔터를 누른 순간의 위치도 같이 잡는다. 위치는 몇 초 걸릴 수 있어서 기다리지 않고 다음 화면으로 넘어간 뒤 채운다.
+ * 앞 카메라로 얼굴을 찍지 않도록 뒤 카메라만 쓴다 (앞뒤 전환 버튼은 팀에서 빼기로 함).
  */
 export function CameraScreen() {
   const { updateDraft } = useUploadDraft();
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
-  const [facing, setFacing] = useState<CameraType>('back');
   const [isReady, setIsReady] = useState(false);
   const [isTaking, setIsTaking] = useState(false);
   const [hasFailed, setHasFailed] = useState(false);
@@ -61,8 +60,8 @@ export function CameraScreen() {
     setIsTaking(true);
     setHasFailed(false);
     try {
-      // 셔터 소리는 끄되, 폰 회사 정책으로 강제로 나는 기기(일부 한국 폰)에서는 그대로 날 수 있다.
-      const photo = await cameraRef.current.takePictureAsync({ quality: 0.8, shutterSound: false });
+      // 몰래 찍는 것처럼 보이지 않게 셔터 소리를 켠다 (팀 결정)
+      const photo = await cameraRef.current.takePictureAsync({ quality: 0.8, shutterSound: true });
       const photoUri = await normalizePhoto(photo);
       updateDraft({ photoUri });
       router.push('/upload/write');
@@ -73,12 +72,6 @@ export function CameraScreen() {
       isTakingRef.current = false;
       setIsTaking(false);
     }
-  };
-
-  // 앞·뒤 카메라를 바꾸면 카메라가 다시 켜지므로, 다시 준비될 때까지 셔터를 막는다.
-  const flipCamera = () => {
-    setIsReady(false);
-    setFacing((current) => (current === 'back' ? 'front' : 'back'));
   };
 
   return (
@@ -97,7 +90,7 @@ export function CameraScreen() {
 
       <CameraViewfinder
         cameraRef={cameraRef}
-        facing={facing}
+        facing="back"
         hasPermission={permission?.granted ?? false}
         onRequestPermission={askPermission}
         onReady={() => setIsReady(true)}
@@ -116,9 +109,6 @@ export function CameraScreen() {
           onPress={takePhoto}
           style={styles.shutter}>
           <View style={styles.shutterInner} />
-        </Pressable>
-        <Pressable accessibilityLabel="카메라 전환" onPress={flipCamera} style={styles.flipButton}>
-          <Icon name="cameraSwitch" />
         </Pressable>
       </View>
     </SafeAreaView>
@@ -146,7 +136,7 @@ const styles = StyleSheet.create({
     pointerEvents: 'none',
   },
   // 셔터를 카메라 칸 바로 아래(Figma 간격 48)에 붙여서 사진과 한 덩어리로 보이게 한다.
-  // 화면이 긴 폰은 남는 공간이 셔터 아래 검은 부분으로 간다. 전환 버튼은 같은 줄 오른쪽 끝.
+  // 화면이 긴 폰은 남는 공간이 셔터 아래 검은 부분으로 간다.
   controls: {
     height: shutterSize,
     marginTop: spacing.xxxl,
@@ -169,15 +159,5 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: radius.full,
     backgroundColor: colors.background01,
-  },
-  flipButton: {
-    position: 'absolute',
-    right: screenPaddingX,
-    width: flipButtonSize,
-    height: flipButtonSize,
-    borderRadius: radius.full,
-    backgroundColor: colors.textTertiary,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });

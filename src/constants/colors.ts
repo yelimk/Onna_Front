@@ -89,6 +89,8 @@ export const colors = {
   softCircleButton: 'rgba(225, 225, 225, 0.4)',
   // 흰 동그라미 버튼을 누르고 있을 때 배경 (Figma bell_circle pressed, Gray/100)
   pressedCircleButton: palette.gray[100],
+  // 확인 창 뒤를 어둡게 덮는 막 (Figma 삭제 확인, Gray/800 80%)
+  dialogDim: 'rgba(49, 49, 49, 0.8)',
   // 토스트 알림 배경 (Figma Gray/800)
   toastBackground: palette.gray[800],
   // 좋아요를 누른 버튼 테두리 (Figma like activated, Error/03)
