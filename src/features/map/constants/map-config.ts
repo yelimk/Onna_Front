@@ -55,3 +55,12 @@ export const zonesRefetchMeters = 30;
  * 거기 있는 척하지 않도록 아주 부정확한 위치라고 알린다. 이때 앱은 맛보기 사진 말고는 모두 잠가서 보여준다.
  */
 export const browsingAccuracyMeters = 2000;
+
+/**
+ * 경로 추천(GET /recommendations/route)에 보낼 산책 시간을 셀 때, 직선 거리에 곱하는 값.
+ * 길은 직선보다 돌아가므로 조금 늘려 잡아, 서버가 목적지까지 걷는 동안 들를 만한 자리를 고르게 한다.
+ */
+export const routeDetourFactor = 1.3;
+
+/** 목적지가 아주 가까워도 들를 자리를 고를 여유를 주는 가장 짧은 산책 시간(분) */
+export const minRouteMinutes = 10;

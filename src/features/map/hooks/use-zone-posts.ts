@@ -9,20 +9,12 @@ import {
   zonesRefreshMs,
 } from '@/features/map/constants/map-config';
 import { useLocationAccuracy } from '@/features/map/hooks/use-my-location';
-import type { Coordinate, PhotoMarker } from '@/features/map/types/home-map-marker';
+import type { Coordinate } from '@/features/map/types/home-map-marker';
 import { getDistanceMeters } from '@/features/map/utils/get-distance-meters';
+import { rememberRecords } from '@/features/map/utils/known-records';
 import { toServerCoordinate } from '@/features/map/utils/to-coordinate';
 import { toPhotoMarker } from '@/features/map/utils/zones-to-markers';
 import type { PostPreview, Zone } from '@/types/api';
-
-/*
- * 묶음에서 받은 기록을 앱이 켜져 있는 동안 기억한다. 목록에서 누른 기록의 사진 카드가
- * 같은 기록을 다시 묻지 않고 바로 해시태그·사진을 보여주게 하려는 것이다 (사진 카드: use-record-detail.ts).
- */
-const knownZonePosts = new Map<string, PhotoMarker>();
-
-/** 묶음 목록에서 받아 둔 기록 한 건. 아직 받은 적 없으면 undefined */
-export const findZonePost = (postId: string) => knownZonePosts.get(postId);
 
 /** 오래됐는지 보는 간격. 받은 지 zonesRefreshMs가 지났는지 이만큼마다 확인한다. */
 const staleCheckMs = 30 * 1000;
@@ -79,7 +71,8 @@ export function useZonePosts(zone: Zone | undefined, myLocation: Coordinate | nu
   );
 
   useEffect(() => {
-    posts?.forEach((post) => knownZonePosts.set(post.id, post));
+    // 목록에서 누른 기록의 사진 카드가 같은 기록을 다시 묻지 않고 바로 해시태그·사진을 보여주게 한다.
+    if (posts) rememberRecords(posts);
   }, [posts]);
 
   return { posts, errorCode };

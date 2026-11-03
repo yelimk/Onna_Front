@@ -4,9 +4,9 @@ import { openRadiusMeters } from '@/features/map/constants/map-config';
 import { useHomeMapMarkers } from '@/features/map/hooks/use-home-map-markers';
 import { useLocationAccuracy } from '@/features/map/hooks/use-my-location';
 import { openNearbyPost, useOpenedPost } from '@/features/map/hooks/use-opened-posts';
-import { findZonePost } from '@/features/map/hooks/use-zone-posts';
 import type { Coordinate } from '@/features/map/types/home-map-marker';
 import { getDistanceMeters } from '@/features/map/utils/get-distance-meters';
+import { findKnownRecord } from '@/features/map/utils/known-records';
 import { formatHashtag } from '@/utils/format-hashtag';
 
 /** 사진 카드에 필요한 기록 한 건 */
@@ -36,7 +36,7 @@ export function useRecordDetail(recordId: string, myLocation: Coordinate | null)
   const accuracy = useLocationAccuracy();
   const { opened, openErrorCode } = useOpenedPost(recordId);
 
-  const found = useMemo(() => records.find(({ id }) => id === recordId) ?? findZonePost(recordId), [records, recordId]);
+  const found = useMemo(() => records.find(({ id }) => id === recordId) ?? findKnownRecord(recordId), [records, recordId]);
   const isNearby = found !== undefined && myLocation !== null && getDistanceMeters(myLocation, found.coordinate) <= openRadiusMeters;
   // 사진에는 좌표가 없어 구역 자리로 거리를 재므로, 서버가 이미 열림(OPEN)이라고 한 기록도 열어 본다.
   // 어디서 왔는지 모르는 기록(목록에 없음)은 서버가 판단하게 물어본다.
