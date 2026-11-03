@@ -50,13 +50,14 @@ export function SurveyDone({ answers, placeNames, nickname, nearbySpotCount }: S
               <AppText variant="caption02" color="textTertiary">
                 {row.label}
               </AppText>
-              <AppText variant="subtitle04" style={styles.value}>
+              {/* Figma는 한 줄로만 보여준다. 해시태그를 많이 고르면 끝을 말줄임으로 자른다. */}
+              <AppText variant="subtitle04" numberOfLines={1} style={styles.value}>
                 {row.value}
               </AppText>
             </View>
           ))}
         </View>
-        <AppText variant="caption04" color="textDeactivated" style={styles.center}>
+        <AppText variant="caption04" color="textDeactivated">
           {'마이 > 사용자 기호 수정에서 언제든 바꿀 수 있어요'}
         </AppText>
       </View>

@@ -8,7 +8,8 @@ import type { IntroIllustrationName } from '@/features/auth/constants/intro-slid
 
 const searchImage = require('@/assets/images/onboarding/intro-search.png');
 const bookImage = require('@/assets/images/onboarding/intro-book.png');
-const glowImage = require('@/assets/images/onboarding/intro-glow.svg');
+// Figma는 SVG 흐림 효과(blur)로 그렸지만 폰에서는 SVG 흐림이 안 먹어서 딱딱한 타원이 된다. 그래서 미리 흐리게 만든 PNG를 쓴다.
+const glowImage = require('@/assets/images/onboarding/intro-glow.png');
 
 type IntroIllustrationProps = {
   name: IntroIllustrationName;

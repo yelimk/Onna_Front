@@ -12,12 +12,12 @@ type PermissionCardProps = {
   required: boolean;
 };
 
-/** 권한 하나를 왜 쓰는지 설명하는 카드. 필수 권한은 아이콘 배경과 '필수' 글자를 주황으로 강조한다. */
+/** 권한 하나를 왜 쓰는지 설명하는 카드. 필수 권한은 아이콘·아이콘 배경·'필수' 글자를 주황으로 강조한다. */
 export function PermissionCard({ icon, title, description, required }: PermissionCardProps) {
   return (
     <View style={styles.card}>
       <View style={[styles.iconCircle, required && styles.requiredIcon]}>
-        <Icon name={icon} />
+        <Icon name={icon} color={required ? 'primary' : undefined} />
       </View>
       <View style={styles.texts}>
         <View style={styles.titleRow}>

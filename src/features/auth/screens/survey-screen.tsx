@@ -82,7 +82,7 @@ export function SurveyScreen() {
 
   return (
     <ScreenContainer
-      header={<SurveyHeader step={step} totalSteps={totalSteps} onBack={goBack} onSkip={goToMap} />}
+      header={<SurveyHeader step={step} totalSteps={totalSteps} onBack={goBack} />}
       footer={
         <Button
           label={step === totalSteps ? (isSaving ? '저장하는 중…' : '완료') : '다음'}

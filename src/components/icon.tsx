@@ -26,6 +26,7 @@ const figmaIcons = {
   location: {
     default: require('@/assets/icons/location-black.svg'),
     textDeactivated: require('@/assets/icons/location-gray.svg'),
+    primary: require('@/assets/icons/location-orange.svg'),
   },
   record: {
     default: require('@/assets/icons/file-black.svg'),
@@ -44,6 +45,7 @@ const figmaIcons = {
   camera: {
     default: require('@/assets/icons/camera.svg'),
     textInverse: require('@/assets/icons/camera-white.svg'),
+    primary: require('@/assets/icons/camera-orange.svg'),
   },
   cameraSwitch: { default: require('@/assets/icons/camera-switch-white.svg') },
   bell: { default: require('@/assets/icons/bell.svg') },

@@ -9,8 +9,9 @@ import { colors } from '@/constants/colors';
 import { radius, spacing } from '@/constants/layout';
 import { IntroIllustration } from '@/features/auth/components/intro-illustration';
 import { introSlides } from '@/features/auth/constants/intro-slides';
+import { markIntroSeen } from '@/features/auth/utils/intro-seen';
 
-/** 시작: 서비스 소개 3장. 마지막 장에서 '다음'을 누르면 로그인으로 간다. */
+/** 시작: 서비스 소개 3장. 처음 설치했을 때만 나오고, 마지막 장에서 '다음'을 누르면 로그인으로 간다. */
 export function IntroScreen() {
   const [slideIndex, setSlideIndex] = useState(0);
   const slide = introSlides[slideIndex];
@@ -18,7 +19,9 @@ export function IntroScreen() {
 
   const handleNext = () => {
     if (isLastSlide) {
-      router.push('/login');
+      markIntroSeen();
+      // 다시 볼 일이 없는 화면이라 뒤로 가기로 돌아오지 않게 바꿔 끼운다
+      router.replace('/login');
       return;
     }
     setSlideIndex(slideIndex + 1);
