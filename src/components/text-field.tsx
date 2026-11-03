@@ -107,9 +107,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing.xs,
   },
+  // Figma 입력칸 세트는 높이를 모두 50으로 통일했다 (테두리 1.5 포함). 글자 위아래 여백으로 맞추면 폰마다 줄 높이가 달라 50을 넘어서 높이를 고정한다.
   box: {
     flex: 1,
-    minHeight: 50,
+    height: 50,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
@@ -130,7 +131,7 @@ const styles = StyleSheet.create({
   input: {
     ...typography.body01,
     flex: 1,
-    paddingVertical: spacing.sm,
+    paddingVertical: 0,
     color: colors.textPrimary,
     // 웹 미리보기에서 브라우저 기본 포커스 테두리가 칸 테두리와 겹쳐서 끈다 (폰에는 없음)
     outlineWidth: 0,
