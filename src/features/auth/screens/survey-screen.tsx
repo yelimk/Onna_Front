@@ -40,10 +40,9 @@ export function SurveyScreen() {
 
   const isDone = step > totalSteps;
   const canGoNext =
-    !isSaving &&
-    ((step === 1 && answers.relation !== undefined) ||
-      (step === 2 && answers.placeTagIds.length >= minPlaceCount) ||
-      step === 3);
+    (step === 1 && answers.relation !== undefined) ||
+    (step === 2 && answers.placeTagIds.length >= minPlaceCount) ||
+    step === 3;
 
   const goToMap = () => router.replace('/map');
   const goBack = () => (step === 1 ? router.back() : setStep(step - 1));
@@ -54,6 +53,8 @@ export function SurveyScreen() {
       setStep(step + 1);
       return;
     }
+    // 저장하는 동안 버튼 모양은 그대로 두고, 두 번 눌러도 한 번만 보낸다
+    if (isSaving) return;
     setIsSaving(true);
     try {
       await saveMyTags(answers.placeTagIds);
@@ -87,7 +88,7 @@ export function SurveyScreen() {
       header={<SurveyHeader step={step} totalSteps={totalSteps} onBack={goBack} />}
       footer={
         <Button
-          label={step === totalSteps ? (isSaving ? '저장하는 중…' : '완료') : '다음'}
+          label={step === totalSteps ? '완료' : '다음'}
           variant="primary"
           disabled={!canGoNext}
           onPress={goNext}
