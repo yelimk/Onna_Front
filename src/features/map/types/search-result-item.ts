@@ -11,4 +11,12 @@ export type SearchResultItem = {
   address: string;
   distanceMeters: number | null;
   coordinate: Coordinate;
+  /** 해시태그 결과만: 이 해시태그가 붙은 기록의 자리. 고르면 지도에 핀으로 찍는다. */
+  postPins?: PostPin[];
+};
+
+/** 서버가 해시태그 검색결과와 함께 주는 기록 자리 */
+export type PostPin = {
+  postId: string;
+  coordinate: Coordinate;
 };

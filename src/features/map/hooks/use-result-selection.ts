@@ -37,7 +37,7 @@ export function useResultSelection({ items, allItems, initialKey, myLocation }: 
   const placeRoute = usePlaceRoute(place, myLocation);
 
   const hashtag = selectedItem?.kind === 'hashtag' ? `#${selectedItem.title}` : null;
-  const hashtagRecords = useHashtagRecords(hashtag, myLocation);
+  const hashtagRecords = useHashtagRecords(hashtag ? selectedItem : null, myLocation);
   const selectedRecord = hashtagRecords.find((record) => record.id === selectedRecordId) ?? null;
   const hashtagNearby = useNearbyRecords(hashtag ? (selectedItem?.coordinate ?? null) : null, myLocation);
   const recordRegionName = useRegionName(selectedRecord?.coordinate ?? null);

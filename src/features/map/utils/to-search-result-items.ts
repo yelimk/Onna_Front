@@ -21,7 +21,8 @@ export function toHashtagItems(results: (HashtagResult & { regionName: string })
     title: result.name,
     address: result.regionName,
     distanceMeters: result.distanceMeters,
-    coordinate: result.record.coordinate,
+    coordinate: result.coordinate,
+    postPins: result.postPins,
   }));
 }
 
