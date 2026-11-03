@@ -44,9 +44,8 @@ export function WriteScreen() {
   return (
     <ScreenContainer
       header={<UploadStepHeader title="한 줄 남기기" step={2} />}
-      footer={
-        <Button label="다음" variant="primary" disabled={!canGoNext} onPress={() => router.push('/upload/confirm')} />
-      }>
+      // Figma처럼 다 채우기 전(글자수 초과, 해시태그 안 고름 등)에는 '다음' 버튼을 아예 보여주지 않는다
+      footer={canGoNext && <Button label="다음" variant="primary" onPress={() => router.push('/upload/confirm')} />}>
       {/* 빈 곳을 누르면 키보드를 닫는다. 닫히는 순간 한 줄 칸을 벗어나서 해시태그를 받아 온다. */}
       <Pressable accessible={false} onPress={Keyboard.dismiss} style={styles.blankArea}>
         <View style={styles.title}>
