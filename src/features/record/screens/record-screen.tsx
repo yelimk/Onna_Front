@@ -27,6 +27,7 @@ export function RecordScreen() {
   return (
     <ScreenContainer
       withBottomInset={false}
+      flushTop
       header={
         <ScreenHeader
           title="내 기록"
@@ -64,8 +65,9 @@ export function RecordScreen() {
 }
 
 const styles = StyleSheet.create({
+  // Figma 기록 사이 선: 0.5 두께, Gray/300
   divider: {
-    height: 1,
-    backgroundColor: colors.disabledBackground,
+    height: 0.5,
+    backgroundColor: colors.borderDeactivated,
   },
 });

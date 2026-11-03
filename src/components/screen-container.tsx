@@ -15,6 +15,8 @@ type ScreenContainerProps = {
   withBottomInset?: boolean;
   /** 흰 카드들을 올리는 화면(마이, 설정)은 회색 배경 */
   background?: 'white' | 'gray';
+  /** 목록이 머리글 바로 아래에서 시작하는 화면(Figma 내 기록)은 위쪽 여백을 없앤다 */
+  flushTop?: boolean;
 };
 
 /** 모든 화면의 바깥 틀. 좌우 여백, 안전 영역, 위·아래 고정 영역을 맞춘다. */
@@ -24,13 +26,14 @@ export function ScreenContainer({
   footer,
   withBottomInset = true,
   background = 'white',
+  flushTop = false,
 }: ScreenContainerProps) {
   return (
     <SafeAreaView
       style={[styles.safeArea, background === 'gray' && styles.grayBackground]}
       edges={withBottomInset ? ['top', 'bottom'] : ['top']}>
       {header && <View style={styles.header}>{header}</View>}
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={[styles.content, flushTop && styles.flushTop]} keyboardShouldPersistTaps="handled">
         {children}
       </ScrollView>
       {footer && <View style={styles.footer}>{footer}</View>}
@@ -54,6 +57,9 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: screenPaddingX,
     paddingVertical: spacing.xl,
+  },
+  flushTop: {
+    paddingTop: 0,
   },
   footer: {
     paddingHorizontal: screenPaddingX,
