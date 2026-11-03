@@ -14,8 +14,7 @@ import { toggleSpotLike, useLikedSpotIds } from '@/features/my/hooks/use-liked-s
 import { radius, spacing } from '@/constants/layout';
 import { mockLikedSpots, mockOpenedHistory, mockSpotDetails } from '@/mock/my-activity';
 
-// Figma 좋아요 내역 상세: 사진 모서리 22, 오른쪽 위 신고 버튼(동그라미) 36
-const photoRadius = 22;
+// Figma 좋아요 내역 상세: 오른쪽 위 신고 버튼(동그라미) 36
 const reportButtonSize = 36;
 
 /**
@@ -101,9 +100,10 @@ const styles = StyleSheet.create({
   post: {
     gap: spacing.md,
   },
+  // Figma 수정: 사진 모서리 12 (기록 상세와 같게)
   photoBox: {
     aspectRatio: 3 / 4,
-    borderRadius: photoRadius,
+    borderRadius: radius.md,
     overflow: 'hidden',
   },
   photo: {

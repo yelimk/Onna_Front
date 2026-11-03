@@ -10,7 +10,8 @@ import { samplePhotos } from '@/mock/sample-photos';
 import type { MyPost } from '@/types/api';
 
 // 서버 기록은 사진 주소(문자열)라서, 앱 안 예시 사진도 주소로 바꿔 같은 모양으로 맞춘다
-const toUri = (photo: number) => Image.resolveAssetSource(photo)?.uri ?? '';
+// 웹 미리보기에는 resolveAssetSource가 없어서, 없으면 빈 주소로 둔다 (폰에서는 있음)
+const toUri = (photo: number) => Image.resolveAssetSource?.(photo)?.uri ?? '';
 
 export const mockMyPosts: MyPost[] = [
   {

@@ -34,9 +34,7 @@ async function send(path: string, options: RequestOptions, accessToken?: string)
       headers,
       body: options.formData ?? (options.body !== undefined ? JSON.stringify(options.body) : undefined),
     });
-  } catch (error) {
-    // 서버까지 못 간 진짜 이유(예: Network request failed)를 개발 서버 터미널에 남긴다. 백엔드와 원인을 찾을 때 쓴다.
-    if (__DEV__) console.warn(`[api] ${options.method ?? 'GET'} ${path} 요청이 서버에 닿지 못했어요`, error);
+  } catch {
     throw new ApiError(0, 'NETWORK_ERROR', '서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.');
   }
 }
