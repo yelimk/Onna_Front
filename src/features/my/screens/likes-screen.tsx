@@ -25,6 +25,7 @@ export function LikesScreen() {
 
   return (
     <ScreenContainer
+      contentTopGap={spacing.xs}
       header={
         <ScreenHeader
           title="좋아요 내역"
@@ -40,14 +41,14 @@ export function LikesScreen() {
 
       {viewMode === '리스트' ? (
         <View>
-          {mockLikedSpots.map((spot) => (
+          {mockLikedSpots.map((spot, index) => (
             <Fragment key={spot.spotId}>
+              {index > 0 && <ListDivider />}
               <PhotoListRow
                 item={spot}
                 onPress={() => router.push(`/map/opened/${spot.spotId}`)}
                 right={<Icon name="heartFilled" />}
               />
-              <ListDivider />
             </Fragment>
           ))}
         </View>

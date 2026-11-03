@@ -24,6 +24,7 @@ export function OpenedHistoryScreen() {
 
   return (
     <ScreenContainer
+      contentTopGap={spacing.xs}
       header={
         <ScreenHeader
           title="연 자리 기록"

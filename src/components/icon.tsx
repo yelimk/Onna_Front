@@ -50,6 +50,8 @@ const figmaIcons = {
   bell: { default: require('@/assets/icons/bell.svg') },
   check: { default: require('@/assets/icons/check-white.svg') },
   report: { default: require('@/assets/icons/siren-inner.svg') },
+  // 신고를 마친 뒤의 빨간 사이렌 (Figma 좋아요 내역 상세)
+  reported: { default: require('@/assets/icons/siren-red.svg') },
   hashtag: { default: require('@/assets/icons/hashtag-m-inner.svg') },
   hashtagSmall: { default: require('@/assets/icons/hashtag-s-inner.svg') },
   heart: { default: require('@/assets/icons/heart-empty.svg') },
@@ -60,6 +62,11 @@ const figmaIcons = {
   },
   unlock: { default: require('@/assets/icons/unlock-s.svg') },
   settings: { default: require('@/assets/icons/setting-s.svg') },
+  // 마이 '내 활동' 메뉴의 24 크기 아이콘 (Figma 마이 새 버전)
+  heartMedium: { default: require('@/assets/icons/heart-black-m.svg') },
+  unlockMedium: { default: require('@/assets/icons/unlock-m.svg') },
+  hashtagMedium: { default: require('@/assets/icons/hashtag-black-m.svg') },
+  settingsMedium: { default: require('@/assets/icons/setting-m.svg') },
   eyeOpen: {
     default: require('@/assets/icons/eye-open-black.svg'),
     textInverse: require('@/assets/icons/eye-open-white.svg'),
@@ -78,6 +85,7 @@ const figmaIcons = {
 const innerPadding: Partial<Record<keyof typeof figmaIcons, number>> = {
   toastError: 2 / 24,
   report: 2 / 24,
+  reported: 2 / 24,
   hashtag: 3 / 24,
   hashtagSmall: 1 / 16,
 };

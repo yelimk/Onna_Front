@@ -61,8 +61,10 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     backgroundColor: colors.background01,
   },
+  // Figma 프로필 카드: 옆 16, 위아래 20
   profile: {
-    padding: spacing.lg,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.lg,
     gap: spacing.sm,
   },
   nameRow: {
@@ -93,8 +95,8 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   statDivider: {
-    width: 1,
+    width: 0.5,
     height: 29,
-    backgroundColor: colors.disabledBackground,
+    backgroundColor: colors.borderDeactivated,
   },
 });

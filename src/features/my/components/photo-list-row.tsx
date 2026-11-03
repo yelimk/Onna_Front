@@ -76,12 +76,15 @@ const styles = StyleSheet.create({
   photo: {
     borderRadius: radius.sm,
   },
+  // Figma list_l·list_m: 글 묶음 위아래 4
   texts: {
     flex: 1,
     gap: spacing.xxs,
+    paddingVertical: spacing.xxs,
   },
+  // Figma 좋아요 내역·연 자리 기록: 줄 사이 선 0.5, Gray/300
   divider: {
-    height: 1,
-    backgroundColor: colors.disabledBackground,
+    height: 0.5,
+    backgroundColor: colors.borderDeactivated,
   },
 });

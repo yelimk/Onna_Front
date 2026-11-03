@@ -77,9 +77,10 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     backgroundColor: colors.background01,
   },
+  // Figma 설정: 줄 사이 선 0.5, Gray/300
   divider: {
-    height: 1,
-    backgroundColor: colors.disabledBackground,
+    height: 0.5,
+    backgroundColor: colors.borderDeactivated,
   },
   row: {
     flexDirection: 'row',

@@ -28,7 +28,7 @@ export function SettingsScreen() {
   };
 
   return (
-    <ScreenContainer background="gray" header={<ScreenHeader title="설정" />}>
+    <ScreenContainer background="gray" contentTopGap={spacing.xs} header={<ScreenHeader title="설정" />}>
       <View style={styles.groups}>
         <MenuGroup title="권한">
           <MenuRow
@@ -59,7 +59,6 @@ export function SettingsScreen() {
         </MenuGroup>
 
         <MenuGroup title="계정 · 안전">
-          <MenuRow label="로그인 계정" trailing="이메일" />
           <MenuRow label="이용약관 · 개인정보 처리방침" onPress={() => router.push('/terms')} />
           <MenuRow label="버전" trailing={Constants.expoConfig?.version ?? '-'} />
         </MenuGroup>

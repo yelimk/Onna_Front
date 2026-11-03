@@ -16,7 +16,7 @@ import { mockNotificationGroups } from '@/mock/notifications';
  */
 export function NotificationsScreen() {
   return (
-    <ScreenContainer header={<ScreenHeader title="알림" />}>
+    <ScreenContainer contentTopGap={spacing.xs} header={<ScreenHeader title="알림" />}>
       <View style={styles.groups}>
         {mockNotificationGroups.map((group) => (
           <View key={group.label} style={styles.group}>
@@ -45,8 +45,9 @@ const styles = StyleSheet.create({
   group: {
     gap: spacing.xxs,
   },
+  // Figma 알림: 줄 사이 선 0.5, Gray/300
   divider: {
-    height: 1,
-    backgroundColor: colors.disabledBackground,
+    height: 0.5,
+    backgroundColor: colors.borderDeactivated,
   },
 });

@@ -40,6 +40,7 @@ export function PreferencesScreen() {
 
   return (
     <ScreenContainer
+      contentTopGap={spacing.xs}
       header={<ScreenHeader title="사용자 기호 설정" />}
       footer={
         <Button
@@ -78,6 +79,9 @@ export function PreferencesScreen() {
   );
 }
 
+// Figma 사용자 기호 설정: 해시태그 칩 사이 11 (디자인 시스템 간격 8·12 사이 값이라 이 화면에만 쓴다)
+const chipGap = 11;
+
 const styles = StyleSheet.create({
   group: {
     marginTop: sectionGap,
@@ -86,6 +90,6 @@ const styles = StyleSheet.create({
   chips: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing.sm,
+    gap: chipGap,
   },
 });
