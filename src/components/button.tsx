@@ -22,7 +22,7 @@ const labelColor: Record<ButtonVariant, ColorName> = {
 };
 
 function getLabelColor(variant: ButtonVariant, { disabled, pressed }: { disabled: boolean; pressed: boolean }): ColorName {
-  if (disabled) return variant === 'dark' ? 'textDeactivated' : 'textInverse';
+  if (disabled) return 'textInverse';
   if (pressed) return 'textDeactivated';
   return labelColor[variant];
 }
@@ -30,14 +30,14 @@ function getLabelColor(variant: ButtonVariant, { disabled, pressed }: { disabled
 /**
  * Figma 공통 컴포넌트 button. primary(주황)는 강조, dark(검정)는 기본 진행, outline은 보조 동작.
  * 누르고 있으면 버튼 위에 어두운 막을 덮고 글자를 회색으로 바꾼다 (Figma default_pressed, black_pressed).
- * 비활성이면 회색 배경에 흰 글자, 단 dark는 검은 배경을 유지하고 글자만 회색으로 바꾼다 (Figma black_disabled).
+ * 비활성이면 어떤 버튼이든 회색 배경에 흰 글자 (Figma deactivated).
  */
 export function Button({ label, variant = 'dark', icon, disabled, style, ...rest }: ButtonProps) {
   return (
     <Pressable
       accessibilityRole="button"
       disabled={disabled}
-      style={[styles.base, styles[variant], disabled && variant !== 'dark' && styles.disabled, style]}
+      style={[styles.base, styles[variant], disabled && styles.disabled, style]}
       {...rest}>
       {({ pressed }) => {
         const showPressed = pressed && !disabled && variant !== 'outline';
