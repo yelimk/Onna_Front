@@ -3,7 +3,7 @@ import { fromServerCoordinate } from '@/features/map/utils/to-coordinate';
 import type { PostPreview, Zone } from '@/types/api';
 import { formatHashtag } from '@/utils/format-hashtag';
 
-type MarkerOptions = {
+export type MarkerOptions = {
   /**
    * 내 위치로 받은 구역인지. 위치 없이 둘러볼 때는 캠퍼스 가운데 기준으로 받은 흐림 단계라서 믿지 않고,
    * 맛보기 사진만 보여준다 (위치 안내 카드의 '둘러보기에서는 맛보기 사진과 해시태그만 보여요').
@@ -12,7 +12,7 @@ type MarkerOptions = {
 };
 
 /** 서버의 사진 한 장 → 지도 기록. 사진에는 좌표가 없어서, 그 사진이 속한 구역 자리에 놓는다. */
-function toPhotoMarker(zone: Zone, preview: PostPreview, { isNearMe }: MarkerOptions): PhotoMarker {
+export function toPhotoMarker(zone: Zone, preview: PostPreview, { isNearMe }: MarkerOptions): PhotoMarker {
   const canShow = isNearMe || preview.isTeaser;
   return {
     kind: 'photo',
