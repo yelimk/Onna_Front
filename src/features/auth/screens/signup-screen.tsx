@@ -9,7 +9,7 @@ import { SignupHeader } from '@/features/auth/components/signup-header';
 import { StepTitle } from '@/features/auth/components/step-title';
 import { TermsAgreement } from '@/features/auth/components/terms-agreement';
 import { signupTotalSteps, useSignup } from '@/features/auth/hooks/use-signup';
-import { nicknameLength, passwordLength } from '@/features/auth/utils/signup-rules';
+import { nicknameLength } from '@/features/auth/utils/signup-rules';
 
 /**
  * 시작: 회원가입 4단계 (이메일 → 비밀번호 → 닉네임 → 약관).
@@ -17,7 +17,7 @@ import { nicknameLength, passwordLength } from '@/features/auth/utils/signup-rul
  * 이미 가입된 이메일이면 1단계로 돌아가 이메일 칸에 알려준다.
  */
 export function SignupScreen() {
-  const { step, setStep, form, update, errors, canGoNext, isSubmitting, goNext } = useSignup();
+  const { step, setStep, form, update, errors, successes, canGoNext, isSubmitting, goNext } = useSignup();
   const goBack = () => (step === 1 ? router.back() : setStep(step - 1));
 
   return (
@@ -57,16 +57,16 @@ export function SignupScreen() {
               value={form.password}
               onChangeText={(password) => update({ password })}
               error={errors.password}
-              helper={`${passwordLength.min}~${passwordLength.max}자`}
               isPassword
               autoComplete="new-password"
             />
             <TextField
               label="비밀번호 확인"
-              placeholder="비밀번호를 한 번 더 입력해 주세요"
+              placeholder="비밀번호를 다시 입력해 주세요"
               value={form.passwordConfirm}
               onChangeText={(passwordConfirm) => update({ passwordConfirm })}
               error={errors.passwordConfirm}
+              success={successes.passwordConfirm}
               isPassword
               autoComplete="new-password"
             />
@@ -86,8 +86,8 @@ export function SignupScreen() {
             value={form.nickname}
             onChangeText={(nickname) => update({ nickname })}
             error={errors.nickname}
+            success={successes.nickname}
             maxLength={nicknameLength.max}
-            showCount
           />
         </>
       )}

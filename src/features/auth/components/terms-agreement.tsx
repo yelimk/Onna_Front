@@ -1,4 +1,3 @@
-import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
@@ -16,7 +15,7 @@ type TermsAgreementProps = {
 
 /**
  * 회원가입 마지막 단계의 약관 동의 목록. 모두 필수라 전부 골라야 다음으로 간다.
- * 줄을 누르면 동의가 바뀌고, 오른쪽 화살표를 누르면 약관 전문(/terms)을 본다.
+ * 줄을 누르면 동의가 바뀐다. 약관 전문이 아직 없어서 오른쪽 화살표는 모양만 두고 누를 수 없게 했다 (팀 결정).
  */
 export function TermsAgreement({ agreed, onChange }: TermsAgreementProps) {
   const toggle = (term: TermName) =>
@@ -38,9 +37,7 @@ export function TermsAgreement({ agreed, onChange }: TermsAgreementProps) {
                 [필수] {term}
               </AppText>
             </Pressable>
-            <Pressable accessibilityLabel={`${term} 보기`} hitSlop={12} onPress={() => router.push('/terms')}>
-              <Icon name="forwardSmall" />
-            </Pressable>
+            <Icon name="forwardSmall" />
           </View>
         );
       })}

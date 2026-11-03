@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, TextInput, View, type TextInputProps } from 'rea
 
 import { AppText } from '@/components/app-text';
 import { Icon } from '@/components/icon';
-import { colors } from '@/constants/colors';
+import { colors, type ColorName } from '@/constants/colors';
 import { radius, spacing } from '@/constants/layout';
 import { typography } from '@/constants/typography';
 
@@ -16,6 +16,8 @@ type TextFieldProps = Omit<TextInputProps, 'secureTextEntry'> & {
   helper?: string;
   /** 있으면 빨간 테두리와 빨간 안내 문구로 보여준다 */
   error?: string;
+  /** 규칙에 맞았을 때 초록 안내 문구 (예: '비밀번호가 일치합니다'). error가 있으면 error가 먼저다. */
+  success?: string;
   /** 입력창 오른쪽에 붙는 버튼 등 (예: 인증 요청) */
   accessory?: ReactNode;
   /** maxLength와 함께 쓰면 오른쪽 아래에 '22/40'처럼 글자 수를 보여준다 */
@@ -33,6 +35,7 @@ export function TextField({
   required = false,
   helper,
   error,
+  success,
   accessory,
   showCount = false,
   isPassword = false,
@@ -44,7 +47,7 @@ export function TextField({
   const [isFocused, setIsFocused] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const count = showCount && rest.maxLength ? `${rest.value?.length ?? 0}/${rest.maxLength}` : undefined;
-  const bottomText = error ?? helper;
+  const bottomText = error ?? success ?? helper;
 
   return (
     <View>
@@ -83,7 +86,7 @@ export function TextField({
       </View>
       {(bottomText || count) && (
         <View style={styles.bottomRow}>
-          <AppText variant="caption02" color={error !== undefined ? 'error' : 'textTertiary'} style={styles.helper}>
+          <AppText variant="caption02" color={getHelperColor(error, success)} style={styles.helper}>
             {bottomText}
           </AppText>
           {count && (
@@ -95,6 +98,12 @@ export function TextField({
       )}
     </View>
   );
+}
+
+function getHelperColor(error: string | undefined, success: string | undefined): ColorName {
+  if (error !== undefined) return 'error';
+  if (success !== undefined) return 'success';
+  return 'textTertiary';
 }
 
 const styles = StyleSheet.create({
