@@ -77,19 +77,19 @@ const styles = StyleSheet.create({
   },
   // 사진 두 장을 서로 반대로 기울여 겹친다 (Figma -12°, +12°)
   illustration: {
-    width: 240,
-    height: 170,
+    width: 251,
+    height: 162,
   },
   backPhoto: {
     position: 'absolute',
-    left: 0,
+    left: 12,
     top: 18,
     transform: [{ rotate: '-12deg' }],
   },
   frontPhoto: {
     position: 'absolute',
-    right: 0,
-    top: 12,
+    left: 102,
+    top: 13,
     transform: [{ rotate: '12deg' }],
   },
   texts: {

@@ -58,6 +58,13 @@ export const toastShadow = {
   elevation: 6,
 } as const;
 
+/** 설문 완료의 주황 테두리 사진은 더 떠 보이게 그림자를 진하게 (Figma blur_color, 검정 32%) */
+export const highlightedPhotoShadow = {
+  ...photoShadow,
+  shadowOpacity: 0.32,
+  elevation: 8,
+} as const;
+
 /** 리스트/지도 토글에서 고른 칸이 살짝 떠 보이게 (Figma drop shadow 0 0 8, 검정 8%) */
 export const toggleShadow = {
   shadowColor: palette.gray.black,

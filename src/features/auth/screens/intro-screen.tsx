@@ -6,7 +6,7 @@ import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
 import { ScreenContainer } from '@/components/screen-container';
 import { colors } from '@/constants/colors';
-import { radius, spacing } from '@/constants/layout';
+import { radius, sectionGap, spacing } from '@/constants/layout';
 import { IntroIllustration } from '@/features/auth/components/intro-illustration';
 import { introSlides } from '@/features/auth/constants/intro-slides';
 import { markIntroSeen } from '@/features/auth/utils/intro-seen';
@@ -74,8 +74,9 @@ const styles = StyleSheet.create({
   center: {
     textAlign: 'center',
   },
+  // Figma 온보딩: 점과 '다음' 버튼 사이 40
   dots: {
-    marginBottom: spacing.xl,
+    marginBottom: sectionGap,
     flexDirection: 'row',
     justifyContent: 'center',
     gap: spacing.xs,

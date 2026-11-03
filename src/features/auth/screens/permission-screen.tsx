@@ -16,7 +16,9 @@ export function PermissionScreen() {
   };
 
   return (
-    <ScreenContainer footer={<Button label="확인하고 허용하기" variant="primary" onPress={handleAllow} />}>
+    <ScreenContainer
+      contentTopGap={spacing.lg}
+      footer={<Button label="확인하고 허용하기" variant="primary" onPress={handleAllow} />}>
       <View style={styles.title}>
         <AppText variant="heading02">{'걸어서 열고, 그 자리에 남기려면\n이 권한이 필요해요'}</AppText>
         <AppText variant="body01" color="textTertiary">

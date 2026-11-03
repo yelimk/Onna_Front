@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import { StyleSheet, View, type ViewStyle } from 'react-native';
 
 import { colors } from '@/constants/colors';
-import { photoShadow, radius } from '@/constants/layout';
+import { highlightedPhotoShadow, photoShadow, radius } from '@/constants/layout';
 
 type BlurPhotoProps = {
   size: number;
@@ -31,6 +31,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background01,
   },
   highlighted: {
+    ...highlightedPhotoShadow,
     backgroundColor: colors.photoHighlightFrame,
   },
   image: {

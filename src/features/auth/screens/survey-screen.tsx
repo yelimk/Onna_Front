@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { getMe, saveMyTags } from '@/api/users';
 import { Button } from '@/components/button';
 import { ScreenContainer } from '@/components/screen-container';
+import { spacing } from '@/constants/layout';
 import { PlaceStep } from '@/features/auth/components/place-step';
 import { RelationStep } from '@/features/auth/components/relation-step';
 import { SurveyDone } from '@/features/auth/components/survey-done';
@@ -82,6 +83,7 @@ export function SurveyScreen() {
 
   return (
     <ScreenContainer
+      contentTopGap={spacing.xxl}
       header={<SurveyHeader step={step} totalSteps={totalSteps} onBack={goBack} />}
       footer={
         <Button
