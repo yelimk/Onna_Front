@@ -41,19 +41,14 @@ export function RecordListItem({ post, onPress, showMeta = true }: RecordListIte
               contentFit="cover"
             />
             <View style={[styles.body, { height: size.photo }]}>
-              <View style={styles.top}>
-                <View style={styles.texts}>
+              {/* 날짜는 제목 줄 옆에만 둔다. 글 전체 옆에 두면 날짜(2026.08.28) 너비만큼 코멘트 칸이 좁아져 줄이 일찍 꺾인다 */}
+              <View style={styles.titleRow}>
+                <View style={styles.title}>
                   {post.title && (
                     <AppText variant={size.title} numberOfLines={1}>
                       {post.title}
                     </AppText>
                   )}
-                  <AppText variant={size.comment} numberOfLines={2}>
-                    {post.oneLine}
-                  </AppText>
-                  <AppText variant={size.meta} color="textTertiary" style={styles.hashtags}>
-                    {post.tags.map(formatHashtag).join(' ')}
-                  </AppText>
                 </View>
                 {showMeta && (
                   <AppText variant={size.meta} color="textDeactivated" style={styles.date}>
@@ -61,6 +56,12 @@ export function RecordListItem({ post, onPress, showMeta = true }: RecordListIte
                   </AppText>
                 )}
               </View>
+              <AppText variant={size.comment} numberOfLines={2}>
+                {post.oneLine}
+              </AppText>
+              <AppText variant={size.meta} color="textTertiary" style={styles.hashtags}>
+                {post.tags.map(formatHashtag).join(' ')}
+              </AppText>
               {showMeta && (
                 <View style={styles.likes}>
                   <Icon name="heartSmall" size={16} color="textDeactivated" />
@@ -102,11 +103,11 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: spacing.xxs,
   },
-  top: {
+  titleRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
   },
-  texts: {
+  title: {
     flex: 1,
   },
   hashtags: {
