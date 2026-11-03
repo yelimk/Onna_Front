@@ -10,6 +10,7 @@ import { ScreenContainer } from '@/components/screen-container';
 import { ScreenHeader } from '@/components/screen-header';
 import { showToast } from '@/components/toast';
 import { colors } from '@/constants/colors';
+import { toggleSpotLike, useLikedSpotIds } from '@/features/my/hooks/use-liked-spots';
 import { radius, spacing } from '@/constants/layout';
 import { mockLikedSpots, mockOpenedHistory, mockSpotDetails } from '@/mock/my-activity';
 
@@ -28,7 +29,7 @@ export function MySpotDetailScreen() {
     mockLikedSpots.find((item) => item.spotId === id) ??
     mockOpenedHistory.flatMap((group) => group.items).find((item) => item.spotId === id);
   const detail = id ? mockSpotDetails[id] : undefined;
-  const [liked, setLiked] = useState(detail?.liked ?? false);
+  const likedIds = useLikedSpotIds();
   const [isReported, setIsReported] = useState(false);
 
   if (!spot || !detail) {
@@ -85,7 +86,8 @@ export function MySpotDetailScreen() {
           </View>
         </View>
 
-        <LikeButton liked={liked} onPress={() => setLiked(!liked)} />
+        {/* 좋아요 내역 목록과 같은 상태를 써서, 여기서 취소하면 목록 하트도 같이 바뀐다 */}
+        <LikeButton liked={id ? likedIds.includes(id) : false} onPress={() => id && toggleSpotLike(id)} />
       </View>
     </ScreenContainer>
   );

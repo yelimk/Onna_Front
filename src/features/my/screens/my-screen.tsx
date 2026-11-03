@@ -8,8 +8,8 @@ import { spacing } from '@/constants/layout';
 import { ActivityMenu } from '@/features/my/components/activity-menu';
 import { ProfileCard, StatsCard } from '@/features/my/components/profile-summary';
 import { profileBadges } from '@/features/my/constants/profile-badges';
+import { useLikedSpotIds } from '@/features/my/hooks/use-liked-spots';
 import { useMySummary } from '@/features/my/hooks/use-my-summary';
-import { mockMyStats } from '@/mock/my-activity';
 
 /**
  * ③ 마이 탭: 프로필, 내 숫자, 메뉴. 알림은 오른쪽 위 종 버튼으로 들어간다.
@@ -17,6 +17,8 @@ import { mockMyStats } from '@/mock/my-activity';
  */
 export function MyScreen() {
   const { nickname, leftCount, openedCount } = useMySummary();
+  // 좋아요 내역에서 취소하면 이 숫자도 같이 줄도록 같은 좋아요 상태를 센다
+  const likedCount = useLikedSpotIds().length;
 
   return (
     <ScreenContainer withBottomInset={false} background="gray" contentTopGap={spacing.xs}>
@@ -33,7 +35,7 @@ export function MyScreen() {
           stats={[
             { label: '남긴 자리', value: leftCount },
             { label: '연 자리', value: openedCount },
-            { label: '좋아한 자리', value: mockMyStats.likedCount },
+            { label: '좋아한 자리', value: likedCount },
           ]}
         />
         <ActivityMenu

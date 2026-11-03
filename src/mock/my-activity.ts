@@ -4,11 +4,6 @@ import { samplePhotos } from '@/mock/sample-photos';
 import type { MapArea } from '@/types/map-area';
 import type { PhotoSource } from '@/types/photo-source';
 
-// 남긴·연 자리 수는 서버에서 받는다. 좋아요한 자리 수는 API가 없어서 아직 가짜 값이다.
-export const mockMyStats = {
-  likedCount: 9,
-};
-
 /** 좋아요 내역·연 자리 기록 목록의 한 줄 */
 export type MySpotItem = {
   spotId: string;
@@ -44,9 +39,9 @@ export const mockOpenedHistory: { dateLabel: string; items: MySpotItem[] }[] = [
   },
 ];
 
-/** 좋아요 내역·연 자리 기록에서 누르면 보이는 상세 (사진 아래 한 줄, 날짜, 좋아요했는지). 서버 API가 나오면 그 값으로 바꾼다. */
-export const mockSpotDetails: Record<string, { oneLine: string; dateLabel: string; liked: boolean }> = {
-  '2': { oneLine: '노을 질 때 다 같이 사진 찍어주던 사람들', dateLabel: '2026.08.22', liked: true },
-  '3': { oneLine: '아침마다 창문 열어주시는 경비 아저씨', dateLabel: '2026.08.13', liked: true },
-  '6': { oneLine: '뚱뚱한 비둘기 앉아서 쉬는중', dateLabel: '2026.08.02', liked: true },
+/** 좋아요 내역·연 자리 기록에서 누르면 보이는 상세 (사진 아래 한 줄, 날짜). 서버 API가 나오면 그 값으로 바꾼다. */
+export const mockSpotDetails: Record<string, { oneLine: string; dateLabel: string }> = {
+  '2': { oneLine: '노을 질 때 다 같이 사진 찍어주던 사람들', dateLabel: '2026.08.22' },
+  '3': { oneLine: '아침마다 창문 열어주시는 경비 아저씨', dateLabel: '2026.08.13' },
+  '6': { oneLine: '뚱뚱한 비둘기 앉아서 쉬는중', dateLabel: '2026.08.02' },
 };
