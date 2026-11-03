@@ -87,6 +87,8 @@ export const colors = {
   photoHighlightFrame: palette.primary[300],
   // 회색 칸 위에 얹는 옅은 동그라미 버튼 (Figma reload_circle, Gray/200 40%)
   softCircleButton: 'rgba(225, 225, 225, 0.4)',
+  // 흰 동그라미 버튼을 누르고 있을 때 배경 (Figma bell_circle pressed, Gray/100)
+  pressedCircleButton: palette.gray[100],
   // 토스트 알림 배경 (Figma Gray/800)
   toastBackground: palette.gray[800],
   // 좋아요를 누른 버튼 테두리 (Figma like activated, Error/03)
