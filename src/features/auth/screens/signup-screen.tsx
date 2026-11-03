@@ -70,7 +70,8 @@ export function SignupScreen() {
 
       {step === 3 && (
         <>
-          <StepTitle gapBelow={spacing.xl}
+          <StepTitle
+            gapBelow={spacing.xl}
             title="어떻게 불러드릴까요?"
             description={'닉네임은 내 화면에서만 보여요.\n남긴 사진은 늘 익명으로 건네져요.'}
           />
