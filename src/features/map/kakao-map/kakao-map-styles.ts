@@ -63,11 +63,12 @@ export const kakaoMapCss = `
   .photo {
     width: ${photoSize}px; height: ${photoSize}px; box-sizing: border-box;
     border: 3px solid ${colors.background01}; border-radius: ${radius.sm}px;
-    box-shadow: ${shadow};
+    box-shadow: ${shadow}; background-size: cover; background-position: center;
   }
   /* 아직 열리지 않은 사진은 흐린 회색으로 가린다 */
-  .photo-locked { background: radial-gradient(circle, ${colors.lockedPhotoCenter}, ${colors.lockedPhotoEdge}); }
-  .photo-open { border-color: ${colors.primary}; background: ${colors.placeholderBox}; }
+  /* 사진 주소가 오면 마커가 background-image를 덮어쓴다. 크기·위치(cover)가 지워지지 않게 background 묶음 대신 낱개로 쓴다. */
+  .photo-locked { background-image: radial-gradient(circle, ${colors.lockedPhotoCenter}, ${colors.lockedPhotoEdge}); }
+  .photo-open { border-color: ${colors.primary}; background-color: ${colors.placeholderBox}; }
 
   .chip {
     padding: ${spacing.xxs}px ${spacing.sm}px; border-radius: ${radius.full}px;

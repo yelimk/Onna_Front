@@ -53,6 +53,13 @@ export function buildKakaoMapHtml({ appKey, center, level }: KakaoMapHtmlOptions
       return element;
     }
 
+    // 서버 사진 주소를 배경으로 깐다. 주소가 없으면 CSS의 회색 가림이 그대로 보인다.
+    function setPhoto(element, imageUrl) {
+      // 서명이 붙은 주소라 다시 인코딩하면 깨진다. CSS 문자열을 끝내 버리는 따옴표·역슬래시만 바꾼다.
+      if (imageUrl) element.style.backgroundImage = 'url("' + imageUrl.replace(/["\\\\]/g, encodeURIComponent) + '")';
+      return element;
+    }
+
     function createMarkerElement(marker) {
       var root = createElement('button', 'marker');
       if (marker.kind === 'result') {
@@ -64,8 +71,10 @@ export function buildKakaoMapHtml({ appKey, center, level }: KakaoMapHtmlOptions
         root.appendChild(pin);
       } else if (marker.kind === 'cluster') {
         var stack = createElement('div', 'stack');
-        ['stack-back', 'stack-middle', 'stack-front'].forEach(function (position) {
-          stack.appendChild(createElement('div', 'photo photo-locked ' + position));
+        var imageUrls = marker.imageUrls || [];
+        // 맨 앞(stack-front)에 첫 대표 사진이 오도록 뒤에서부터 채운다.
+        ['stack-back', 'stack-middle', 'stack-front'].forEach(function (position, index) {
+          stack.appendChild(setPhoto(createElement('div', 'photo photo-locked ' + position), imageUrls[2 - index]));
         });
         if (marker.isSelected) {
           // 이미 열어 본 묶음은 Figma처럼 이름표 없이 주황 원으로만 감싼다.
@@ -78,7 +87,7 @@ export function buildKakaoMapHtml({ appKey, center, level }: KakaoMapHtmlOptions
           root.appendChild(createElement('span', 'cluster-more', '+' + marker.moreCount + '개 더'));
         }
       } else {
-        root.appendChild(createElement('div', 'photo ' + (marker.isOpen ? 'photo-open' : 'photo-locked')));
+        root.appendChild(setPhoto(createElement('div', 'photo ' + (marker.isOpen ? 'photo-open' : 'photo-locked')), marker.imageUrl));
         root.appendChild(createElement('span', 'chip ' + (marker.isOpen ? 'chip-dark' : 'chip-light'), marker.hashtags[0]));
       }
       root.addEventListener('click', function () {

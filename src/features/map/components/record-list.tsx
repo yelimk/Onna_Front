@@ -2,13 +2,16 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { Icon } from '@/components/icon';
-import { PhotoPlaceholder } from '@/components/photo-placeholder';
 import { colors } from '@/constants/colors';
 import { radius, spacing } from '@/constants/layout';
+import { RecordPhoto } from '@/features/map/components/record-photo';
+
 /** 목록 한 줄에 필요한 것만. 묶음 기록과 지도 기록(PhotoMarker) 모두 이 모양을 가진다. */
 type ListedRecord = {
   id: string;
   hashtags: string[];
+  /** 서버가 흐림 단계에 맞춰 흐리게 만든 사진. 없으면 회색 상자 */
+  imageUrl?: string;
 };
 
 type RecordListProps<Record extends ListedRecord> = {
@@ -30,7 +33,7 @@ export function RecordList<Record extends ListedRecord>({ records, onPress }: Re
             accessibilityLabel={record.hashtags.join(' ')}
             onPress={() => onPress(record)}
             style={styles.row}>
-            <PhotoPlaceholder width={thumbnailSize} height={thumbnailSize} style={styles.thumbnail} />
+            <RecordPhoto imageUrl={record.imageUrl} width={thumbnailSize} height={thumbnailSize} style={styles.thumbnail} />
             <View style={styles.hashtags}>
               {record.hashtags.map((hashtag) => (
                 <AppText key={hashtag} variant="button03" color="textSecondary">

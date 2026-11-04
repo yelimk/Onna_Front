@@ -61,6 +61,9 @@ export type OpenedPost = {
   question: string;
   oneLine: string;
   tags: string[];
+  /** 이 기록이 남겨진 구역 이름·주소 ('영남대학교 정문', '경산시 대동') */
+  zoneName: string;
+  zoneAddress: string;
   liked: boolean;
 };
 

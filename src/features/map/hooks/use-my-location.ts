@@ -10,6 +10,8 @@ import type { Coordinate } from '@/features/map/types/home-map-marker';
  * 위치를 쓰는 화면이 하나라도 떠 있으면 지켜보고, 모두 닫히면 멈춘다. 마지막 위치는 기억해 둔다.
  */
 let currentLocation: Coordinate | null = null;
+/** 마지막 위치의 오차 반경(m). 서버가 사진을 열어 줄지 정할 때 같이 보낸다. */
+let currentAccuracy: number | null = null;
 let watcher: Promise<Location.LocationSubscription | null> | null = null;
 let watchingScreens = 0;
 const listeners = new Set<() => void>();
@@ -20,6 +22,7 @@ function startWatching() {
     { accuracy: Location.Accuracy.High, distanceInterval: 5 },
     ({ coords }) => {
       currentLocation = { latitude: coords.latitude, longitude: coords.longitude };
+      currentAccuracy = coords.accuracy;
       listeners.forEach((listener) => listener());
     },
   ).catch(() => {
@@ -46,6 +49,12 @@ const subscribe = (listener: () => void) => {
   return () => listeners.delete(listener);
 };
 const getSnapshot = () => currentLocation;
+const getAccuracySnapshot = () => currentAccuracy;
+
+/** 지금 내 위치의 오차 반경(m). 위치를 아직 모르면 null. 서버 요청에 위치와 같이 보낼 때 쓴다. */
+export function useLocationAccuracy() {
+  return useSyncExternalStore(subscribe, getAccuracySnapshot, getAccuracySnapshot);
+}
 
 /**
  * 위치 권한과 지금 내 위치. 권한이 있으면 걸을 때마다 위치를 새로 받는다.

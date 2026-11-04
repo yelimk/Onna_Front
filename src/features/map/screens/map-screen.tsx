@@ -4,6 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Badge } from '@/components/badge';
 import { screenPaddingX, spacing } from '@/constants/layout';
 import { AiBadge } from '@/features/map/components/ai-badge';
 import { ExploreModeToggle } from '@/features/map/components/explore-mode-toggle';
@@ -21,6 +22,7 @@ import { usePlaceRoute } from '@/features/map/hooks/use-place-route';
 import { useResultsMap, type ResultsMapView } from '@/features/map/hooks/use-results-map';
 import { KakaoMapView } from '@/features/map/kakao-map/kakao-map-view';
 import type { MapMarker } from '@/features/map/types/home-map-marker';
+import { getZonesNotice } from '@/features/map/utils/get-zones-notice';
 import { openNavigation, openRecord } from '@/features/map/utils/open-search-result';
 import { useFadeStyle } from '@/hooks/use-fade-style';
 
@@ -42,7 +44,8 @@ function openMarker(marker: MapMarker) {
 export function MapScreen() {
   const insets = useSafeAreaInsets();
   const { isChecking, isGranted, location, request } = useMyLocation();
-  const { markers, nearestPhoto } = useHomeMapMarkers(location);
+  const { markers, nearestPhoto, errorCode } = useHomeMapMarkers(location);
+  const zonesNotice = getZonesNotice(errorCode);
   const [isExploring, setIsExploring] = useState(false);
   // 탐색 모드를 켜면 바로 가장 가까운 기록이 보이도록 펼친 상태로 시작한다.
   const [isSheetExpanded, setIsSheetExpanded] = useState(true);
@@ -106,6 +109,7 @@ export function MapScreen() {
         <View style={styles.toggle}>
           <ExploreModeToggle value={isExploring} onChange={changeExploring} />
         </View>
+        {zonesNotice && <Badge label={zonesNotice} tone="dark" style={styles.notice} />}
         {placeRoute.routePlan && (
           <Animated.View style={chromeStyle}>
             <AiBadge label="AI 추천 경로" />
@@ -165,6 +169,9 @@ const styles = StyleSheet.create({
   },
   toggle: {
     alignSelf: 'flex-end',
+  },
+  notice: {
+    alignSelf: 'center',
   },
   bottom: {
     position: 'absolute',

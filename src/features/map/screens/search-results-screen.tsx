@@ -34,9 +34,11 @@ function getSheetMessage(tab: SearchTab, items: SearchResultItem[], options: {
   isHashtagQuery: boolean;
   isSearching: boolean;
   errorMessage: string | null;
+  hashtagErrorMessage: string | null;
 }) {
   if (tab === 'place' && options.isHashtagQuery) return hashtagOnlyMessage;
   if (tab === 'place' && options.errorMessage) return options.errorMessage;
+  if (tab === 'hashtag' && options.hashtagErrorMessage) return options.hashtagErrorMessage;
   if (items.length === 0 && !options.isSearching) return '검색결과가 없어요';
   return null;
 }
@@ -133,6 +135,7 @@ export function SearchResultsScreen() {
                 isHashtagQuery: search.isHashtagQuery,
                 isSearching: search.isPlaceSearching,
                 errorMessage: search.placeErrorMessage,
+                hashtagErrorMessage: search.hashtagErrorMessage,
               })}
               sortOrder={sortOrder}
               onSortChange={setSortOrder}

@@ -8,8 +8,8 @@ import { screenPaddingX, spacing } from '@/constants/layout';
 import { PhotoDetailCard } from '@/features/map/components/photo-detail-card';
 import { ReportSheet } from '@/features/map/components/report-sheet';
 import { useMyLocation } from '@/features/map/hooks/use-my-location';
+import { toggleLike } from '@/features/map/hooks/use-opened-posts';
 import { useRecordDetail } from '@/features/map/hooks/use-record-detail';
-import { toggleLikedRecord } from '@/features/map/hooks/use-record-memory';
 
 /** Figma 사진 높이. 작은 폰에서는 화면 높이의 절반을 넘지 않게 줄인다. */
 const maxPhotoHeight = 410;
@@ -41,7 +41,7 @@ export function PhotoDetailScreen() {
             onReport={() => setIsReporting(true)}
             // 남기기는 앱 카메라로 바로 찍는다. 갤러리에서 고르는 길은 없다.
             onLeaveMine={() => router.push('/upload/camera')}
-            onToggleLike={() => toggleLikedRecord(record.id)}
+            onToggleLike={() => toggleLike(record.id)}
           />
         ) : (
           <AppText variant="body01" color="textInverse" style={styles.notFound}>

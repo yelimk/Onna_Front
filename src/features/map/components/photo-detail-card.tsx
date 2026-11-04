@@ -3,14 +3,20 @@ import Animated from 'react-native-reanimated';
 
 import { AppText } from '@/components/app-text';
 import { Icon } from '@/components/icon';
-import { PhotoPlaceholder } from '@/components/photo-placeholder';
 import { colors, palette } from '@/constants/colors';
 import { radius, spacing } from '@/constants/layout';
+import { RecordPhoto } from '@/features/map/components/record-photo';
 import { sheetCornerRadius } from '@/features/map/constants/map-layout';
 import { usePopStyle } from '@/features/map/hooks/use-pop-style';
 import type { RecordDetail } from '@/features/map/hooks/use-record-detail';
 
 const headerButtonSize = 36;
+
+/** 아직 못 연 기록의 안내. 위치가 부정확해서 못 연 것이면 멀리 있다고 하지 않는다. */
+function getLockedMessage(openErrorCode: string | null) {
+  if (openErrorCode === 'RETRY_LOCATION') return '위치를 정확히 잡는 중이에요. 잠시만 기다려 주세요';
+  return '한줄 코멘트는 가까이 가면 열려요';
+}
 
 type PhotoDetailCardProps = {
   record: RecordDetail;
@@ -46,10 +52,10 @@ export function PhotoDetailCard({ record, photoHeight, onClose, onReport, onLeav
         </Pressable>
       </View>
 
-      <PhotoPlaceholder width="100%" height={photoHeight} style={styles.photo} />
+      <RecordPhoto imageUrl={record.imageUrl} width="100%" height={photoHeight} style={styles.photo} />
 
       <AppText variant="button02" color={record.isUnlocked ? 'textPrimary' : 'textDeactivated'}>
-        {record.isUnlocked ? record.comment : '한줄 코멘트는 가까이 가면 열려요'}
+        {record.isUnlocked ? record.comment : getLockedMessage(record.openErrorCode)}
       </AppText>
 
       <View style={styles.hashtags}>

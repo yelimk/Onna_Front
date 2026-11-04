@@ -22,10 +22,10 @@ export const defaultMapCenter: Coordinate = { latitude: 35.8306, longitude: 128.
 export const defaultMapLevel = 3;
 
 /**
- * 이 거리 안에 들어온 사진은 흐리지 않게 열린다.
- * 기본 확대 단계에서 Figma 탐색 모드의 원 크기와 비슷해지는 값이고, 실제 값은 캠퍼스를 걸어보며 정한다.
+ * 이 거리 안에 들어온 사진은 열린다. 서버가 사진 열기(POST /posts/{id}/open)를 25m 안에서만 허락해서 같은 값을 쓴다.
+ * 탐색 모드의 원, 길안내 '범위 내 기록들', 사진 카드의 '가까우면 열어 보기'가 모두 이 값을 따른다.
  */
-export const openRadiusMeters = 100;
+export const openRadiusMeters = 25;
 
 /** 고른 장소에서 이 거리 안의 기록을 '이 근처 남겨진 기록'으로 센다. 걸어서 5분 안쪽이다. */
 export const nearbyRecordRadiusMeters = 300;
@@ -38,3 +38,29 @@ export const maxRouteStops = 3;
 
 /** 직선 경로일 때 걸리는 시간을 셀 걸음 속도(m/s). 보통 걸음 약 시속 4km. */
 export const walkingSpeedMetersPerSecond = 1.1;
+
+/**
+ * 지도 구역(/map/zones)을 다시 받는 간격. 서버가 주는 사진 주소가 5분 뒤 만료되어서, 그보다 조금 빨리 새로 받는다.
+ */
+export const zonesRefreshMs = 4 * 60 * 1000;
+
+/**
+ * 이만큼 걸으면 구역을 다시 받는다. 흐림 단계(S0→OPEN)는 서버가 내 위치로 정해서,
+ * 다시 받아야 가까워진 사진이 열린다. 위치를 5m마다 받으므로 매번 묻지 않도록 간격을 둔다.
+ */
+export const zonesRefetchMeters = 30;
+
+/**
+ * 위치 권한 없이 둘러볼 때 서버에 보내는 오차(m). 서버는 위치를 꼭 받아야 해서 캠퍼스 가운데를 보내되,
+ * 거기 있는 척하지 않도록 아주 부정확한 위치라고 알린다. 이때 앱은 맛보기 사진 말고는 모두 잠가서 보여준다.
+ */
+export const browsingAccuracyMeters = 2000;
+
+/**
+ * 경로 추천(GET /recommendations/route)에 보낼 산책 시간을 셀 때, 직선 거리에 곱하는 값.
+ * 길은 직선보다 돌아가므로 조금 늘려 잡아, 서버가 목적지까지 걷는 동안 들를 만한 자리를 고르게 한다.
+ */
+export const routeDetourFactor = 1.3;
+
+/** 목적지가 아주 가까워도 들를 자리를 고를 여유를 주는 가장 짧은 산책 시간(분) */
+export const minRouteMinutes = 10;

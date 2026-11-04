@@ -7,6 +7,7 @@ import { useHomeMapMarkers } from '@/features/map/hooks/use-home-map-markers';
 import type { Coordinate } from '@/features/map/types/home-map-marker';
 import type { WalkRoute } from '@/features/map/types/walk-route';
 import { getDistanceMeters } from '@/features/map/utils/get-distance-meters';
+import { findKnownRecord } from '@/features/map/utils/known-records';
 import { locateOnRoute, splitRoute } from '@/features/map/utils/route-progress';
 
 type NavigationParams = {
@@ -39,7 +40,8 @@ export function useWalkNavigation(myLocation: Coordinate | null) {
   );
   const stops = useMemo(() => {
     const ids = params.stopIds ? params.stopIds.split(',') : [];
-    return ids.map((id) => records.find((record) => record.id === id)).filter((stop) => stop !== undefined);
+    // 서버가 추천한 자리는 지도 구역에 없을 수 있어서, 경로 추천 때 기억해 둔 기록에서도 찾는다.
+    return ids.map((id) => records.find((record) => record.id === id) ?? findKnownRecord(id)).filter((stop) => stop !== undefined);
   }, [params.stopIds, records]);
 
   // 출발점은 길안내를 시작한 순간의 위치로 고정한다. 위치를 모르면 캠퍼스에서 출발한다고 본다.
