@@ -115,6 +115,22 @@ type MySpotBase = {
 
 export type OpenedSpot = MySpotBase & { openedAt: string };
 
+/**
+ * 알림 한 줄. OPENED: 누군가 내 자리를 열었다 / TEASER: 내 사진이 구역 대표 사진이 되었다.
+ * 안 읽음 표시는 서버가 주지 않아서, 앱이 알림 화면을 마지막으로 본 시각과 createdAt을 비교해 정한다.
+ */
+export type AppNotification = {
+  type: 'OPENED' | 'TEASER';
+  postId: number;
+  title: string;
+  zoneName: string | null;
+  imageUrl: string;
+  /** 열린 시각 / 대표 사진이 된 시각 */
+  createdAt: string;
+  /** 내가 남긴 한 줄. Figma 알림에 필요해서 백엔드에 추가를 요청했다. 서버가 주기 전까지는 비어 있다. */
+  oneLine?: string;
+};
+
 export type LikedSpot = MySpotBase & { likedAt: string };
 
 export type HashtagSearchResult = Coordinate & {

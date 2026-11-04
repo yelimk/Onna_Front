@@ -8,26 +8,37 @@ import { ScreenHeader } from '@/components/screen-header';
 import { colors } from '@/constants/colors';
 import { spacing } from '@/constants/layout';
 import { NotificationRow } from '@/features/notification/components/notification-row';
-import { mockNotificationGroups } from '@/mock/notifications';
+import { useNotifications, type NotificationItem } from '@/features/notification/hooks/use-notifications';
 
 /**
  * ③ 마이 탭: 알림. 푸시 알림은 1차에서 하지 않아서, 앱 안 알림 목록으로만 보여준다.
- * 알림을 누르면 내가 남긴 기록으로 간다.
+ * 알림을 누르면 그 기록의 상세로 간다. 마이 탭 안에서 열어서, 뒤로 가면 알림 화면으로 돌아온다.
  */
 export function NotificationsScreen() {
+  const { groups, unreadKeys, markRead } = useNotifications();
+
+  const openRecord = (notification: NotificationItem) => {
+    markRead(notification.key);
+    router.push({ pathname: '/my/record/[id]', params: { id: String(notification.postId) } });
+  };
+
   return (
     <ScreenContainer contentTopGap={spacing.xs} header={<ScreenHeader title="알림" />}>
       <View style={styles.groups}>
-        {mockNotificationGroups.map((group) => (
+        {groups.map((group) => (
           <View key={group.label} style={styles.group}>
             <AppText variant="caption02" color="textTertiary">
               {group.label}
             </AppText>
             <View>
               {group.items.map((notification, index) => (
-                <Fragment key={notification.id}>
+                <Fragment key={notification.key}>
                   {index > 0 && <View style={styles.divider} />}
-                  <NotificationRow notification={notification} onPress={() => router.push('/record')} />
+                  <NotificationRow
+                    notification={notification}
+                    isUnread={unreadKeys.includes(notification.key)}
+                    onPress={() => openRecord(notification)}
+                  />
                 </Fragment>
               ))}
             </View>
