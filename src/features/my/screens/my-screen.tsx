@@ -9,7 +9,6 @@ import { ActivityMenu } from '@/features/my/components/activity-menu';
 import { ProfileCard, StatsCard } from '@/features/my/components/profile-summary';
 import { profileBadges } from '@/features/my/constants/profile-badges';
 import { useMySummary } from '@/features/my/hooks/use-my-summary';
-import { useHasNewNotifications } from '@/features/notification/hooks/use-has-new-notifications';
 
 /**
  * ③ 마이 탭: 프로필, 내 숫자, 메뉴. 알림은 오른쪽 위 종 버튼으로 들어간다.
@@ -17,7 +16,6 @@ import { useHasNewNotifications } from '@/features/notification/hooks/use-has-ne
  */
 export function MyScreen() {
   const { nickname, leftCount, openedCount, likedCount } = useMySummary();
-  const hasNewNotifications = useHasNewNotifications();
 
   return (
     <ScreenContainer withBottomInset={false} background="gray" contentTopGap={spacing.xs}>
@@ -25,14 +23,7 @@ export function MyScreen() {
         <AppText variant="heading02" style={styles.title}>
           마이
         </AppText>
-        <IconButton
-          icon="bell"
-          size={48}
-          showPressed
-          showDot={hasNewNotifications}
-          accessibilityLabel={hasNewNotifications ? '알림, 새 알림 있음' : '알림'}
-          onPress={() => router.push('/my/notifications')}
-        />
+        <IconButton icon="bell" size={48} showPressed accessibilityLabel="알림" onPress={() => router.push('/my/notifications')} />
       </View>
 
       <View style={styles.sections}>
