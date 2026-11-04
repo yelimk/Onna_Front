@@ -54,6 +54,8 @@ export function useSubmitPost() {
     } catch (error) {
       if (isApiError(error, 'FACE_DETECTED')) {
         showToast('얼굴이 보여요. 얼굴이 나오지 않게 다시 찍어 주세요', 'error');
+        // 다시 찍을 버튼이 이 화면에 없어서 촬영 화면으로 바로 돌려보낸다. 쓴 제목·한 줄·해시태그는 draft에 남아 있다.
+        router.dismissTo('/upload/camera');
       } else if (isApiError(error, 'RETRY_LOCATION')) {
         showToast('위치가 정확하지 않아요. 오른쪽 위 버튼으로 다시 찾아 주세요', 'error');
       } else {
