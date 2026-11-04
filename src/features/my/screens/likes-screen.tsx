@@ -30,7 +30,6 @@ export function LikesScreen() {
 
   return (
     <ScreenContainer
-      glassHeader
       contentTopGap={spacing.xs}
       header={
         <ScreenHeader

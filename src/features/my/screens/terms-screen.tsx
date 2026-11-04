@@ -8,8 +8,7 @@ import { ScreenHeader } from '@/components/screen-header';
  */
 export function TermsScreen() {
   return (
-    <ScreenContainer
-      glassHeader background="gray" header={<ScreenHeader title="이용약관 · 개인정보 처리방침" smallTitle />}>
+    <ScreenContainer background="gray" header={<ScreenHeader title="이용약관 · 개인정보 처리방침" smallTitle />}>
       {null}
     </ScreenContainer>
   );

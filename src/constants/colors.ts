@@ -93,9 +93,6 @@ export const colors = {
   dialogDim: 'rgba(49, 49, 49, 0.8)',
   // 위치 확인 화면의 회색 지도 칸 (Figma 위치 확인 #ECECEA, 디자인 시스템 회색과 달리 살짝 누런 회색)
   uploadMapBackground: '#ECECEA',
-  // 스크롤하면 내용이 비치는 상단 바 배경 (Figma: 흰 배경 40%, 회색 배경 화면은 Background/02 40%)
-  glassWhite: 'rgba(255, 255, 255, 0.4)',
-  glassGray: 'rgba(247, 247, 247, 0.4)',
   // 토스트 알림 배경 (Figma Gray/800)
   toastBackground: palette.gray[800],
   // 좋아요를 누른 버튼 테두리 (Figma like activated, Error/03)

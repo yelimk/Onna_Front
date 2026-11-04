@@ -26,7 +26,6 @@ export function RecordScreen() {
 
   return (
     <ScreenContainer
-      glassHeader
       withBottomInset={false}
       contentTopGap={0}
       header={
