@@ -42,9 +42,12 @@ export function SettingsScreen() {
             onPress={openPhoneSettings}
             hideArrow
           />
-          {/* 1차는 앱 안 알림 목록만 있어서 이 권한이 없어도 알림 목록은 보인다. 푸시를 붙일 때 쓰려고 온보딩에서 미리 묻는다 */}
+        </MenuGroup>
+
+        {/* Figma처럼 알림은 묶음을 따로 둔다. 1차는 앱 안 알림 목록만 있어서 이 권한이 없어도 알림 목록은 보인다. 푸시를 붙일 때 쓰려고 온보딩에서 미리 묻는다 */}
+        <MenuGroup title="알림">
           <MenuRow
-            label="알림"
+            label="알림 권한"
             description="휴대폰으로 알림을 받으려면 필요해요"
             trailing={permissionLabels.notification}
             onPress={openPhoneSettings}
