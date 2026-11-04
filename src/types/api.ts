@@ -36,14 +36,19 @@ export type Question = {
   text: string;
 };
 
-export type PostPreview = {
+export type PostPreview = Coordinate & {
   postId: number;
+  /** 기록 제목 (10자) */
+  title: string;
   stage: PostStage;
   imageUrl: string;
   tags: string[];
   /** 맛보기(흐리지 않게 보여주는 사진)인지 */
   isTeaser: boolean;
-  distanceM: number;
+  /** 내가 좋아요했는지 */
+  liked: boolean;
+  /** 내 위치에서 사진까지 거리(10m 단위). 위치 없이 부르면 null. 사진 좌표(lat·lng)는 일부러 흐린 좌표다. */
+  distanceM: number | null;
 };
 
 export type Zone = Coordinate & {
@@ -61,6 +66,8 @@ export type OpenedPost = {
   postId: number;
   imageUrl: string;
   question: string;
+  /** 기록 제목 (10자) */
+  title: string;
   oneLine: string;
   tags: string[];
   /** 이 기록이 남겨진 구역 이름·주소 ('영남대학교 정문', '경산시 대동') */
@@ -120,10 +127,21 @@ export type HashtagSearchResult = Coordinate & {
   name: string;
   distanceM: number;
   postCount: number;
-  posts: (Coordinate & { postId: number })[];
+  /** 기록 핀. 구역 밖에 남긴 기록은 zoneName이 null이다. */
+  posts: (Coordinate & { postId: number; zoneName: string | null })[];
+};
+
+/** 경로에 들를 자리 */
+export type RouteStop = Coordinate & {
+  postId: number;
+  title: string;
+  /** 해시태그 이름 ('#' 없이) */
+  tags: string[];
+  zoneName: string | null;
 };
 
 export type RouteRecommendation = {
-  title: string;
-  stops: (Coordinate & { postId: number })[];
+  /** 들를 곳이 없으면 null */
+  title: string | null;
+  stops: RouteStop[];
 };

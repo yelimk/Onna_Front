@@ -14,7 +14,7 @@ type RecordPhotoProps = {
 
 /**
  * 지도 기능의 기록 사진. 서버가 흐림 단계에 맞춰 흐리게 만든 사진을 그대로 보여준다.
- * 주소가 5분 뒤 만료되어 같은 사진도 주소가 바뀌므로, 캐시는 주소 기준으로 둔다.
+ * 주소가 30분 뒤 만료되어 같은 사진도 주소가 바뀌므로, 캐시는 주소 기준으로 둔다.
  */
 export function RecordPhoto({ imageUrl, width, height, style }: RecordPhotoProps) {
   if (!imageUrl) return <PhotoPlaceholder width={width} height={height} style={style} />;

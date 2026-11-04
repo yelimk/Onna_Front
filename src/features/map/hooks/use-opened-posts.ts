@@ -3,9 +3,9 @@ import { useSyncExternalStore } from 'react';
 import { isApiError } from '@/api/api-error';
 import { likePost, openPost, unlikePost } from '@/api/map';
 import { showToast } from '@/components/toast';
-import { browsingAccuracyMeters, zonesRefreshMs } from '@/features/map/constants/map-config';
+import { zonesRefreshMs } from '@/features/map/constants/map-config';
 import type { Coordinate } from '@/features/map/types/home-map-marker';
-import { toServerCoordinate } from '@/features/map/utils/to-coordinate';
+import { toMyLocation } from '@/features/map/utils/to-coordinate';
 import type { OpenedPost } from '@/types/api';
 
 /*
@@ -34,22 +34,20 @@ function updateState(postId: string, change: Partial<PostState>) {
   listeners.forEach((listener) => listener());
 }
 
-/** 사진 주소가 만료되기 전이면 다시 묻지 않는다 (지도 구역과 같은 4분). */
+/** 사진 주소가 만료되기 전이면 다시 묻지 않는다 (지도 구역과 같은 25분). */
 const isFresh = ({ post, openedAt }: PostState) => post !== null && Date.now() - openedAt < zonesRefreshMs;
 
 /**
  * 기록을 연다. 서버가 내 위치로 가까운지 본다: 멀면 TOO_FAR, 위치가 부정확하면(오차 50m 넘음) RETRY_LOCATION.
  * 실패해도 던지지 않고 이유만 남긴다. 화면은 잠긴 모습으로 두고, 위치가 바뀌면 다시 시도한다.
  */
-export async function openNearbyPost(postId: string, myLocation: Coordinate, accuracy: number | null) {
-  if (opening.has(postId) || isFresh(getState(postId))) return;
+export async function openNearbyPost(postId: string, location: Coordinate, accuracy: number | null) {
+  const myLocation = toMyLocation(location, accuracy);
+  // 오차를 모르면 서버가 판단할 수 없어서 묻지 않는다. 오차가 잡히면(다음 위치) 그때 연다.
+  if (!myLocation || opening.has(postId) || isFresh(getState(postId))) return;
   opening.add(postId);
   try {
-    // 오차를 모르면 정확하다고 속이지 않도록 아주 부정확한 값을 보낸다. 서버는 RETRY_LOCATION으로 거절하고, 다음 위치 때 다시 묻는다.
-    const post = await openPost(Number(postId), {
-      ...toServerCoordinate(myLocation),
-      accuracy: accuracy ?? browsingAccuracyMeters,
-    });
+    const post = await openPost(Number(postId), myLocation);
     updateState(postId, { post, openedAt: Date.now(), errorCode: null });
   } catch (error) {
     // 예전에 연 사진은 그대로 두고 이유만 남긴다. 멀어져도 이번에 앱을 켠 동안에는 열린 채로 보인다.

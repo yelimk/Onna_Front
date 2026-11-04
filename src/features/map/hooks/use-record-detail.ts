@@ -12,6 +12,8 @@ import { formatHashtag } from '@/utils/format-hashtag';
 /** 사진 카드에 필요한 기록 한 건 */
 export type RecordDetail = {
   id: string;
+  /** 카드 맨 위 이름. 기록 제목, 없으면(제목 필수 전 기록) 장소 이름 */
+  title: string;
   placeName: string;
   hashtags: string[];
   /** 서버가 열어 준 기록이면 남긴 사람의 한 줄, 아니면 빈 값 */
@@ -38,7 +40,7 @@ export function useRecordDetail(recordId: string, myLocation: Coordinate | null)
 
   const found = useMemo(() => records.find(({ id }) => id === recordId) ?? findKnownRecord(recordId), [records, recordId]);
   const isNearby = found !== undefined && myLocation !== null && getDistanceMeters(myLocation, found.coordinate) <= openRadiusMeters;
-  // 사진에는 좌표가 없어 구역 자리로 거리를 재므로, 서버가 이미 열림(OPEN)이라고 한 기록도 열어 본다.
+  // 사진 좌표는 일부러 흐린 좌표라 앱의 거리 계산은 대략이다. 그래서 서버가 이미 열림(OPEN, 예전에 연 사진 포함)이라고 한 기록도 열어 본다.
   // 어디서 왔는지 모르는 기록(목록에 없음)은 서버가 판단하게 물어본다.
   const shouldTryOpen = !opened && myLocation !== null && (found === undefined || isNearby || found.isOpen);
 
@@ -47,9 +49,11 @@ export function useRecordDetail(recordId: string, myLocation: Coordinate | null)
   }, [shouldTryOpen, recordId, myLocation, accuracy]);
 
   if (!found && !opened) return null;
+  const placeName = opened?.zoneName ?? found?.placeName ?? '';
   return {
     id: recordId,
-    placeName: opened?.zoneName ?? found?.placeName ?? '',
+    title: opened?.title || found?.title || placeName,
+    placeName,
     hashtags: opened ? opened.tags.map(formatHashtag) : (found?.hashtags ?? []),
     comment: opened?.oneLine ?? '',
     imageUrl: opened?.imageUrl ?? found?.imageUrl,

@@ -3,17 +3,12 @@ import { AppState } from 'react-native';
 
 import { isApiError } from '@/api/api-error';
 import { getZonePosts } from '@/api/map';
-import {
-  browsingAccuracyMeters,
-  defaultMapCenter,
-  zonesRefetchMeters,
-  zonesRefreshMs,
-} from '@/features/map/constants/map-config';
+import { zonesRefetchMeters, zonesRefreshMs } from '@/features/map/constants/map-config';
 import { useLocationAccuracy } from '@/features/map/hooks/use-my-location';
 import type { Coordinate } from '@/features/map/types/home-map-marker';
 import { getDistanceMeters } from '@/features/map/utils/get-distance-meters';
 import { rememberRecords } from '@/features/map/utils/known-records';
-import { toServerCoordinate } from '@/features/map/utils/to-coordinate';
+import { toMyLocation } from '@/features/map/utils/to-coordinate';
 import { toPhotoMarker } from '@/features/map/utils/zones-to-markers';
 import type { PostPreview, Zone } from '@/types/api';
 
@@ -28,23 +23,22 @@ type ZonePostsState = {
 
 /**
  * 묶음 안 기록 목록(GET /zones/{zoneId}/posts). 서버가 AI 추천순으로 정렬해 준 순서 그대로 쓴다.
- * 흐림 단계가 내 위치로 정해지므로 지도 구역과 같은 기준(30m 걷기, 4분)으로 다시 받는다.
+ * 흐림 단계가 내 위치로 정해지므로 지도 구역과 같은 기준(30m 걷기, 25분)으로 다시 받는다. 위치를 모르면 위치 없이 받는다.
  */
-export function useZonePosts(zone: Zone | undefined, myLocation: Coordinate | null, isNearMe: boolean) {
+export function useZonePosts(zone: Zone | undefined, location: Coordinate | null) {
   const accuracy = useLocationAccuracy();
   const [{ previews, errorCode }, setState] = useState<ZonePostsState>({ previews: null, errorCode: null });
   const lastRequest = useRef<{ zoneId: number; at: number; origin: Coordinate | null } | null>(null);
 
   useEffect(() => {
     if (!zone) return;
+    const myLocation = toMyLocation(location, accuracy);
+    // 오차를 아직 모르면 위치 없이 받은 것으로 친다 (지도 구역과 같은 규칙).
+    const origin = myLocation ? location : null;
 
     const fetchPosts = () => {
-      lastRequest.current = { zoneId: zone.zoneId, at: Date.now(), origin: myLocation };
-      const request = {
-        ...toServerCoordinate(myLocation ?? defaultMapCenter),
-        accuracy: myLocation ? (accuracy ?? browsingAccuracyMeters) : browsingAccuracyMeters,
-      };
-      getZonePosts(zone.zoneId, request)
+      lastRequest.current = { zoneId: zone.zoneId, at: Date.now(), origin };
+      getZonePosts(zone.zoneId, myLocation)
         .then((result) => {
           // 위치가 바뀌어 효과가 다시 돌아도 같은 묶음이면 받은 목록을 쓴다. 다른 묶음으로 바뀌었을 때만 버린다.
           if (lastRequest.current?.zoneId === zone.zoneId) setState({ previews: result, errorCode: null });
@@ -57,25 +51,24 @@ export function useZonePosts(zone: Zone | undefined, myLocation: Coordinate | nu
         });
     };
 
-    if (isStale(lastRequest.current, zone.zoneId, myLocation)) fetchPosts();
+    if (isStale(lastRequest.current, zone.zoneId, origin)) fetchPosts();
     // 가만히 있어 위치가 안 바뀌어도, 사진 주소가 만료되기 전에 다시 받는다.
     const timer = setInterval(() => {
-      if (isStale(lastRequest.current, zone.zoneId, myLocation)) fetchPosts();
+      if (isStale(lastRequest.current, zone.zoneId, origin)) fetchPosts();
     }, staleCheckMs);
     // 앱이 뒤에 있는 동안은 타이머가 멈추므로, 다시 앞으로 오면 바로 확인한다.
     const subscription = AppState.addEventListener('change', (appState) => {
-      if (appState === 'active' && isStale(lastRequest.current, zone.zoneId, myLocation)) fetchPosts();
+      if (appState === 'active' && isStale(lastRequest.current, zone.zoneId, origin)) fetchPosts();
     });
     return () => {
       clearInterval(timer);
       subscription.remove();
     };
-  }, [zone, myLocation, accuracy]);
+  }, [zone, location, accuracy]);
 
-  // 맛보기만 보여줄지(isNearMe)는 지도 구역을 다시 받으면 바뀔 수 있어서, 받은 값과 따로 그때그때 적용한다.
   const posts = useMemo(
-    () => (zone && previews ? previews.map((preview) => toPhotoMarker(zone, preview, { isNearMe })) : null),
-    [zone, previews, isNearMe],
+    () => (zone && previews ? previews.map((preview) => toPhotoMarker(zone, preview)) : null),
+    [zone, previews],
   );
 
   useEffect(() => {

@@ -19,4 +19,6 @@ export type SearchResultItem = {
 export type PostPin = {
   postId: string;
   coordinate: Coordinate;
+  /** 기록이 남겨진 구역 이름. 구역 밖에 남긴 기록은 null (그때는 동네 이름으로 대신한다) */
+  placeName: string | null;
 };
