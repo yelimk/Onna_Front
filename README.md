@@ -76,6 +76,7 @@ npx tsc --noEmit
 | 위치 | expo-location |
 | 로그인 토큰 저장 | expo-secure-store |
 | 카메라 | expo-camera (카메라 권한만, 갤러리 권한 없음) |
+| 사진 파일 업로드 | expo-file-system (찍은 사진을 `File`로 담아 multipart로 보냄) |
 | 사진 자르기·줄이기 | expo-image-manipulator (모든 사진을 세로 3:4, 1080×1440으로) |
 | 알림 권한 | expo-notifications (권한 요청만. 푸시 알림은 아직 없음) |
 | 장소 검색 | 카카오 로컬 API (키워드 검색) |

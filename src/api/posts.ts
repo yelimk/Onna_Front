@@ -1,3 +1,5 @@
+import { File } from 'expo-file-system';
+
 import { apiRequest } from '@/api/client';
 import type { CreatedPost, MyLocation } from '@/types/api';
 
@@ -33,8 +35,9 @@ type CreatePostInput = {
  */
 export function createPost({ photoUri, location, questionId, title, oneLine, tags }: CreatePostInput) {
   const formData = new FormData();
-  // React Native의 FormData는 파일을 {uri, name, type} 모양으로 받는다
-  formData.append('image', { uri: photoUri, name: 'photo.jpg', type: 'image/jpeg' } as unknown as Blob);
+  // 앱의 fetch(expo/fetch)는 옛 React Native 방식 {uri, name, type}을 받지 못하고 'Unsupported FormDataPart'로 끊긴다.
+  // 그래서 expo-file-system의 File(Blob처럼 쓰는 파일)로 사진을 담는다.
+  formData.append('image', new File(photoUri));
   formData.append('lat', String(location.lat));
   formData.append('lng', String(location.lng));
   formData.append('accuracy', String(location.accuracy));
