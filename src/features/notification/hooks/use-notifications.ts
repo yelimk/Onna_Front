@@ -4,6 +4,7 @@ import { getMyNotifications } from '@/api/users';
 import { getNotificationsSeenAt, markNotificationsSeen } from '@/features/notification/utils/notification-seen-at';
 import { mockNotifications } from '@/mock/notifications';
 import type { AppNotification } from '@/types/api';
+import { getStartOfToday, getStartOfWeek } from '@/utils/week-range';
 
 export type NotificationItem = AppNotification & {
   /** 서버 알림에 번호가 없어서 종류·기록·시각으로 만든 이름표. 같은 자리가 여러 번 열려도 겹치지 않는다 */
@@ -12,23 +13,24 @@ export type NotificationItem = AppNotification & {
 
 export type NotificationGroup = { label: string; items: NotificationItem[] };
 
-const dayMs = 86_400_000;
-
-/** 서버는 최근 순으로 주고, '오늘'·'이번주' 묶음은 앱이 알림 시각으로 나눈다. 일주일보다 오래된 알림은 '이전'에 둔다 */
+/**
+ * 서버는 최근 순으로 주고, '오늘'·'이번주' 묶음은 앱이 알림 시각으로 나눈다.
+ * 이번주는 이번 주 월요일 0시부터다. Figma에 두 묶음만 있어서 그보다 오래된 알림은 보여주지 않는다 (팀 결정).
+ */
 function groupByPeriod(items: NotificationItem[]) {
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
-  const startOfWeek = startOfToday.getTime() - 6 * dayMs;
+  const startOfToday = getStartOfToday();
+  const startOfWeek = getStartOfWeek();
 
   const labelOf = (createdAt: string) => {
     const time = new Date(createdAt).getTime();
-    if (time >= startOfToday.getTime()) return '오늘';
-    return time >= startOfWeek ? '이번주' : '이전';
+    if (time >= startOfToday) return '오늘';
+    return time >= startOfWeek ? '이번주' : undefined;
   };
 
   const groups: NotificationGroup[] = [];
   for (const item of items) {
     const label = labelOf(item.createdAt);
+    if (!label) continue;
     const last = groups.at(-1);
     if (last?.label === label) last.items.push(item);
     else groups.push({ label, items: [item] });

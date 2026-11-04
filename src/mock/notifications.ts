@@ -9,22 +9,23 @@ import { Image } from 'react-native';
 
 import { samplePhotos } from '@/mock/sample-photos';
 import type { AppNotification, MyPost } from '@/types/api';
+import { getStartOfToday, getStartOfWeek } from '@/utils/week-range';
 
 const toUri = (photo: number) => Image.resolveAssetSource?.(photo)?.uri ?? '';
 
 /*
- * '오늘'·'이번주' 묶음이 늘 보이게 오늘 0시를 기준으로 시각을 정한다.
+ * '오늘'·'이번주' 묶음이 늘 보이게 오늘 0시와 이번 주 월요일 0시를 기준으로 시각을 정한다.
  * 지금 시각 기준으로 정하면 앱을 켤 때마다 알림이 새로 온 것처럼 빨간 점이 다시 붙는다.
+ * 오늘이 월요일이면 '이번주' 예시도 오늘 묶음에 들어간다.
  */
-const startOfToday = new Date();
-startOfToday.setHours(0, 0, 0, 0);
-const minutesAfterToday = (minutes: number) => new Date(startOfToday.getTime() + minutes * 60_000).toISOString();
-const daysBeforeToday = (days: number) => new Date(startOfToday.getTime() - days * 86_400_000).toISOString();
+const minutesAfterToday = (minutes: number) => new Date(getStartOfToday() + minutes * 60_000).toISOString();
+const minutesAfterMonday = (minutes: number) => new Date(getStartOfWeek() + minutes * 60_000).toISOString();
+const daysBeforeToday = (days: number) => new Date(getStartOfToday() - days * 86_400_000).toISOString();
 
 const samples = [
   { postId: -11, type: 'OPENED', title: '떡볶이집', oneLine: '이모가 떡볶이 국물 더 부어줌.', photo: samplePhotos.operaHouse, createdAt: minutesAfterToday(2) },
   { postId: -12, type: 'TEASER', title: '아침 창문', oneLine: '아침마다 창문 열어주시는 경비 아저씨.', photo: samplePhotos.morningWindow, createdAt: minutesAfterToday(1) },
-  { postId: -13, type: 'OPENED', title: '경비실 앞', oneLine: '경비 아저씨가 우산 빌려주심.', photo: samplePhotos.operaHouse, createdAt: daysBeforeToday(3) },
+  { postId: -13, type: 'OPENED', title: '경비실 앞', oneLine: '경비 아저씨가 우산 빌려주심.', photo: samplePhotos.operaHouse, createdAt: minutesAfterMonday(0) },
 ] as const;
 
 export const mockNotifications: AppNotification[] = samples.map((sample) => ({

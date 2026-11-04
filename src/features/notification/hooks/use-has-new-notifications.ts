@@ -5,6 +5,7 @@ import { getMyNotifications } from '@/api/users';
 import { getNotificationsSeenAt, useNotificationsSeenAt } from '@/features/notification/utils/notification-seen-at';
 import { mockNotifications } from '@/mock/notifications';
 import type { AppNotification } from '@/types/api';
+import { getStartOfWeek } from '@/utils/week-range';
 
 /**
  * 마이 탭 알림 종에 빨간 점을 붙일지. 알림 화면을 마지막으로 나간 뒤에 온 알림이 하나라도 있으면 true.
@@ -26,5 +27,10 @@ export function useHasNewNotifications() {
   );
 
   if (seenAt === undefined) return false;
-  return notifications.some((item) => new Date(item.createdAt).getTime() > seenAt);
+  // 알림 화면은 이번 주 알림만 보여줘서, 그보다 오래된 알림으로는 점을 붙이지 않는다 (눌러도 볼 알림이 없게 되지 않도록)
+  const startOfWeek = getStartOfWeek();
+  return notifications.some((item) => {
+    const time = new Date(item.createdAt).getTime();
+    return time >= startOfWeek && time > seenAt;
+  });
 }
