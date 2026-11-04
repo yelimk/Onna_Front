@@ -14,6 +14,8 @@ export type MySpotItem = {
   title: string;
   hashtags: string[];
   photo: PhotoSource;
+  /** 상세 화면의 한 줄 코멘트. 서버가 아직 주지 않아서 비어 있을 수 있다 */
+  oneLine?: string;
   /** 좋아요한 날 또는 연 날 */
   date: string;
 };
@@ -35,6 +37,7 @@ function toItem(spot: OpenedSpot | LikedSpot, date: string): MySpotItem {
     title: spot.title,
     hashtags: spot.tags.map(formatHashtag),
     photo: { uri: spot.imageUrl },
+    oneLine: spot.oneLine,
     date,
   };
   spotsById.set(item.postId, item);

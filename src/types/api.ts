@@ -109,6 +109,8 @@ type MySpotBase = {
   imageUrl: string;
   tags: string[];
   zoneName: string | null;
+  /** 한 줄 코멘트. 상세 화면에 필요해서 백엔드에 추가를 요청했다. 서버가 주기 전까지는 비어 있다. */
+  oneLine?: string;
 };
 
 export type OpenedSpot = MySpotBase & { openedAt: string };

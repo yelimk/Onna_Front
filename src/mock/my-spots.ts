@@ -27,6 +27,7 @@ const sampleSpots = [
     imageUrl: toUri(samplePhotos.operaHouse),
     tags: ['말없이챙겨준', '국밥집', '단골'],
     zoneName: '정문',
+    oneLine: '노을 질 때 다 같이 사진 찍어주던 사람들',
   },
   {
     postId: sampleSpotIds[1],
@@ -34,6 +35,7 @@ const sampleSpots = [
     imageUrl: toUri(samplePhotos.morningWindow),
     tags: ['창밖풍경', '아침'],
     zoneName: '기숙사',
+    oneLine: '아침마다 창문 열어주시는 경비 아저씨',
   },
   {
     postId: sampleSpotIds[2],
@@ -41,6 +43,7 @@ const sampleSpots = [
     imageUrl: toUri(samplePhotos.pigeon),
     tags: ['동물친구', '퉁퉁'],
     zoneName: null,
+    oneLine: '뚱뚱한 비둘기 앉아서 쉬는중',
   },
 ];
 
