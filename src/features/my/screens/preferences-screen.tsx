@@ -5,31 +5,39 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { saveMyTags } from '@/api/users';
 import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
-import { Chip } from '@/components/chip';
 import { ScreenContainer } from '@/components/screen-container';
 import { ScreenHeader } from '@/components/screen-header';
-import { sectionGap, spacing } from '@/constants/layout';
+import { spacing } from '@/constants/layout';
+import { walkDurationOptions, walkTimeOptions, type WalkDuration, type WalkTime } from '@/constants/walk-options';
+import { ChipGroup, PreferenceCard } from '@/features/my/components/preference-card';
 import { useTags } from '@/hooks/use-tags';
 import { formatHashtag } from '@/utils/format-hashtag';
 import { showApiError } from '@/utils/show-api-error';
 
 /**
- * ③ 마이 탭: 사용자 기호 설정. 온보딩 설문에서 고른 취향을 다시 고친다.
- * 서버 태그 목록에서 고르고 '저장하기'로 통째로 바꿔 저장한다.
- * 내가 전에 고른 태그를 받는 API가 아직 없어서, 처음에는 아무것도 고르지 않은 상태로 시작한다.
+ * ③ 마이 탭: 사용자 기호 설정 (Figma 새 버전: 해시태그 유형 카드 + 걸음 유형 카드).
+ * 해시태그는 서버 태그 목록에서 고르고 '저장하기'로 통째로 바꿔 저장한다.
+ * 걷는 방식·시간은 서버에 저장할 곳이 아직 없어서 화면 안에서만 고른다 (백엔드에 요청해 둠).
+ * 내가 전에 고른 것을 받는 API도 아직 없어서, 처음에는 아무것도 고르지 않은 상태로 시작한다.
  */
 export function PreferencesScreen() {
   const { tags, hasFailed, reload } = useTags();
-  const [selected, setSelected] = useState<number[]>([]);
+  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
+  const [walkTimes, setWalkTimes] = useState<WalkTime[]>([]);
+  const [walkDuration, setWalkDuration] = useState<WalkDuration>();
   const [isSaving, setIsSaving] = useState(false);
 
-  const toggle = (tagId: number) =>
-    setSelected(selected.includes(tagId) ? selected.filter((item) => item !== tagId) : [...selected, tagId]);
+  const toggleTag = (tagId: number) =>
+    setSelectedTagIds((ids) => (ids.includes(tagId) ? ids.filter((id) => id !== tagId) : [...ids, tagId]));
+  const toggleWalkTime = (time: WalkTime) =>
+    setWalkTimes((times) => (times.includes(time) ? times.filter((item) => item !== time) : [...times, time]));
 
   const save = async () => {
+    // 저장하는 동안 버튼 모양은 그대로 두고, 두 번 눌러도 한 번만 보낸다
+    if (isSaving) return;
     setIsSaving(true);
     try {
-      await saveMyTags(selected);
+      await saveMyTags(selectedTagIds);
       router.back();
     } catch (error) {
       showApiError(error);
@@ -41,56 +49,62 @@ export function PreferencesScreen() {
   return (
     <ScreenContainer
       glassHeader
+      background="gray"
       contentTopGap={spacing.xs}
       header={<ScreenHeader title="사용자 기호 설정" />}
       footer={
         <Button
-          label={isSaving ? '저장하는 중…' : '저장하기'}
+          label="저장하기"
           variant="primary"
-          // 서버는 빈 목록을 받지 않아서 하나 이상 골라야 저장할 수 있다
-          disabled={selected.length === 0 || isSaving}
+          // 서버는 빈 목록을 받지 않아서 해시태그를 하나 이상 골라야 저장할 수 있다
+          disabled={selectedTagIds.length === 0}
           onPress={save}
         />
       }>
-      <AppText variant="subtitle02">어떤 자리에 끌리나요?</AppText>
-      <AppText variant="body01" color="textSecondary">
-        고른 해시태그로 AI가 추천해줘요
-      </AppText>
+      <View style={styles.cards}>
+        <PreferenceCard title="해시태그 유형" description="마음이 가는 해시태그를 모두 선택해 주세요">
+          {hasFailed && (
+            <Pressable onPress={reload} hitSlop={8}>
+              <AppText variant="caption02" color="textTertiary">
+                해시태그를 불러오지 못했어요. 눌러서 다시 불러오기
+              </AppText>
+            </Pressable>
+          )}
+          <ChipGroup
+            options={(tags ?? []).map((tag) => ({ key: tag.id, label: formatHashtag(tag.name) }))}
+            isSelected={(tagId) => selectedTagIds.includes(tagId)}
+            onToggle={toggleTag}
+          />
+        </PreferenceCard>
 
-      <View style={styles.group}>
-        {hasFailed && (
-          <Pressable onPress={reload} hitSlop={8}>
-            <AppText variant="caption02" color="textTertiary">
-              해시태그를 불러오지 못했어요. 눌러서 다시 불러오기
-            </AppText>
-          </Pressable>
-        )}
-        <View style={styles.chips}>
-          {tags?.map((tag) => (
-            <Chip
-              key={tag.id}
-              label={formatHashtag(tag.name)}
-              selected={selected.includes(tag.id)}
-              onPress={() => toggle(tag.id)}
+        <PreferenceCard title="걸음 유형" gapBelowTitle={spacing.sm}>
+          <View style={styles.walkGroups}>
+            <ChipGroup
+              label="걷는 방식"
+              options={walkTimeOptions.map((time) => ({ key: time, label: time }))}
+              isSelected={(time) => walkTimes.includes(time)}
+              onToggle={toggleWalkTime}
             />
-          ))}
-        </View>
+            <ChipGroup
+              label="한번에 걷는 시간"
+              options={walkDurationOptions.map((duration) => ({ key: duration, label: duration }))}
+              isSelected={(duration) => walkDuration === duration}
+              onToggle={setWalkDuration}
+            />
+          </View>
+        </PreferenceCard>
       </View>
     </ScreenContainer>
   );
 }
 
-// Figma 사용자 기호 설정: 해시태그 칩 사이 11 (디자인 시스템 간격 8·12 사이 값이라 이 화면에만 쓴다)
-const chipGap = 11;
-
 const styles = StyleSheet.create({
-  group: {
-    marginTop: sectionGap,
-    gap: spacing.xs,
+  // Figma: 카드끼리 20
+  cards: {
+    gap: spacing.lg,
   },
-  chips: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: chipGap,
+  // Figma 걸음 유형: 묶음끼리 24
+  walkGroups: {
+    gap: spacing.xl,
   },
 });
