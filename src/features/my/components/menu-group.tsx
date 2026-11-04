@@ -37,14 +37,17 @@ type MenuRowProps = {
   icon?: IconName;
   /** 오른쪽 끝: 글자 값, 스위치 등 */
   trailing?: ReactNode;
-  /** 있으면 오른쪽에 > 가 붙고 누를 수 있다 */
+  /** 있으면 누를 수 있고, 오른쪽에 > 가 붙는다 */
   onPress?: () => void;
+  /** 눌러도 > 를 숨긴다. Figma 설정의 권한 줄은 상태 글자만 있고 > 가 없다 */
+  hideArrow?: boolean;
 };
 
 /** 마이·설정의 한 줄. 마이 메뉴(아이콘 있음)는 Figma 52 높이, 설정 줄은 60 높이다. */
-export function MenuRow({ label, description, icon, trailing, onPress }: MenuRowProps) {
+export function MenuRow({ label, description, icon, trailing, onPress, hideArrow = false }: MenuRowProps) {
+  const showsArrow = Boolean(onPress) && !hideArrow;
   // 오른쪽에 화살표나 스위치가 오면 그 자체에 여백이 있어서 오른쪽 안쪽 여백을 줄인다
-  const hasRightControl = Boolean(onPress) || typeof trailing === 'object';
+  const hasRightControl = showsArrow || typeof trailing === 'object';
 
   return (
     <Pressable
@@ -61,7 +64,7 @@ export function MenuRow({ label, description, icon, trailing, onPress }: MenuRow
         )}
       </View>
       {typeof trailing === 'string' ? <AppText variant="body02">{trailing}</AppText> : trailing}
-      {onPress && <Icon name="forwardSmall" />}
+      {showsArrow && <Icon name="forwardSmall" />}
     </Pressable>
   );
 }

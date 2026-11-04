@@ -1,26 +1,23 @@
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
-import { useState } from 'react';
 import { Linking, Pressable, StyleSheet, View } from 'react-native';
 
 import { logout } from '@/api/auth';
 import { AppText } from '@/components/app-text';
 import { ScreenContainer } from '@/components/screen-container';
 import { ScreenHeader } from '@/components/screen-header';
-import { Toggle } from '@/components/toggle';
 import { spacing } from '@/constants/layout';
 import { MenuGroup, MenuRow } from '@/features/my/components/menu-group';
 import { usePermissionLabels } from '@/features/my/hooks/use-permission-labels';
 
 /**
- * ③ 마이 탭: 설정. 위치·카메라는 휴대폰의 실제 권한 상태를 보여주고, 허용이 안 됐으면 누르면 휴대폰 설정으로 간다.
- * 로그아웃은 폰에 저장한 출입증을 지운다. 스위치와 탈퇴는 서버 API가 아직 없어서 화면만 있다.
+ * ③ 마이 탭: 설정. 위치·카메라·알림은 휴대폰의 실제 권한 상태를 보여주고, 누르면 휴대폰 설정으로 간다.
+ * 앱 안에서는 권한을 끌 수 없어서 스위치 대신 상태 글자로 둔다 (Figma의 '사진 위치·시간 저장', '다녀갔어요 알림' 스위치는 뺐다, 팀 결정).
+ * 로그아웃은 폰에 저장한 출입증을 지운다. 탈퇴는 서버 API가 아직 없어서 화면만 있다.
  */
 export function SettingsScreen() {
   const permissionLabels = usePermissionLabels();
-  const [savesPhotoLocation, setSavesPhotoLocation] = useState(true);
-  const [visitNotification, setVisitNotification] = useState(true);
-  const openPhoneSettings = permissionLabels.isAllGranted ? undefined : () => Linking.openSettings();
+  const openPhoneSettings = () => Linking.openSettings();
 
   const logOut = async () => {
     await logout();
@@ -32,29 +29,26 @@ export function SettingsScreen() {
       <View style={styles.groups}>
         <MenuGroup title="권한">
           <MenuRow
-            label="위치 권한"
-            description="다가가서 열리려면 '앱 사용 중' 이상 필요"
+            label="위치"
+            description="사진을 열려면 '앱 사용 중' 이상이 필요해요"
             trailing={permissionLabels.location}
             onPress={openPhoneSettings}
+            hideArrow
           />
           <MenuRow
             label="카메라"
             description="앱 카메라로만 남길 수 있어요"
             trailing={permissionLabels.camera}
             onPress={openPhoneSettings}
+            hideArrow
           />
+          {/* 1차는 앱 안 알림 목록만 있어서 이 권한이 없어도 알림 목록은 보인다. 푸시를 붙일 때 쓰려고 온보딩에서 미리 묻는다 */}
           <MenuRow
-            label="사진 위치·시간 저장"
-            description="꺼져 있으면 기록을 남길 수 없어요"
-            trailing={<Toggle value={savesPhotoLocation} onChange={setSavesPhotoLocation} />}
-          />
-        </MenuGroup>
-
-        <MenuGroup title="알림">
-          <MenuRow
-            label="다녀갔어요 알림"
-            description="내 순간에 좋아요가 닿으면 조용히 알려요"
-            trailing={<Toggle value={visitNotification} onChange={setVisitNotification} />}
+            label="알림"
+            description="휴대폰으로 알림을 받으려면 필요해요"
+            trailing={permissionLabels.notification}
+            onPress={openPhoneSettings}
+            hideArrow
           />
         </MenuGroup>
 
