@@ -1,9 +1,8 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { saveMyTags } from '@/api/users';
-import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
 import { ScreenContainer } from '@/components/screen-container';
 import { ScreenHeader } from '@/components/screen-header';
@@ -22,7 +21,7 @@ import { showApiError } from '@/utils/show-api-error';
  * 내가 전에 고른 것을 받는 API도 아직 없어서, 처음에는 아무것도 고르지 않은 상태로 시작한다.
  */
 export function PreferencesScreen() {
-  const { tags, hasFailed, reload } = useTags();
+  const { tags } = useTags();
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
   const [walkTimes, setWalkTimes] = useState<WalkTime[]>([]);
   const [walkDuration, setWalkDuration] = useState<WalkDuration>();
@@ -61,13 +60,6 @@ export function PreferencesScreen() {
       footer={<Button label="저장하기" variant="primary" onPress={save} />}>
       <View style={styles.cards}>
         <PreferenceCard title="해시태그 유형" description="마음이 가는 해시태그를 모두 선택해 주세요">
-          {hasFailed && (
-            <Pressable onPress={reload} hitSlop={8}>
-              <AppText variant="caption02" color="textTertiary">
-                해시태그를 불러오지 못했어요. 눌러서 다시 불러오기
-              </AppText>
-            </Pressable>
-          )}
           <ChipGroup
             options={(tags ?? []).map((tag) => ({ key: tag.id, label: formatHashtag(tag.name) }))}
             isSelected={(tagId) => selectedTagIds.includes(tagId)}

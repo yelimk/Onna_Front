@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { getMe, saveMyTags } from '@/api/users';
 import { Button } from '@/components/button';
 import { ScreenContainer } from '@/components/screen-container';
+import { showToast } from '@/components/toast';
 import { spacing } from '@/constants/layout';
 import { PlaceStep } from '@/features/auth/components/place-step';
 import { RelationStep } from '@/features/auth/components/relation-step';
@@ -30,7 +31,7 @@ export function SurveyScreen() {
   const [answers, setAnswers] = useState<SurveyAnswers>({ placeTagIds: [], walkTimes: [] });
   const [nickname, setNickname] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-  const { tags, hasFailed, reload } = useTags();
+  const { tags } = useTags();
 
   useEffect(() => {
     getMe()
@@ -39,16 +40,23 @@ export function SurveyScreen() {
   }, []);
 
   const isDone = step > totalSteps;
-  const canGoNext =
-    (step === 1 && answers.relation !== undefined) ||
-    (step === 2 && answers.placeTagIds.length >= minPlaceCount) ||
-    step === 3;
+  // 버튼은 Figma처럼 늘 주황으로 두고, 덜 골랐으면 넘어가지 않고 알려준다
+  const missingMessage =
+    step === 1 && answers.relation === undefined
+      ? '대구·경북과의 사이를 선택해 주세요'
+      : step === 2 && answers.placeTagIds.length < minPlaceCount
+        ? `해시태그를 ${minPlaceCount}개 이상 선택해 주세요`
+        : undefined;
 
   const goToMap = () => router.replace('/map');
   const goBack = () => (step === 1 ? router.back() : setStep(step - 1));
   const update = (patch: Partial<SurveyAnswers>) => setAnswers({ ...answers, ...patch });
 
   const goNext = async () => {
+    if (missingMessage) {
+      showToast(missingMessage, 'error');
+      return;
+    }
     if (step < totalSteps) {
       setStep(step + 1);
       return;
@@ -90,7 +98,6 @@ export function SurveyScreen() {
         <Button
           label={step === totalSteps ? '완료' : '다음'}
           variant="primary"
-          disabled={!canGoNext}
           onPress={goNext}
         />
       }>
@@ -98,8 +105,6 @@ export function SurveyScreen() {
       {step === 2 && (
         <PlaceStep
           tags={tags}
-          hasFailed={hasFailed}
-          onRetry={reload}
           value={answers.placeTagIds}
           onChange={(placeTagIds) => update({ placeTagIds })}
         />
