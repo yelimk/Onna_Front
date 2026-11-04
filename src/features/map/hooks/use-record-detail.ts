@@ -50,14 +50,16 @@ export function useRecordDetail(recordId: string, myLocation: Coordinate | null)
 
   if (!found && !opened) return null;
   const placeName = opened?.zoneName ?? found?.placeName ?? '';
+  // 내 기록은 한 줄·사진을 이미 받아 두어서, 위치를 몰라 서버에 열어 달라고 못 해도 열린 모습으로 보여준다.
+  const isMine = found?.isMine === true;
   return {
     id: recordId,
     title: opened?.title || found?.title || placeName,
     placeName,
     hashtags: opened ? opened.tags.map(formatHashtag) : (found?.hashtags ?? []),
-    comment: opened?.oneLine ?? '',
+    comment: opened?.oneLine ?? (isMine ? (found?.comment ?? '') : ''),
     imageUrl: opened?.imageUrl ?? found?.imageUrl,
-    isUnlocked: opened !== null,
+    isUnlocked: opened !== null || isMine,
     isLiked: opened?.liked ?? false,
     isNearby,
     openErrorCode,

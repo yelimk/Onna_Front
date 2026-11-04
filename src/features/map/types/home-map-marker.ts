@@ -33,6 +33,8 @@ export type PhotoMarker = {
   placeName?: string;
   /** 남긴 사람의 한 줄. 열린 기록에서만 보여준다. */
   comment?: string;
+  /** 내가 남긴 기록. 지도 구역에는 없고 내 기록(GET /users/me/posts)에서 온다. 늘 열려 있다. */
+  isMine?: boolean;
 };
 
 export type HomeMapMarker = ClusterMarker | PhotoMarker;
