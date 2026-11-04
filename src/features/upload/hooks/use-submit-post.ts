@@ -1,9 +1,9 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert } from 'react-native';
 
 import { isApiError } from '@/api/api-error';
 import { createPost } from '@/api/posts';
+import { showToast } from '@/components/toast';
 import { useUploadDraft } from '@/features/upload/upload-draft';
 import { getPhotoLocation } from '@/features/upload/utils/get-photo-location';
 import { showApiError } from '@/utils/show-api-error';
@@ -11,6 +11,7 @@ import { showApiError } from '@/utils/show-api-error';
 /**
  * 위치 확인 화면의 '기록 완료'와 '위치 다시 찾기'.
  * 서버가 거절하는 두 경우(얼굴, 부정확한 위치)는 사용자가 할 일이 달라서 따로 안내한다.
+ * Figma에 이 안내 화면이 없어서, 다른 오류처럼 빨간 토스트로 알린다 (팀 결정). 2초 안에 읽히게 짧게 쓴다.
  */
 export function useSubmitPost() {
   const { draft, updateDraft } = useUploadDraft();
@@ -27,7 +28,7 @@ export function useSubmitPost() {
     if (location) {
       updateDraft({ location });
     } else {
-      Alert.alert('위치를 찾지 못했어요', '위치 권한이 켜져 있는지 확인하고 다시 눌러 주세요.');
+      showToast('위치를 찾지 못했어요. 위치 권한을 확인해 주세요', 'error');
     }
   };
 
@@ -48,9 +49,9 @@ export function useSubmitPost() {
       router.dismissTo('/record');
     } catch (error) {
       if (isApiError(error, 'FACE_DETECTED')) {
-        Alert.alert('얼굴이 보여요', '다른 사람이 알아볼 수 없도록 얼굴이 나오지 않게 다시 찍어 주세요.');
+        showToast('얼굴이 보여요. 얼굴이 나오지 않게 다시 찍어 주세요', 'error');
       } else if (isApiError(error, 'RETRY_LOCATION')) {
-        Alert.alert('위치가 정확하지 않아요', '하늘이 보이는 곳에서 오른쪽 위 버튼으로 위치를 다시 찾아 주세요.');
+        showToast('위치가 정확하지 않아요. 오른쪽 위 버튼으로 다시 찾아 주세요', 'error');
       } else {
         showApiError(error);
       }
