@@ -5,7 +5,7 @@ import { isApiError } from '@/api/api-error';
 import { createPost } from '@/api/posts';
 import { showToast } from '@/components/toast';
 import { useUploadDraft } from '@/features/upload/upload-draft';
-import { getPhotoLocation } from '@/features/upload/utils/get-photo-location';
+import { getPhotoLocation, hasLocationPermission } from '@/features/upload/utils/get-photo-location';
 import { showApiError } from '@/utils/show-api-error';
 
 /**
@@ -27,9 +27,13 @@ export function useSubmitPost() {
     setIsLocating(false);
     if (location) {
       updateDraft({ location });
-    } else {
-      showToast('위치를 찾지 못했어요. 위치 권한을 확인해 주세요', 'error');
+      return;
     }
+    // 권한이 꺼져 있으면 기다려도 소용없어서 권한을 켜라고 하고, 권한이 있으면 신호를 못 잡은 거라 잠시 뒤 다시 누르게 한다
+    const message = (await hasLocationPermission())
+      ? '위치를 찾지 못했어요. 잠시 후 다시 눌러 주세요'
+      : '위치 권한을 켜 주세요';
+    showToast(message, 'error');
   };
 
   const submit = async () => {

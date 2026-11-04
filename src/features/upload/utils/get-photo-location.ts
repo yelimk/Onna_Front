@@ -21,3 +21,9 @@ export async function getPhotoLocation(): Promise<MyLocation | null> {
     return null;
   }
 }
+
+/** 위치 권한이 켜져 있는지. 위치를 못 잡았을 때 권한 문제인지, 신호 문제인지 나눠서 안내하려고 쓴다. */
+export async function hasLocationPermission() {
+  const permission = await Location.getForegroundPermissionsAsync().catch(() => null);
+  return permission?.granted ?? false;
+}
