@@ -294,6 +294,7 @@ GUI 디자인을 입힌 화면: 시작 화면(스플래시, 주황 배경), 소�
 - [x] 남기기: 셔터 순간 위치, 서버 질문, 제목(10자), AI 해시태그 추천(번호 없이 이름으로 주고받음), 업로드(얼굴·위치 거절 안내) → `features/upload/`
 - [x] 내 기록 목록·상세, 마이 탭 닉네임·남긴 자리·연 자리·좋아한 자리 수 → `hooks/use-my-posts.ts`, `features/my/hooks/use-my-summary.ts`
 - [x] 좋아요 내역·연 자리 기록 목록과 상세, 좋아요 누르기·취소 → `features/my/hooks/use-my-spots.ts`, `use-liked-spots.ts` (상세의 한 줄 코멘트는 목록 API에 없어서 비어 있음)
+- [ ] 시연 전에 지울 예시 데이터: 서버 목록이 비었을 때 대신 보여주는 내 기록(`mock/my-posts.ts`), 좋아요 내역·연 자리 기록(`mock/my-spots.ts`)
 - [x] 지도 홈 마커(`getMapZones`) → `features/map/hooks/use-map-zones.ts`, `utils/zones-to-markers.ts`
 - [x] 묶음 목록(`getZonePosts`) → `features/map/hooks/use-zone-posts.ts`
 - [x] 사진 카드 열기·좋아요(`openPost`, `likePost`, `unlikePost`) → `features/map/hooks/use-opened-posts.ts`, `use-record-detail.ts`

@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react';
 
 import { likePost, unlikePost } from '@/api/map';
+import { isSampleSpot } from '@/mock/my-spots';
 import { showApiError } from '@/utils/show-api-error';
 
 /*
@@ -27,6 +28,8 @@ export function setLikedSpotIds(ids: number[]) {
 export async function toggleSpotLike(postId: number) {
   const wasLiked = likedIds.includes(postId);
   setLikedSpotIds(wasLiked ? likedIds.filter((id) => id !== postId) : [...likedIds, postId]);
+  // 예시 자리는 서버에 없는 기록이라 화면에서만 바꾼다 (시연 전에 지운다, mock/my-spots.ts)
+  if (isSampleSpot(postId)) return;
   try {
     await (wasLiked ? unlikePost(postId) : likePost(postId));
   } catch (error) {
