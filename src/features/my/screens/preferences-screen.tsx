@@ -7,6 +7,7 @@ import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
 import { ScreenContainer } from '@/components/screen-container';
 import { ScreenHeader } from '@/components/screen-header';
+import { showToast } from '@/components/toast';
 import { spacing } from '@/constants/layout';
 import { walkDurationOptions, walkTimeOptions, type WalkDuration, type WalkTime } from '@/constants/walk-options';
 import { ChipGroup, PreferenceCard } from '@/features/my/components/preference-card';
@@ -35,6 +36,11 @@ export function PreferencesScreen() {
   const save = async () => {
     // 저장하는 동안 버튼 모양은 그대로 두고, 두 번 눌러도 한 번만 보낸다
     if (isSaving) return;
+    // 서버는 빈 목록을 받지 않는다. 버튼은 Figma처럼 늘 주황으로 두고, 비어 있으면 저장하지 않고 알려준다.
+    if (selectedTagIds.length === 0) {
+      showToast('해시태그를 하나 이상 선택해 주세요', 'error');
+      return;
+    }
     setIsSaving(true);
     try {
       await saveMyTags(selectedTagIds);
@@ -52,15 +58,7 @@ export function PreferencesScreen() {
       background="gray"
       contentTopGap={spacing.xs}
       header={<ScreenHeader title="사용자 기호 설정" />}
-      footer={
-        <Button
-          label="저장하기"
-          variant="primary"
-          // 서버는 빈 목록을 받지 않아서 해시태그를 하나 이상 골라야 저장할 수 있다
-          disabled={selectedTagIds.length === 0}
-          onPress={save}
-        />
-      }>
+      footer={<Button label="저장하기" variant="primary" onPress={save} />}>
       <View style={styles.cards}>
         <PreferenceCard title="해시태그 유형" description="마음이 가는 해시태그를 모두 선택해 주세요">
           {hasFailed && (
