@@ -1,8 +1,10 @@
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { Linking, Pressable, StyleSheet, View } from 'react-native';
 
 import { logout } from '@/api/auth';
+import { getMe } from '@/api/users';
 import { AppText } from '@/components/app-text';
 import { ScreenContainer } from '@/components/screen-container';
 import { ScreenHeader } from '@/components/screen-header';
@@ -17,6 +19,13 @@ import { usePermissionLabels } from '@/features/my/hooks/use-permission-labels';
  */
 export function SettingsScreen() {
   const permissionLabels = usePermissionLabels();
+  const [email, setEmail] = useState('');
+
+  useEffect(() => {
+    getMe()
+      .then((me) => setEmail(me.email))
+      .catch(() => undefined);
+  }, []);
   const openPhoneSettings = () => Linking.openSettings();
 
   const logOut = async () => {
@@ -56,8 +65,8 @@ export function SettingsScreen() {
         </MenuGroup>
 
         <MenuGroup title="계정 · 안전">
-          {/* Figma 값은 '카카오'지만 앱은 이메일로만 로그인해서 '이메일'로 둔다 */}
-          <MenuRow label="로그인 계정" trailing="이메일" />
+          {/* Figma 값은 '카카오'지만 앱은 이메일로만 로그인해서, 어떤 계정인지 알 수 있게 실제 이메일 주소를 보여준다 */}
+          <MenuRow label="로그인 계정" trailing={email} />
           <MenuRow label="이용약관 · 개인정보 처리방침" onPress={() => router.push('/terms')} />
           <MenuRow label="버전" trailing={Constants.expoConfig?.version ?? '-'} />
         </MenuGroup>
