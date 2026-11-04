@@ -175,7 +175,7 @@ GUI 디자인을 입힌 화면: 시작 화면(스플래시, 주황 배경), 소�
 
 가짜 데이터는 `src/mock/`와 각 기능의 `constants/preview-*.ts`에 있어요. 백엔드 API가 나오면 이 값을 서버 데이터로 바꿔요.
 
-지도 API는 **카카오맵**이에요. Expo Go에서도 열리도록 네이티브 SDK 대신 WebView 안에 카카오맵 JavaScript SDK를 띄워요. 지금은 지도 홈(`/map`), 검색결과(`/map/results`), 묶음 목록(`/map/cluster/[id]`)이 카카오맵이고, 나머지 지도 화면과 내 기록 지도, 남기기 위치 확인은 아직 회색 지도(`components/map-placeholder.tsx`)예요.
+지도 API는 **카카오맵**이에요. Expo Go에서도 열리도록 네이티브 SDK 대신 WebView 안에 카카오맵 JavaScript SDK를 띄워요. 지금은 지도 홈(`/map`), 검색결과(`/map/results`), 묶음 목록(`/map/cluster/[id]`), 남기기 위치 확인(`/upload/confirm`의 작은 지도, `features/map/components/place-preview-map.tsx`)이 카카오맵이고, 나머지 지도 화면과 내 기록 지도는 아직 회색 지도(`components/map-placeholder.tsx`)예요.
 
 지도 홈은 Figma GUI 디자인(비탐색 모드, 탐색 모드)으로 바뀌었어요. 카카오맵 코드는 `features/map/kakao-map/`에 모여 있어요.
 
