@@ -11,7 +11,8 @@ import { SegmentedToggle } from '@/components/segmented-toggle';
 import { spacing } from '@/constants/layout';
 import { ListDivider, PhotoListRow } from '@/features/my/components/photo-list-row';
 import { toggleSpotLike, useLikedSpotIds } from '@/features/my/hooks/use-liked-spots';
-import { mockLikedAreas, mockLikedSpots } from '@/mock/my-activity';
+import { useLikedSpotList } from '@/features/my/hooks/use-my-spots';
+import { mockLikedAreas } from '@/mock/my-activity';
 
 const viewModes = ['리스트', '지도'] as const;
 type ViewMode = (typeof viewModes)[number];
@@ -24,9 +25,8 @@ export function LikesScreen() {
   const [viewMode, setViewMode] = useState<ViewMode>('리스트');
   const [selectedAreaId, setSelectedAreaId] = useState<string | null>(null);
   const likedIds = useLikedSpotIds();
-  // 목록은 이 화면을 열 때 좋아요였던 자리로 고정한다.
-  // 그래서 하트를 취소해도 빈 하트로 남아 다시 누를 수 있고, 화면을 나갔다 다시 열면 그때 빠진다 (팀 결정).
-  const [listedSpots] = useState(() => mockLikedSpots.filter((spot) => likedIds.includes(spot.spotId)));
+  // 하트를 취소해도 빈 하트로 남아 다시 누를 수 있고, 화면을 나갔다 다시 열면 그때 빠진다 (팀 결정)
+  const listedSpots = useLikedSpotList() ?? [];
 
   return (
     <ScreenContainer
@@ -47,19 +47,19 @@ export function LikesScreen() {
       {viewMode === '리스트' ? (
         <View>
           {listedSpots.map((spot, index) => (
-            <Fragment key={spot.spotId}>
+            <Fragment key={spot.postId}>
               {index > 0 && <ListDivider />}
               <PhotoListRow
                 item={spot}
-                onPress={() => router.push({ pathname: '/my/spot/[id]', params: { id: spot.spotId } })}
+                onPress={() => router.push({ pathname: '/my/spot/[id]', params: { id: spot.postId } })}
                 right={
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel="좋아요"
-                    accessibilityState={{ selected: likedIds.includes(spot.spotId) }}
+                    accessibilityState={{ selected: likedIds.includes(spot.postId) }}
                     hitSlop={8}
-                    onPress={() => toggleSpotLike(spot.spotId)}>
-                    <Icon name={likedIds.includes(spot.spotId) ? 'heartFilled' : 'heart'} />
+                    onPress={() => toggleSpotLike(spot.postId)}>
+                    <Icon name={likedIds.includes(spot.postId) ? 'heartFilled' : 'heart'} />
                   </Pressable>
                 }
               />

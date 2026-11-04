@@ -13,8 +13,8 @@ import { useHashtagSuggestions } from '@/features/upload/hooks/use-hashtag-sugge
 import { useWriteQuestion } from '@/features/upload/hooks/use-write-question';
 import { useUploadDraft } from '@/features/upload/upload-draft';
 
-// 입력 부담을 줄이려고 제목은 짧게, 한 줄은 한 문장 길이까지만 받는다 (GUI 0/15, 22/40. 서버는 한 줄 100자까지 받는다)
-const maxTitleLength = 15;
+// 서버가 받는 길이에 맞춘다 (제목 10자, 한 줄 40자). Figma는 제목 0/15지만 서버 기준을 따른다.
+const maxTitleLength = 10;
 const maxOneLineLength = 40;
 
 /**
@@ -24,7 +24,7 @@ const maxOneLineLength = 40;
  */
 export function WriteScreen() {
   const { draft, updateDraft } = useUploadDraft();
-  const { question, questionId, hasFailed: questionFailed, reload: reloadQuestion } = useWriteQuestion();
+  const { question, hasFailed: questionFailed, reload: reloadQuestion } = useWriteQuestion();
   const { suggestions, hasFailed, requestSuggestions, clearSuggestions } = useHashtagSuggestions();
 
   // 한 줄을 고치면 그 한 줄로 고른 해시태그도 더는 맞지 않으니 함께 지운다
@@ -38,7 +38,7 @@ export function WriteScreen() {
 
   // 글자수를 넘긴 한 줄로는 해시태그를 받지 않는다 (어차피 다음으로 못 간다)
   const askSuggestions = () => {
-    if (isOneLineValid) requestSuggestions(questionId, draft.oneLine);
+    if (isOneLineValid) requestSuggestions(draft.oneLine);
   };
 
   return (

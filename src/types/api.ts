@@ -1,6 +1,6 @@
 /**
  * 서버가 주고받는 데이터 모양. 스웨거(/v3/api-docs)의 DTO 이름과 필드를 그대로 옮겼다.
- * 위치는 lat·lng(도), accuracy(m). 날짜는 ISO 문자열. imageUrl은 5분 뒤 만료되니 오래 들고 있지 않는다.
+ * 위치는 lat·lng(도), accuracy(m). 날짜는 ISO 문자열. imageUrl은 30분 뒤 만료되니 오래 들고 있지 않는다.
  */
 
 export type Coordinate = {
@@ -16,9 +16,11 @@ export type MyLocation = Coordinate & {
 /** S0(멀리) → S1 → S2 → OPEN(열림). 단계가 오를수록 더 선명한 사진이 온다. */
 export type PostStage = 'S0' | 'S1' | 'S2' | 'OPEN';
 
+/** 온보딩·기호 설정에서 고르는 서버 태그 사전. AI가 만든 해시태그는 사전에 없어서 이름(string)으로만 주고받는다. */
 export type Tag = {
   id: number;
   name: string;
+  category?: string;
 };
 
 export type Me = {
@@ -76,7 +78,7 @@ export type CreatedPost = {
 export type MyPost = Coordinate & {
   postId: number;
   questionId: number;
-  /** 기록 제목. Figma에는 있지만 서버에 아직 없어서 백엔드에 추가를 요청해 두었다. 서버가 주기 전까지는 비어 있다. */
+  /** 기록 제목. 제목 필수가 되기 전에 올린 기록은 비어 있을 수 있다. */
   title?: string;
   oneLine: string;
   imageUrl: string;
@@ -85,11 +87,33 @@ export type MyPost = Coordinate & {
   createdAt: string;
 };
 
-export type Achievements = {
-  openedCount: number;
-  discoveredZoneCount: number;
-  firstOpenCount: number;
+export type Badge = {
+  /** FIRST_DISCOVERER(최초 발견자), WALKER(걸음왕) */
+  code: string;
+  name: string;
+  earned: boolean;
 };
+
+/** 마이 화면 숫자. 작성자가 지운 사진은 어느 숫자에도 들어가지 않는다. */
+export type Achievements = {
+  postedCount: number;
+  openedCount: number;
+  likedCount: number;
+  badges: Badge[];
+};
+
+/** 연 자리 기록·좋아요 내역의 한 줄. imageUrl은 선명한(OPEN) 사진이다. */
+type MySpotBase = {
+  postId: number;
+  title: string;
+  imageUrl: string;
+  tags: string[];
+  zoneName: string | null;
+};
+
+export type OpenedSpot = MySpotBase & { openedAt: string };
+
+export type LikedSpot = MySpotBase & { likedAt: string };
 
 export type HashtagSearchResult = Coordinate & {
   tagId: number;

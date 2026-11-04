@@ -283,15 +283,16 @@ GUI 디자인을 입힌 화면: 시작 화면(스플래시, 주황 배경), 소�
 | `client.ts` | 모든 요청이 거치는 곳. 로그인 토큰을 붙이고, 토큰이 만료되면 한 번 새로 받아 다시 보내요. 서버 에러는 `ApiError`(`api-error.ts`)로 바꿔요 |
 | `token-storage.ts` | 로그인 토큰을 폰 안 보안 저장소에 저장 |
 | `auth.ts` | 회원가입, 로그인, 로그아웃 |
-| `users.ts` | 내 정보, 선호 태그 저장, 내 기록, 내 업적 |
+| `users.ts` | 내 정보, 선호 태그 불러오기·저장, 내 기록, 내 업적, 연 자리 기록, 좋아요 내역 |
 | `tags.ts` | 해시태그 목록, 남기기 질문 |
 | `posts.ts` | AI 해시태그 추천, 사진 남기기, 기록 삭제 |
 | `map.ts` | 지도 구역, 구역 사진 목록, 자리 열기, 좋아요, 해시태그 검색, 산책 경로 추천 (지도 화면에 붙임, 아래 체크 참고) |
 
 - [x] 이메일 로그인, 회원가입, 앱 시작 시 로그인 확인 → `features/auth/` (틀리면 빨간 칸, 회원가입 입력 규칙은 `features/auth/utils/signup-rules.ts`)
-- [x] 취향 설문 저장, 사용자 기호 수정 저장 → `survey-screen.tsx`, `preferences-screen.tsx`
-- [x] 남기기: 셔터 순간 위치, 서버 질문, AI 해시태그 추천, 업로드(얼굴·위치 거절 안내) → `features/upload/`
-- [x] 내 기록 목록·상세, 마이 탭 닉네임·남긴 자리·연 자리 수 → `hooks/use-my-posts.ts`, `features/my/hooks/use-my-summary.ts`
+- [x] 취향 설문 저장, 사용자 기호 불러오기·수정 저장 (해시태그 3개 이상) → `survey-screen.tsx`, `preferences-screen.tsx`
+- [x] 남기기: 셔터 순간 위치, 서버 질문, 제목(10자), AI 해시태그 추천(번호 없이 이름으로 주고받음), 업로드(얼굴·위치 거절 안내) → `features/upload/`
+- [x] 내 기록 목록·상세, 마이 탭 닉네임·남긴 자리·연 자리·좋아한 자리 수 → `hooks/use-my-posts.ts`, `features/my/hooks/use-my-summary.ts`
+- [x] 좋아요 내역·연 자리 기록 목록과 상세, 좋아요 누르기·취소 → `features/my/hooks/use-my-spots.ts`, `use-liked-spots.ts` (상세의 한 줄 코멘트는 목록 API에 없어서 비어 있음)
 - [x] 지도 홈 마커(`getMapZones`) → `features/map/hooks/use-map-zones.ts`, `utils/zones-to-markers.ts`
 - [x] 묶음 목록(`getZonePosts`) → `features/map/hooks/use-zone-posts.ts`
 - [x] 사진 카드 열기·좋아요(`openPost`, `likePost`, `unlikePost`) → `features/map/hooks/use-opened-posts.ts`, `use-record-detail.ts`
@@ -299,7 +300,7 @@ GUI 디자인을 입힌 화면: 시작 화면(스플래시, 주황 배경), 소�
 - [x] 산책 경로 추천(`getRouteRecommendation`) → `features/map/hooks/use-walk-route.ts` (서버가 목적지를 받지 않아 가는 길의 자리만 앱이 남김)
 - 지도 위치는 서버 모양(`lat`, `lng`, `accuracy`)으로 바꿔 보내요 (`features/map/utils/to-coordinate.ts`, 오차는 `use-my-location.ts`의 `useLocationAccuracy`). 기록 id는 지도 안에서 문자열, 서버에 보낼 때 숫자로 바꿔요.
 - 흐림 단계·사진은 서버 `stage`·`imageUrl`을 그대로 써요. 사진 주소가 5분 뒤 만료돼서, 지도 구역·묶음·연 사진은 받은 지 4분이 지나면(앱이 다시 앞으로 올 때도) 다시 받아요.
-- [ ] 서버에 API가 없어서 아직 가짜 데이터: 좋아요 내역, 연 자리 기록, 알림, 좋아요한 자리 수, 회원 탈퇴, 기록 제목 (칭호는 서버 없이 `features/my/constants/profile-badges.ts`에 고정)
+- [ ] 아직 가짜 데이터: 알림(서버 API는 있음, 아직 안 붙임), 좋아요 내역·연 자리 기록의 '지도' 보기, 회원 탈퇴 (칭호는 서버 없이 `features/my/constants/profile-badges.ts`에 고정)
 - [x] 장소 검색 → 카카오 로컬 API (`features/map/api/search-places.ts`)
 - [x] 해시태그 검색 → 서버 `GET /search/hashtags` (`features/map/hooks/use-hashtag-search.ts`)
 - [ ] 신고 보내기 (명세에 아직 없음) → `report-screen.tsx`
