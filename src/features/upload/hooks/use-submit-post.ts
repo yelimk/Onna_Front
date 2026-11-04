@@ -41,8 +41,9 @@ export function useSubmitPost() {
         photoUri: draft.photoUri,
         location: draft.location,
         questionId: draft.questionId,
+        title: draft.title.trim(),
         oneLine: draft.oneLine.trim(),
-        tagIds: draft.hashtags.map((tag) => tag.id),
+        tags: draft.hashtags,
       });
       router.dismissTo('/record');
     } catch (error) {

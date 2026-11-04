@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
 
-import type { MyLocation, Tag } from '@/types/api';
+import type { MyLocation } from '@/types/api';
 
 /** 남기기 1~3단계가 같이 쓰는 임시 기록. 마지막 단계에서 서버로 보낸 뒤 버린다. */
 export type UploadDraft = {
@@ -13,12 +13,12 @@ export type UploadDraft = {
   /** 서버가 준 남기기 질문. id는 태그 추천과 업로드에 같이 보낸다 */
   questionId?: number;
   question?: string;
-  /** GUI에는 있지만 서버에 아직 제목 필드가 없어서 보내지 않는다 (백엔드와 정할 것) */
+  /** 제목 (서버 필수, 10자까지) */
   title: string;
   /** 한 줄 코멘트 */
   oneLine: string;
-  /** AI 후보에서 고른 태그 (최대 3개) */
-  hashtags: Tag[];
+  /** AI 후보에서 고른 해시태그 이름 (# 없음, 최대 3개) */
+  hashtags: string[];
 };
 
 type UploadDraftContextValue = {

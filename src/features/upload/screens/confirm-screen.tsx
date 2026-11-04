@@ -68,7 +68,7 @@ export function ConfirmScreen() {
             {draft.oneLine || '한 줄을 아직 쓰지 않았어요'}
           </AppText>
           <AppText variant="caption04" color="textTertiary">
-            {draft.hashtags.map((tag) => formatHashtag(tag.name)).join(' ')}
+            {draft.hashtags.map(formatHashtag).join(' ')}
           </AppText>
         </View>
       </View>

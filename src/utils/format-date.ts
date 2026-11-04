@@ -5,3 +5,11 @@ export function formatDate(isoDate: string) {
   const day = String(date.getDate()).padStart(2, '0');
   return `${date.getFullYear()}.${month}.${day}`;
 }
+
+const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+
+/** 날짜별로 묶은 목록의 묶음 제목. 예: '10월 28일 (토)' */
+export function formatDayLabel(isoDate: string) {
+  const date = new Date(isoDate);
+  return `${date.getMonth() + 1}월 ${date.getDate()}일 (${weekdays[date.getDay()]})`;
+}

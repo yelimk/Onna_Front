@@ -6,7 +6,7 @@ import { AppText } from '@/components/app-text';
 import { colors } from '@/constants/colors';
 import { radius, spacing } from '@/constants/layout';
 import type { TypographyVariant } from '@/constants/typography';
-import type { MySpotItem } from '@/mock/my-activity';
+import type { MySpotItem } from '@/features/my/hooks/use-my-spots';
 
 type PhotoListRowProps = {
   item: MySpotItem;

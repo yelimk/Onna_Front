@@ -10,28 +10,27 @@ import { ScreenContainer } from '@/components/screen-container';
 import { ScreenHeader } from '@/components/screen-header';
 import { showToast } from '@/components/toast';
 import { colors } from '@/constants/colors';
-import { toggleSpotLike, useLikedSpotIds } from '@/features/my/hooks/use-liked-spots';
 import { radius, spacing } from '@/constants/layout';
-import { mockLikedSpots, mockOpenedHistory, mockSpotDetails } from '@/mock/my-activity';
+import { toggleSpotLike, useLikedSpotIds } from '@/features/my/hooks/use-liked-spots';
+import { findMySpot } from '@/features/my/hooks/use-my-spots';
+import { formatDate } from '@/utils/format-date';
 
 // Figma 좋아요 내역 상세: 오른쪽 위 신고 버튼(동그라미) 36
 const reportButtonSize = 36;
 
 /**
  * ③ 마이 탭: 좋아요 내역·연 자리 기록에서 사진을 누르면 보이는 상세 (Figma 좋아요 내역 상세).
- * 두 목록이 같은 상세 화면을 쓴다. 좋아요·신고 API가 아직 없어서 화면 안에서만 바뀐다.
+ * 두 목록이 같은 상세 화면을 쓰고, 목록에서 받은 값을 그대로 보여준다.
+ * 목록 API에 한 줄 코멘트가 없어서 코멘트 줄은 비워 둔다 (백엔드에 요청할 것).
  * 신고는 서버 없이 화면만 두기로 해서(팀 결정) 빨간 사이렌을 누르면 접수 토스트만 띄운다. 한 번 신고하면 다시 띄우지 않는다.
  */
 export function MySpotDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const spot =
-    mockLikedSpots.find((item) => item.spotId === id) ??
-    mockOpenedHistory.flatMap((group) => group.items).find((item) => item.spotId === id);
-  const detail = id ? mockSpotDetails[id] : undefined;
+  const spot = findMySpot(Number(id));
   const likedIds = useLikedSpotIds();
   const [isReported, setIsReported] = useState(false);
 
-  if (!spot || !detail) {
+  if (!spot) {
     return <ScreenContainer header={<ScreenHeader />}>{null}</ScreenContainer>;
   }
 
@@ -69,9 +68,8 @@ export function MySpotDetailScreen() {
           </View>
 
           <View style={styles.texts}>
-            <AppText variant="body01">{detail.oneLine}</AppText>
             <AppText variant="caption02" color="textDeactivated">
-              {detail.dateLabel}
+              {formatDate(spot.date)}
             </AppText>
             <View style={styles.hashtags}>
               {spot.hashtags.map((hashtag) => (
@@ -86,7 +84,7 @@ export function MySpotDetailScreen() {
         </View>
 
         {/* 좋아요 내역 목록과 같은 상태를 써서, 여기서 취소하면 목록 하트도 같이 바뀐다 */}
-        <LikeButton liked={id ? likedIds.includes(id) : false} onPress={() => id && toggleSpotLike(id)} />
+        <LikeButton liked={likedIds.includes(spot.postId)} onPress={() => toggleSpotLike(spot.postId)} />
       </View>
     </ScreenContainer>
   );

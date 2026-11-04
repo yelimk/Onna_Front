@@ -31,8 +31,8 @@ export const placeDescriptions: Record<string, string> = {
   '#혼자만의자리': '조용히 머무는 곳',
 };
 
-/** 2/3 단계에서 최소로 골라야 하는 해시태그 수 */
-export const minPlaceCount = 3;
+/** 2/3 단계에서 최소로 골라야 하는 해시태그 수 (서버 기준, 마이 탭 기호 설정과 같다) */
+export { minPreferredTagCount as minPlaceCount } from '@/constants/preferred-tags';
 
 // 걷는 때·시간 보기는 마이 탭 기호 설정과 같이 쓰려고 src/constants로 옮겼다
 export { walkDurationOptions, walkTimeOptions, type WalkDuration, type WalkTime } from '@/constants/walk-options';
