@@ -23,9 +23,10 @@ const minutesAfterMonday = (minutes: number) => new Date(getStartOfWeek() + minu
 const daysBeforeToday = (days: number) => new Date(getStartOfToday() - days * 86_400_000).toISOString();
 
 const samples = [
-  { postId: -11, type: 'OPENED', title: '떡볶이집', oneLine: '이모가 떡볶이 국물 더 부어줌.', photo: samplePhotos.operaHouse, createdAt: minutesAfterToday(2) },
-  { postId: -12, type: 'TEASER', title: '아침 창문', oneLine: '아침마다 창문 열어주시는 경비 아저씨.', photo: samplePhotos.morningWindow, createdAt: minutesAfterToday(1) },
-  { postId: -13, type: 'OPENED', title: '경비실 앞', oneLine: '경비 아저씨가 우산 빌려주심.', photo: samplePhotos.operaHouse, createdAt: minutesAfterMonday(0) },
+  // Figma 알림 예시 문구. 첫 줄은 한 줄을 넘겨 '…'로 잘리는 모양을 보여주려고 길게 둔다. 셋째 줄은 Figma가 'Text'로 비어 있어서 앱에서 채웠다.
+  { postId: -11, type: 'OPENED', title: '오페라하우스', oneLine: '오페라하우스의 지붕이 노랗게 물들었다, 해가 질 때까지 아무도 자리를 뜨지 않았다', photo: samplePhotos.operaHouse, createdAt: minutesAfterToday(2) },
+  { postId: -12, type: 'TEASER', title: '아침 창문', oneLine: '아침마다 창문 열어주시는 경비 아저씨', photo: samplePhotos.morningWindow, createdAt: minutesAfterToday(1) },
+  { postId: -13, type: 'OPENED', title: '경비실 앞', oneLine: '비 오는 날 경비 아저씨가 우산을 빌려주셨다', photo: samplePhotos.operaHouse, createdAt: minutesAfterMonday(0) },
 ] as const;
 
 export const mockNotifications: AppNotification[] = samples.map((sample) => ({
