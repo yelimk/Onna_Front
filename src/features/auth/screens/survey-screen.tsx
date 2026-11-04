@@ -40,21 +40,20 @@ export function SurveyScreen() {
   }, []);
 
   const isDone = step > totalSteps;
-  // 버튼은 Figma처럼 늘 주황으로 두고, 덜 골랐으면 넘어가지 않고 알려준다
-  const missingMessage =
-    step === 1 && answers.relation === undefined
-      ? '대구·경북과의 사이를 선택해 주세요'
-      : step === 2 && answers.placeTagIds.length < minPlaceCount
-        ? `해시태그를 ${minPlaceCount}개 이상 선택해 주세요`
-        : undefined;
+  // 버튼은 Figma처럼 늘 주황으로 두고, 덜 골랐으면 넘어가지 않는다.
+  // 해시태그는 '3개 이상'이라는 조건이 있어서 그 단계만 토스트로 알려준다.
+  const hasAnswered =
+    (step === 1 && answers.relation !== undefined) ||
+    (step === 2 && answers.placeTagIds.length >= minPlaceCount) ||
+    (step === 3 && answers.walkTimes.length > 0 && answers.walkDuration !== undefined);
 
   const goToMap = () => router.replace('/map');
   const goBack = () => (step === 1 ? router.back() : setStep(step - 1));
   const update = (patch: Partial<SurveyAnswers>) => setAnswers({ ...answers, ...patch });
 
   const goNext = async () => {
-    if (missingMessage) {
-      showToast(missingMessage, 'error');
+    if (!hasAnswered) {
+      if (step === 2) showToast(`해시태그를 ${minPlaceCount}개 이상 선택해 주세요`, 'error');
       return;
     }
     if (step < totalSteps) {

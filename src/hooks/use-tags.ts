@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react';
 
 import { getTags } from '@/api/tags';
 import type { Tag } from '@/types/api';
+import { showApiError } from '@/utils/show-api-error';
 
 /**
  * 서버의 해시태그 사전을 불러온다. 취향 설문과 사용자 기호 설정이 같이 써서 src/hooks에 둔다.
- * tags가 null이면 아직 불러오는 중이다. 못 불러오면 칸이 비어 있게 둔다.
+ * tags가 null이면 아직 불러오는 중이다. 못 불러오면 다른 서버 오류처럼 빨간 토스트로 알린다.
  */
 export function useTags() {
   const [tags, setTags] = useState<Tag[] | null>(null);
@@ -14,7 +15,7 @@ export function useTags() {
   useEffect(() => {
     getTags()
       .then(setTags)
-      .catch(() => setTags(null));
+      .catch(showApiError);
   }, []);
 
   return { tags };
