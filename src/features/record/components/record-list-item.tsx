@@ -19,13 +19,13 @@ type RecordListItemProps = {
 
 // 누르고 있으면 사진과 글자가 한 단계씩 작아진다 (Figma list default → pressed)
 const sizes = {
-  default: { photo: 120, title: 'subtitle02', meta: 'caption02' },
-  pressed: { photo: 100, title: 'subtitle03', meta: 'caption04' },
-} satisfies Record<string, { photo: number; title: TypographyVariant; meta: TypographyVariant }>;
+  default: { photo: 120, title: 'subtitle02', comment: 'body01', meta: 'caption02' },
+  pressed: { photo: 100, title: 'subtitle03', comment: 'body02', meta: 'caption04' },
+} satisfies Record<string, { photo: number; title: TypographyVariant; comment: TypographyVariant; meta: TypographyVariant }>;
 
 /**
- * 내 기록 한 줄 (Figma list): 사진, 한 줄, 해시태그, 날짜, 받은 좋아요 수.
- * Figma에는 제목이 있지만 서버에 아직 제목이 없어서, 한 줄 코멘트를 제목 자리에 두 줄까지 보여준다.
+ * 내 기록 한 줄 (Figma list): 사진, 굵은 제목(한 줄), 한 줄 코멘트(두 줄까지, 넘치면 '…'), 해시태그, 날짜, 받은 좋아요 수.
+ * 서버에 아직 제목이 없어서 제목이 없는 기록은 제목 줄 없이 코멘트부터 보여준다.
  * 누르고 있으면 회색 칸 안으로 줄어든다. 줄 높이는 그대로라 아래 목록이 흔들리지 않는다.
  */
 export function RecordListItem({ post, onPress, showMeta = true }: RecordListItemProps) {
@@ -40,15 +40,15 @@ export function RecordListItem({ post, onPress, showMeta = true }: RecordListIte
               style={[styles.photo, { width: size.photo, height: size.photo }]}
               contentFit="cover"
             />
-            <View style={styles.body}>
-              <View style={styles.top}>
-                <View style={styles.texts}>
-                  <AppText variant={size.title} numberOfLines={2}>
-                    {post.oneLine}
-                  </AppText>
-                  <AppText variant={size.meta} color="textTertiary" style={styles.hashtags}>
-                    {post.tags.map(formatHashtag).join(' ')}
-                  </AppText>
+            <View style={[styles.body, { height: size.photo }]}>
+              {/* 날짜는 제목 줄 옆에만 둔다. 글 전체 옆에 두면 날짜(2026.08.28) 너비만큼 코멘트 칸이 좁아져 줄이 일찍 꺾인다 */}
+              <View style={styles.titleRow}>
+                <View style={styles.title}>
+                  {post.title && (
+                    <AppText variant={size.title} numberOfLines={1}>
+                      {post.title}
+                    </AppText>
+                  )}
                 </View>
                 {showMeta && (
                   <AppText variant={size.meta} color="textDeactivated" style={styles.date}>
@@ -56,6 +56,12 @@ export function RecordListItem({ post, onPress, showMeta = true }: RecordListIte
                   </AppText>
                 )}
               </View>
+              <AppText variant={size.comment} numberOfLines={2}>
+                {post.oneLine}
+              </AppText>
+              <AppText variant={size.meta} color="textTertiary" style={styles.hashtags}>
+                {post.tags.map(formatHashtag).join(' ')}
+              </AppText>
               {showMeta && (
                 <View style={styles.likes}>
                   <Icon name="heartSmall" size={16} color="textDeactivated" />
@@ -92,17 +98,16 @@ const styles = StyleSheet.create({
   photo: {
     borderRadius: radius.md,
   },
-  // 좋아요 수를 사진 아래쪽 끝에 맞추려고 위·아래로 벌린다
+  // 글 칸 높이를 사진과 똑같이 고정해서, 글이 길든 짧든 줄마다 높이와 좋아요 위치가 같게 한다
   body: {
     flex: 1,
-    justifyContent: 'space-between',
     paddingTop: spacing.xxs,
   },
-  top: {
+  titleRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
   },
-  texts: {
+  title: {
     flex: 1,
   },
   hashtags: {
@@ -111,10 +116,13 @@ const styles = StyleSheet.create({
   date: {
     paddingLeft: spacing.xs,
   },
+  // 좋아요 수는 글 길이와 상관없이 늘 사진 아래쪽 끝, 오른쪽에 붙인다 (Figma list)
   likes: {
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
     flexDirection: 'row',
     alignItems: 'center',
-    alignSelf: 'flex-end',
     gap: spacing.xxs,
   },
 });

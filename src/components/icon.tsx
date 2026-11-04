@@ -26,6 +26,7 @@ const figmaIcons = {
   location: {
     default: require('@/assets/icons/location-black.svg'),
     textDeactivated: require('@/assets/icons/location-gray.svg'),
+    primary: require('@/assets/icons/location-orange.svg'),
   },
   record: {
     default: require('@/assets/icons/file-black.svg'),
@@ -44,11 +45,13 @@ const figmaIcons = {
   camera: {
     default: require('@/assets/icons/camera.svg'),
     textInverse: require('@/assets/icons/camera-white.svg'),
+    primary: require('@/assets/icons/camera-orange.svg'),
   },
-  cameraSwitch: { default: require('@/assets/icons/camera-switch-white.svg') },
   bell: { default: require('@/assets/icons/bell.svg') },
   check: { default: require('@/assets/icons/check-white.svg') },
   report: { default: require('@/assets/icons/siren-inner.svg') },
+  // 좋아요 내역 상세 오른쪽 위 빨간 사이렌 (Figma)
+  reportRed: { default: require('@/assets/icons/siren-red.svg') },
   hashtag: { default: require('@/assets/icons/hashtag-m-inner.svg') },
   hashtagSmall: { default: require('@/assets/icons/hashtag-s-inner.svg') },
   heart: { default: require('@/assets/icons/heart-empty.svg') },
@@ -59,6 +62,11 @@ const figmaIcons = {
   },
   unlock: { default: require('@/assets/icons/unlock-s.svg') },
   settings: { default: require('@/assets/icons/setting-s.svg') },
+  // 마이 '내 활동' 메뉴의 24 크기 아이콘 (Figma 마이 새 버전)
+  heartMedium: { default: require('@/assets/icons/heart-black-m.svg') },
+  unlockMedium: { default: require('@/assets/icons/unlock-m.svg') },
+  hashtagMedium: { default: require('@/assets/icons/hashtag-black-m.svg') },
+  settingsMedium: { default: require('@/assets/icons/setting-m.svg') },
   eyeOpen: {
     default: require('@/assets/icons/eye-open-black.svg'),
     textInverse: require('@/assets/icons/eye-open-white.svg'),
@@ -66,6 +74,7 @@ const figmaIcons = {
   eyeClosed: { default: require('@/assets/icons/eye-closed.svg') },
   reload: { default: require('@/assets/icons/reload.svg') },
   toastError: { default: require('@/assets/icons/toast-error.svg') },
+  trash: { default: require('@/assets/icons/trash-red.svg') },
   toastSuccess: { default: require('@/assets/icons/toast-success.svg') },
 } satisfies Record<string, ColorVariants>;
 
@@ -76,6 +85,7 @@ const figmaIcons = {
 const innerPadding: Partial<Record<keyof typeof figmaIcons, number>> = {
   toastError: 2 / 24,
   report: 2 / 24,
+  reportRed: 2 / 24,
   hashtag: 3 / 24,
   hashtagSmall: 1 / 16,
 };

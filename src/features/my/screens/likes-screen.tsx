@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { Fragment, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { AreaMapView } from '@/components/area-map-view';
@@ -10,7 +10,8 @@ import { ScreenHeader } from '@/components/screen-header';
 import { SegmentedToggle } from '@/components/segmented-toggle';
 import { spacing } from '@/constants/layout';
 import { ListDivider, PhotoListRow } from '@/features/my/components/photo-list-row';
-import { mockLikedAreas, mockLikedSpots, mockMyStats } from '@/mock/my-activity';
+import { toggleSpotLike, useLikedSpotIds } from '@/features/my/hooks/use-liked-spots';
+import { mockLikedAreas, mockLikedSpots } from '@/mock/my-activity';
 
 const viewModes = ['리스트', '지도'] as const;
 type ViewMode = (typeof viewModes)[number];
@@ -22,9 +23,14 @@ type ViewMode = (typeof viewModes)[number];
 export function LikesScreen() {
   const [viewMode, setViewMode] = useState<ViewMode>('리스트');
   const [selectedAreaId, setSelectedAreaId] = useState<string | null>(null);
+  const likedIds = useLikedSpotIds();
+  // 목록은 이 화면을 열 때 좋아요였던 자리로 고정한다.
+  // 그래서 하트를 취소해도 빈 하트로 남아 다시 누를 수 있고, 화면을 나갔다 다시 열면 그때 빠진다 (팀 결정).
+  const [listedSpots] = useState(() => mockLikedSpots.filter((spot) => likedIds.includes(spot.spotId)));
 
   return (
     <ScreenContainer
+      contentTopGap={spacing.xs}
       header={
         <ScreenHeader
           title="좋아요 내역"
@@ -35,19 +41,28 @@ export function LikesScreen() {
         <AppText variant="caption02" color="textTertiary">
           내가 좋아요한 자리는 나만 볼 수 있어요
         </AppText>
-        <AppText variant="caption01">{mockMyStats.likedCount}곳</AppText>
+        <AppText variant="caption01">{likedIds.length}곳</AppText>
       </View>
 
       {viewMode === '리스트' ? (
         <View>
-          {mockLikedSpots.map((spot) => (
+          {listedSpots.map((spot, index) => (
             <Fragment key={spot.spotId}>
+              {index > 0 && <ListDivider />}
               <PhotoListRow
                 item={spot}
-                onPress={() => router.push(`/map/opened/${spot.spotId}`)}
-                right={<Icon name="heartFilled" />}
+                onPress={() => router.push({ pathname: '/my/spot/[id]', params: { id: spot.spotId } })}
+                right={
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="좋아요"
+                    accessibilityState={{ selected: likedIds.includes(spot.spotId) }}
+                    hitSlop={8}
+                    onPress={() => toggleSpotLike(spot.spotId)}>
+                    <Icon name={likedIds.includes(spot.spotId) ? 'heartFilled' : 'heart'} />
+                  </Pressable>
+                }
               />
-              <ListDivider />
             </Fragment>
           ))}
         </View>

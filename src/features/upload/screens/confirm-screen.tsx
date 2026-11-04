@@ -25,14 +25,15 @@ const locationPin = require('@/assets/icons/location-pick.svg');
  */
 export function ConfirmScreen() {
   const { draft } = useUploadDraft();
-  const { canSubmit, isSubmitting, isLocating, relocate, submit } = useSubmitPost();
+  const { canSubmit, isLocating, relocate, submit } = useSubmitPost();
 
   return (
     <ScreenContainer
+      contentTopGap={spacing.sm}
       header={<UploadStepHeader title="위치 확인" step={3} />}
       footer={
         <Button
-          label={isSubmitting ? '올리는 중…' : '기록 완료'}
+          label="기록 완료"
           variant="primary"
           disabled={!canSubmit}
           onPress={submit}
@@ -85,7 +86,7 @@ const styles = StyleSheet.create({
   mapBox: {
     height: 145,
     borderRadius: radius.lg,
-    backgroundColor: colors.mapBackground,
+    backgroundColor: colors.uploadMapBackground,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -115,11 +116,13 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     marginVertical: spacing.xl,
     padding: spacing.sm,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.borderDeactivated,
   },
+  // Figma 미리보기 카드: 글 묶음 위아래 4
   previewTexts: {
     flex: 1,
+    paddingVertical: spacing.xxs,
   },
 });

@@ -1,3 +1,5 @@
+import type { WalkDuration, WalkTime } from '@/constants/walk-options';
+
 /** 온보딩 설문 선택지. GUI 설문 1/3~3/3 문구 그대로. 첫 추천의 근거가 된다. */
 
 export type RelationOption = {
@@ -32,11 +34,8 @@ export const placeDescriptions: Record<string, string> = {
 /** 2/3 단계에서 최소로 골라야 하는 해시태그 수 */
 export const minPlaceCount = 3;
 
-export const walkTimeOptions = ['등하굣길', '공강 시간', '저녁 산책', '러닝할 때', '주말 나들이'] as const;
-export type WalkTime = (typeof walkTimeOptions)[number];
-
-export const walkDurationOptions = ['10분', '20분', '30분 이상'] as const;
-export type WalkDuration = (typeof walkDurationOptions)[number];
+// 걷는 때·시간 보기는 마이 탭 기호 설정과 같이 쓰려고 src/constants로 옮겼다
+export { walkDurationOptions, walkTimeOptions, type WalkDuration, type WalkTime } from '@/constants/walk-options';
 
 export type SurveyAnswers = {
   relation?: RelationOption['id'];

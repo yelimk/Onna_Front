@@ -5,11 +5,11 @@ import { AppText } from '@/components/app-text';
 import { IconButton } from '@/components/icon-button';
 import { ScreenContainer } from '@/components/screen-container';
 import { spacing } from '@/constants/layout';
-import { MenuGroup, MenuRow } from '@/features/my/components/menu-group';
+import { ActivityMenu } from '@/features/my/components/activity-menu';
 import { ProfileCard, StatsCard } from '@/features/my/components/profile-summary';
 import { profileBadges } from '@/features/my/constants/profile-badges';
+import { useLikedSpotIds } from '@/features/my/hooks/use-liked-spots';
 import { useMySummary } from '@/features/my/hooks/use-my-summary';
-import { mockMyStats } from '@/mock/my-activity';
 
 /**
  * ③ 마이 탭: 프로필, 내 숫자, 메뉴. 알림은 오른쪽 위 종 버튼으로 들어간다.
@@ -17,9 +17,11 @@ import { mockMyStats } from '@/mock/my-activity';
  */
 export function MyScreen() {
   const { nickname, leftCount, openedCount } = useMySummary();
+  // 좋아요 내역에서 취소하면 이 숫자도 같이 줄도록 같은 좋아요 상태를 센다
+  const likedCount = useLikedSpotIds().length;
 
   return (
-    <ScreenContainer withBottomInset={false} background="gray">
+    <ScreenContainer withBottomInset={false} background="gray" contentTopGap={spacing.xs}>
       <View style={styles.titleRow}>
         <AppText variant="heading02" style={styles.title}>
           마이
@@ -33,15 +35,18 @@ export function MyScreen() {
           stats={[
             { label: '남긴 자리', value: leftCount },
             { label: '연 자리', value: openedCount },
-            { label: '좋아요한 자리', value: mockMyStats.likedCount },
+            { label: '좋아한 자리', value: likedCount },
           ]}
         />
-        <MenuGroup>
-          <MenuRow icon="heartSmall" label="좋아요 내역" onPress={() => router.push('/my/likes')} />
-          <MenuRow icon="unlock" label="연 자리 기록" onPress={() => router.push('/my/opened-history')} />
-          <MenuRow icon="hashtagSmall" label="사용자 기호 설정" onPress={() => router.push('/my/preferences')} />
-          <MenuRow icon="settings" label="설정" onPress={() => router.push('/my/settings')} />
-        </MenuGroup>
+        <ActivityMenu
+          title="내 활동"
+          items={[
+            { icon: 'heartMedium', label: '좋아요 내역', onPress: () => router.push('/my/likes') },
+            { icon: 'unlockMedium', label: '연 자리 기록', onPress: () => router.push('/my/opened-history') },
+            { icon: 'hashtagMedium', label: '사용자 기호 설정', onPress: () => router.push('/my/preferences') },
+            { icon: 'settingsMedium', label: '설정', onPress: () => router.push('/my/settings') },
+          ]}
+        />
       </View>
     </ScreenContainer>
   );
@@ -52,12 +57,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: spacing.lg,
+    marginBottom: spacing.sm,
   },
   title: {
     paddingHorizontal: spacing.xs,
   },
+  // Figma 마이: 카드끼리 12
   sections: {
-    gap: spacing.xl,
+    gap: spacing.sm,
   },
 });

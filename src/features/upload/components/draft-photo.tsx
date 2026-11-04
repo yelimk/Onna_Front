@@ -17,7 +17,8 @@ export function DraftPhoto({ uri, width, height }: DraftPhotoProps) {
 }
 
 const styles = StyleSheet.create({
+  // Figma 남기기 화면의 작은 사진(100) 모서리 8
   photo: {
-    borderRadius: radius.md,
+    borderRadius: radius.sm,
   },
 });

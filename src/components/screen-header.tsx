@@ -8,6 +8,8 @@ import { spacing } from '@/constants/layout';
 
 type ScreenHeaderProps = {
   title?: string;
+  /** 제목이 긴 화면(이용약관)은 Figma에서 한 단계 작은 글씨(18)를 쓴다 */
+  smallTitle?: boolean;
   /** 가운데에 두는 것 (예: 설문 단계 '1/3', 회원가입 제목) */
   center?: ReactNode;
   /** 오른쪽 끝 (예: 건너뛰기) */
@@ -17,7 +19,7 @@ type ScreenHeaderProps = {
   onBack?: () => void;
 };
 
-export function ScreenHeader({ title, center, right, showBack = true, onBack }: ScreenHeaderProps) {
+export function ScreenHeader({ title, smallTitle = false, center, right, showBack = true, onBack }: ScreenHeaderProps) {
   return (
     <View style={styles.container}>
       <View style={styles.left}>
@@ -26,7 +28,7 @@ export function ScreenHeader({ title, center, right, showBack = true, onBack }: 
             <Icon name="back" />
           </Pressable>
         )}
-        {title && <AppText variant="heading02">{title}</AppText>}
+        {title && <AppText variant={smallTitle ? 'subtitle02' : 'heading02'}>{title}</AppText>}
       </View>
 
       {center && (

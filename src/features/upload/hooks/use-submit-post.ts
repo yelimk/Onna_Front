@@ -18,7 +18,7 @@ export function useSubmitPost() {
   const [isLocating, setIsLocating] = useState(false);
 
   const canSubmit =
-    !!draft.photoUri && !!draft.location && draft.questionId !== undefined && !isSubmitting && !isLocating;
+    !!draft.photoUri && !!draft.location && draft.questionId !== undefined && !isLocating;
 
   const relocate = async () => {
     setIsLocating(true);
@@ -32,6 +32,8 @@ export function useSubmitPost() {
   };
 
   const submit = async () => {
+    // 올리는 동안 버튼 모양은 그대로 두고(Figma에 기다리는 모양이 없음), 두 번 눌러도 한 번만 보낸다
+    if (isSubmitting) return;
     if (!draft.photoUri || !draft.location || draft.questionId === undefined) return;
     setIsSubmitting(true);
     try {
@@ -56,5 +58,5 @@ export function useSubmitPost() {
     }
   };
 
-  return { canSubmit, isSubmitting, isLocating, relocate, submit };
+  return { canSubmit, isLocating, relocate, submit };
 }

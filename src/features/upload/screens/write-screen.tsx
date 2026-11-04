@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Keyboard, Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
@@ -32,71 +32,83 @@ export function WriteScreen() {
     updateDraft({ oneLine, hashtags: [] });
     clearSuggestions();
   };
-  const canGoNext = draft.title.trim().length > 0 && draft.oneLine.trim().length > 0 && draft.hashtags.length > 0;
+  const isTitleValid = draft.title.trim().length > 0 && draft.title.length <= maxTitleLength;
+  const isOneLineValid = draft.oneLine.trim().length > 0 && draft.oneLine.length <= maxOneLineLength;
+  const canGoNext = isTitleValid && isOneLineValid && draft.hashtags.length > 0;
+
+  // 글자수를 넘긴 한 줄로는 해시태그를 받지 않는다 (어차피 다음으로 못 간다)
+  const askSuggestions = () => {
+    if (isOneLineValid) requestSuggestions(questionId, draft.oneLine);
+  };
 
   return (
     <ScreenContainer
+      contentTopGap={spacing.sm}
       header={<UploadStepHeader title="한 줄 남기기" step={2} />}
-      footer={
-        <Button label="다음" variant="primary" disabled={!canGoNext} onPress={() => router.push('/upload/confirm')} />
-      }>
-      <View style={styles.title}>
-        <DraftPhoto uri={draft.photoUri} width={100} height={100} />
-        {questionFailed ? (
-          <Pressable onPress={reloadQuestion} hitSlop={8} style={styles.titleText}>
-            <AppText variant="body01" color="textTertiary">
-              질문을 불러오지 못했어요. 눌러서 다시 불러오기
+      // Figma처럼 다 채우기 전(글자수 초과, 해시태그 안 고름 등)에는 '다음' 버튼을 아예 보여주지 않는다
+      footer={canGoNext && <Button label="다음" variant="primary" onPress={() => router.push('/upload/confirm')} />}>
+      {/* 빈 곳을 누르면 키보드를 닫는다. 닫히는 순간 한 줄 칸을 벗어나서 해시태그를 받아 온다. */}
+      <Pressable accessible={false} onPress={Keyboard.dismiss} style={styles.blankArea}>
+        <View style={styles.title}>
+          <DraftPhoto uri={draft.photoUri} width={100} height={100} />
+          {questionFailed ? (
+            <Pressable onPress={reloadQuestion} hitSlop={8} style={styles.titleText}>
+              <AppText variant="body01" color="textTertiary">
+                질문을 불러오지 못했어요. 눌러서 다시 불러오기
+              </AppText>
+            </Pressable>
+          ) : (
+            <AppText variant="heading03" style={styles.titleText}>
+              {question ?? ''}
             </AppText>
-          </Pressable>
-        ) : (
-          <AppText variant="heading03" style={styles.titleText}>
-            {question ?? ''}
-          </AppText>
-        )}
-      </View>
+          )}
+        </View>
 
-      <View style={styles.fields}>
-        <TextField
-          label="제목"
-          required
-          value={draft.title}
-          onChangeText={(title) => updateDraft({ title })}
-          placeholder="제목을 입력해 주세요"
-          maxLength={maxTitleLength}
-          showCount
-        />
-        <TextField
-          label="한줄 코멘트"
-          required
-          value={draft.oneLine}
-          onChangeText={changeOneLine}
-          onBlur={() => requestSuggestions(questionId, draft.oneLine)}
-          returnKeyType="done"
-          placeholder="한줄 코멘트를 적어주세요"
-          maxLength={maxOneLineLength}
-          showCount
-        />
-        {hasFailed && (
-          <Pressable onPress={() => requestSuggestions(questionId, draft.oneLine)} hitSlop={8}>
-            <AppText variant="caption02" color="textTertiary">
-              해시태그를 받아 오지 못했어요. 눌러서 다시 받기
-            </AppText>
-          </Pressable>
-        )}
-        {/* 후보를 받아 오기 전에는 칸을 아예 숨긴다 */}
-        {suggestions.length > 0 && (
-          <AiHashtagPicker
-            suggestions={suggestions}
-            selected={draft.hashtags}
-            onChange={(hashtags) => updateDraft({ hashtags })}
+        <View style={styles.fields}>
+          <TextField
+            label="제목"
+            required
+            value={draft.title}
+            onChangeText={(title) => updateDraft({ title })}
+            placeholder="제목을 입력해 주세요"
+            limit={maxTitleLength}
           />
-        )}
-      </View>
+          <TextField
+            label="한줄 코멘트"
+            required
+            value={draft.oneLine}
+            onChangeText={changeOneLine}
+            onBlur={askSuggestions}
+            returnKeyType="done"
+            placeholder="한줄 코멘트를 적어주세요"
+            limit={maxOneLineLength}
+          />
+          {hasFailed && (
+            <Pressable onPress={askSuggestions} hitSlop={8}>
+              <AppText variant="caption02" color="textTertiary">
+                해시태그를 받아 오지 못했어요. 눌러서 다시 받기
+              </AppText>
+            </Pressable>
+          )}
+          {/* 후보를 받아 오기 전에는 칸을 아예 숨긴다 */}
+          {suggestions.length > 0 && (
+            <AiHashtagPicker
+              suggestions={suggestions}
+              selected={draft.hashtags}
+              onChange={(hashtags) => updateDraft({ hashtags })}
+            />
+          )}
+        </View>
+      </Pressable>
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
+  // 화면 아래 빈 곳까지 눌리도록 남은 높이를 채운다
+  blankArea: {
+    flexGrow: 1,
+  },
   title: {
     flexDirection: 'row',
     alignItems: 'center',

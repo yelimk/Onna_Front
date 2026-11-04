@@ -1,6 +1,7 @@
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
 import { Fragment, useEffect } from 'react';
 
 import { ToastHost } from '@/components/toast';
@@ -35,6 +36,8 @@ export default function RootLayout() {
           options={{ presentation: 'transparentModal', animation: 'fade', contentStyle: { backgroundColor: 'transparent' } }}
         />
       </Stack>
+      {/* 기본은 흰 화면 위 검은 시계·배터리. 주황 시작 화면, 검은 촬영 화면만 각자 흰색으로 바꾼다. */}
+      <StatusBar style="dark" />
       {/* 모든 화면 위에 토스트를 띄우려고 화면 묶음(Stack) 바깥 맨 위에 둔다 */}
       <ToastHost />
     </Fragment>

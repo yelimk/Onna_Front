@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, TextInput, View, type TextInputProps } from 'rea
 
 import { AppText } from '@/components/app-text';
 import { Icon } from '@/components/icon';
-import { colors } from '@/constants/colors';
+import { colors, type ColorName } from '@/constants/colors';
 import { radius, spacing } from '@/constants/layout';
 import { typography } from '@/constants/typography';
 
@@ -16,12 +16,19 @@ type TextFieldProps = Omit<TextInputProps, 'secureTextEntry'> & {
   helper?: string;
   /** 있으면 빨간 테두리와 빨간 안내 문구로 보여준다 */
   error?: string;
+  /** 규칙에 맞았을 때 초록 안내 문구 (예: '비밀번호가 일치합니다'). error가 있으면 error가 먼저다. */
+  success?: string;
   /** 입력창 오른쪽에 붙는 버튼 등 (예: 인증 요청) */
   accessory?: ReactNode;
   /** maxLength와 함께 쓰면 오른쪽 아래에 '22/40'처럼 글자 수를 보여준다 */
   showCount?: boolean;
   /** 비밀번호 칸. 오른쪽 눈 아이콘으로 보이기·숨기기를 바꾼다. */
   isPassword?: boolean;
+  /**
+   * 글자 수 한도. maxLength처럼 막지 않고 넘겨서 쓸 수 있게 두되, 넘으면 빨간 테두리와 오른쪽 '글자수 초과'로 알린다 (Figma 한 줄 남기기 오류).
+   * 오른쪽 아래에 '7/15'처럼 글자 수도 보여준다.
+   */
+  limit?: number;
 };
 
 /**
@@ -33,9 +40,11 @@ export function TextField({
   required = false,
   helper,
   error,
+  success,
   accessory,
   showCount = false,
   isPassword = false,
+  limit,
   style,
   onFocus,
   onBlur,
@@ -43,8 +52,12 @@ export function TextField({
 }: TextFieldProps) {
   const [isFocused, setIsFocused] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const count = showCount && rest.maxLength ? `${rest.value?.length ?? 0}/${rest.maxLength}` : undefined;
-  const bottomText = error ?? helper;
+  const length = rest.value?.length ?? 0;
+  const countLimit = limit ?? (showCount ? rest.maxLength : undefined);
+  const count = countLimit ? `${length}/${countLimit}` : undefined;
+  const isOverLimit = limit !== undefined && length > limit;
+  const hasError = error !== undefined || isOverLimit;
+  const bottomText = error ?? success ?? helper;
 
   return (
     <View>
@@ -55,7 +68,7 @@ export function TextField({
         </AppText>
       )}
       <View style={styles.row}>
-        <View style={[styles.box, isFocused && styles.focusedBox, error !== undefined && styles.errorBox]}>
+        <View style={[styles.box, isFocused && styles.focusedBox, hasError && styles.errorBox]}>
           <TextInput
             placeholderTextColor={colors.textPlaceholder}
             secureTextEntry={isPassword && !isPasswordVisible}
@@ -67,7 +80,7 @@ export function TextField({
               setIsFocused(false);
               onBlur?.(event);
             }}
-            style={[styles.input, error !== undefined && styles.errorText, style]}
+            style={[styles.input, hasError && styles.errorText, style]}
             {...rest}
           />
           {isPassword && (
@@ -83,18 +96,24 @@ export function TextField({
       </View>
       {(bottomText || count) && (
         <View style={styles.bottomRow}>
-          <AppText variant="caption02" color={error !== undefined ? 'error' : 'textTertiary'} style={styles.helper}>
+          <AppText variant="caption02" color={getHelperColor(error, success)} style={styles.helper}>
             {bottomText}
           </AppText>
           {count && (
-            <AppText variant="caption04" color="textDeactivated">
-              {count}
+            <AppText variant="caption04" color={isOverLimit ? 'error' : 'textDeactivated'}>
+              {isOverLimit ? '글자수 초과' : count}
             </AppText>
           )}
         </View>
       )}
     </View>
   );
+}
+
+function getHelperColor(error: string | undefined, success: string | undefined): ColorName {
+  if (error !== undefined) return 'error';
+  if (success !== undefined) return 'success';
+  return 'textTertiary';
 }
 
 const styles = StyleSheet.create({

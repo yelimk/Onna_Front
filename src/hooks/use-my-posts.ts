@@ -2,6 +2,7 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 
 import { getMyPosts } from '@/api/users';
+import { mockMyPosts } from '@/mock/my-posts';
 import type { MyPost } from '@/types/api';
 
 /**
@@ -17,7 +18,9 @@ export function useMyPosts() {
     () =>
       getMyPosts()
         .then((result) => {
-          setPosts(result);
+          // 내 기록이 비어 있으면 예시 기록을 대신 보여준다. 팀원 공유용(EAS 업데이트)에서도 화면을 확인하려고 개발 모드로 막지 않았다.
+          // 서버 사진 올리기가 되는 것을 확인하면, 시연 전에 꼭 이 줄과 mock/my-posts.ts를 지운다.
+          setPosts(result.length === 0 ? mockMyPosts : result);
           setHasFailed(false);
         })
         .catch(() => setHasFailed(true)),

@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { spacing } from '@/constants/layout';
@@ -11,14 +11,12 @@ import { formatHashtag } from '@/utils/format-hashtag';
 type PlaceStepProps = {
   /** 서버 해시태그 사전. null이면 불러오는 중 */
   tags: Tag[] | null;
-  hasFailed: boolean;
-  onRetry: () => void;
   value: number[];
   onChange: (value: number[]) => void;
 };
 
 /** 설문 2/3: 끌리는 자리 해시태그 (여러 개, 최소 3개). 고른 태그 id를 서버에 저장한다. */
-export function PlaceStep({ tags, hasFailed, onRetry, value, onChange }: PlaceStepProps) {
+export function PlaceStep({ tags, value, onChange }: PlaceStepProps) {
   const toggle = (tagId: number) =>
     onChange(value.includes(tagId) ? value.filter((item) => item !== tagId) : [...value, tagId]);
 
@@ -34,13 +32,6 @@ export function PlaceStep({ tags, hasFailed, onRetry, value, onChange }: PlaceSt
         }
       />
 
-      {hasFailed && (
-        <Pressable onPress={onRetry} hitSlop={8}>
-          <AppText variant="caption02" color="textTertiary">
-            해시태그를 불러오지 못했어요. 눌러서 다시 불러오기
-          </AppText>
-        </Pressable>
-      )}
 
       <View style={styles.grid}>
         {tags?.map((tag) => {

@@ -46,6 +46,13 @@ export function useSignup() {
     nickname: getNicknameError(form.nickname),
   };
 
+  // Figma 회원가입: 규칙에 맞으면 초록 글자로 알려준다 (비밀번호 일치, 닉네임 사용 가능)
+  const successes = {
+    passwordConfirm:
+      form.passwordConfirm.length > 0 && !errors.passwordConfirm ? '비밀번호가 일치합니다' : undefined,
+    nickname: form.nickname.trim().length > 0 && !errors.nickname ? '사용할 수 있어요' : undefined,
+  };
+
   const isStepDone = [
     form.email.length > 0 && !errors.email,
     form.password.length > 0 && form.passwordConfirm.length > 0 && !errors.password && !errors.passwordConfirm,
@@ -56,6 +63,8 @@ export function useSignup() {
   const update = (patch: Partial<SignupForm>) => setForm((prev) => ({ ...prev, ...patch }));
 
   const submit = async () => {
+    // 기다리는 동안 버튼 모양은 그대로 두고, 두 번 눌러도 한 번만 보낸다
+    if (isSubmitting) return;
     setIsSubmitting(true);
     try {
       const email = form.email.trim();
@@ -82,8 +91,8 @@ export function useSignup() {
     form,
     update,
     errors,
-    canGoNext: isStepDone && !isSubmitting,
-    isSubmitting,
+    successes,
+    canGoNext: isStepDone,
     goNext,
   };
 }

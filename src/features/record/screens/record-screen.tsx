@@ -8,7 +8,6 @@ import { ScreenContainer } from '@/components/screen-container';
 import { ScreenHeader } from '@/components/screen-header';
 import { SegmentedToggle } from '@/components/segmented-toggle';
 import { colors } from '@/constants/colors';
-import { spacing } from '@/constants/layout';
 import { RecordListItem } from '@/features/record/components/record-list-item';
 import { useMyPosts } from '@/hooks/use-my-posts';
 import { mockMyRecordAreas } from '@/mock/my-records';
@@ -28,6 +27,7 @@ export function RecordScreen() {
   return (
     <ScreenContainer
       withBottomInset={false}
+      contentTopGap={0}
       header={
         <ScreenHeader
           title="내 기록"
@@ -35,12 +35,6 @@ export function RecordScreen() {
           right={<SegmentedToggle options={viewModes} selected={viewMode} onSelect={setViewMode} />}
         />
       }>
-      <View style={styles.summary}>
-        <AppText variant="caption02" color="textTertiary">
-          남긴 자리
-        </AppText>
-        <AppText variant="caption01">{posts?.length ?? 0}곳</AppText>
-      </View>
 
       {viewMode === '리스트' ? (
         <View>
@@ -71,13 +65,9 @@ export function RecordScreen() {
 }
 
 const styles = StyleSheet.create({
-  summary: {
-    flexDirection: 'row',
-    gap: spacing.xxs,
-    marginBottom: spacing.xs,
-  },
+  // Figma 기록 사이 선: 0.5 두께, Gray/300
   divider: {
-    height: 1,
-    backgroundColor: colors.disabledBackground,
+    height: 0.5,
+    backgroundColor: colors.borderDeactivated,
   },
 });

@@ -16,7 +16,9 @@ export function PermissionScreen() {
   };
 
   return (
-    <ScreenContainer footer={<Button label="확인하고 허용하기" variant="primary" onPress={handleAllow} />}>
+    <ScreenContainer
+      contentTopGap={spacing.lg}
+      footer={<Button label="확인하고 허용하기" variant="primary" onPress={handleAllow} />}>
       <View style={styles.title}>
         <AppText variant="heading02">{'걸어서 열고, 그 자리에 남기려면\n이 권한이 필요해요'}</AppText>
         <AppText variant="body01" color="textTertiary">
@@ -29,13 +31,13 @@ export function PermissionScreen() {
           icon="location"
           title="위치"
           required
-          description={'가까이 다가가면 사진이 열려요\n앱 사용 중에만 써요'}
+          description="앱 사용 중에만 써요"
         />
         <PermissionCard
           icon="camera"
           title="카메라"
           required
-          description={'그 자리의 순간은 앱 카메라로만 남겨요\n갤러리는 쓰지 않아요'}
+          description="갤러리는 쓰지 않아요"
         />
         <PermissionCard
           icon="bell"

@@ -17,9 +17,9 @@ const tabIcons: Record<string, IconName> = {
   my: 'person',
 };
 
-// GUI에서 탭 첫 화면에만 탭 바가 있고 안쪽 화면(좋아요 내역, 설정 등)에는 없는 탭.
+// GUI에서 탭 첫 화면에만 탭 바가 있고 안쪽 화면(기록 상세, 좋아요 내역, 설정 등)에는 없는 탭.
 // 지도 탭은 GUI가 화면마다 달라서 지도 담당이 정한 뒤에 추가한다.
-const tabsHidingBarOnInnerScreens = ['my'];
+const tabsHidingBarOnInnerScreens = ['record', 'my'];
 
 // Figma '지도 홈 화면 애니메이션'에서 검색을 열면 탭 바가 흐리게 사라진다.
 // 자리까지 없애면 아래 지도 크기가 바뀌어 지도가 출렁이므로, 자리는 두고 흐리게만 지운다.
