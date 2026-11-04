@@ -76,6 +76,8 @@ const figmaIcons = {
   toastError: { default: require('@/assets/icons/toast-error.svg') },
   trash: { default: require('@/assets/icons/trash-red.svg') },
   toastSuccess: { default: require('@/assets/icons/toast-success.svg') },
+  // 'AI 추천' 배지 앞 주황 반짝이 (Figma 그래픽 아이콘 2차). 16 크기의 2배 PNG만 받아서 16으로 쓴다.
+  sparkle: { default: require('@/assets/icons/sparkle-orange.png') },
 } satisfies Record<string, ColorVariants>;
 
 /**

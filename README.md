@@ -158,7 +158,7 @@ src/
   types/          데이터 타입
 assets/
   fonts/          Pretendard 글꼴 파일
-  icons/          Figma 아이콘 SVG (검정·회색·흰색 파일이 따로 있으면 그 파일을 씀)
+  icons/          Figma 아이콘 SVG (검정·회색·흰색 파일이 따로 있으면 그 파일을 씀). 반짝이(sparkle-orange)만 PNG
   images/         앱 아이콘, 온보딩 일러스트 (onboarding/), 목록 예시 사진 (sample/)
 ```
 
