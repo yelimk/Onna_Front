@@ -22,6 +22,8 @@ async function getNotificationGranted() {
  */
 export function usePermissionLabels() {
   const [locationPermission, , getLocationPermission] = Location.useForegroundPermissions();
+  // '항상 허용'인지 알려면 앱을 안 쓸 때(백그라운드) 위치 권한도 봐야 한다. 앱은 묻지 않고 상태만 읽는다.
+  const [backgroundLocationPermission, , getBackgroundLocationPermission] = Location.useBackgroundPermissions();
   const [cameraPermission, , getCameraPermission] = useCameraPermissions();
   const [notificationGranted, setNotificationGranted] = useState<boolean>();
 
@@ -32,19 +34,23 @@ export function usePermissionLabels() {
     const subscription = AppState.addEventListener('change', (state) => {
       if (state !== 'active') return;
       getLocationPermission();
+      getBackgroundLocationPermission();
       getCameraPermission();
       checkNotification();
     });
     return () => subscription.remove();
-  }, [getLocationPermission, getCameraPermission]);
+  }, [getLocationPermission, getBackgroundLocationPermission, getCameraPermission]);
 
   const labelOf = (granted: boolean | undefined, grantedLabel: string) => {
     if (granted === undefined) return '';
     return granted ? grantedLabel : deniedLabel;
   };
 
+  // 휴대폰에서 고른 그대로 보여준다. 안드로이드 '이번만 허용'은 앱이 '앱 사용 중에만'과 구분할 수 없어서 '앱 사용중'으로 보인다.
+  const locationGrantedLabel = backgroundLocationPermission?.granted ? '항상' : '앱 사용중';
+
   return {
-    location: labelOf(locationPermission?.granted, '앱 사용중'),
+    location: labelOf(locationPermission?.granted, locationGrantedLabel),
     camera: labelOf(cameraPermission?.granted, '허용됨'),
     notification: labelOf(notificationGranted, '허용됨'),
   };
