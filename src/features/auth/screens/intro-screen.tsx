@@ -7,7 +7,7 @@ import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
 import { ScreenContainer } from '@/components/screen-container';
 import { sectionGap, spacing } from '@/constants/layout';
-import { duration } from '@/constants/motion';
+import { duration, easeInOut } from '@/constants/motion';
 import { IntroDots } from '@/features/auth/components/intro-dots';
 import { IntroIllustration } from '@/features/auth/components/intro-illustration';
 import { introSlides } from '@/features/auth/constants/intro-slides';
@@ -45,7 +45,7 @@ export function IntroScreen() {
       {/* 장이 바뀌면 key가 바뀌어 새로 그려지면서 들어오는 움직임이 다시 나온다. 첫 장은 앱을 켤 때 바로 보이게 움직이지 않는다 */}
       <Animated.View
         key={slideIndex}
-        entering={slideIndex === 0 ? undefined : SlideInRight.duration(duration.normal)}
+        entering={slideIndex === 0 ? undefined : SlideInRight.duration(duration.screen).easing(easeInOut)}
         style={styles.content}>
         <View style={styles.illustration}>
           <IntroIllustration name={slide.illustration} />

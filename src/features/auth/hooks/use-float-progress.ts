@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
-import { Easing, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
+import { useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
 
-import { duration } from '@/constants/motion';
+import { duration, easeInOut } from '@/constants/motion';
 
 /**
  * 0 → 1 → 0을 끝없이 오가는 값. 소개 그림이 둥둥 떠 있는 움직임에 쓴다.
@@ -12,7 +12,7 @@ export function useFloatProgress() {
   const progress = useSharedValue(0);
 
   useEffect(() => {
-    progress.set(withRepeat(withTiming(1, { duration: duration.float, easing: Easing.inOut(Easing.sin) }), -1, true));
+    progress.set(withRepeat(withTiming(1, { duration: duration.float, easing: easeInOut }), -1, true));
   }, [progress]);
 
   return progress;

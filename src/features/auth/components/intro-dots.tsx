@@ -4,7 +4,7 @@ import Animated, { interpolateColor, useAnimatedStyle, useSharedValue, withTimin
 
 import { colors } from '@/constants/colors';
 import { radius, spacing } from '@/constants/layout';
-import { duration } from '@/constants/motion';
+import { duration, easeInOut } from '@/constants/motion';
 
 // Figma 온보딩: 지금 장은 24 너비 주황 막대, 나머지는 8 회색 점
 const dotSize = 8;
@@ -31,7 +31,7 @@ function Dot({ isActive }: { isActive: boolean }) {
   const progress = useSharedValue(isActive ? 1 : 0);
 
   useEffect(() => {
-    progress.set(withTiming(isActive ? 1 : 0, { duration: duration.normal }));
+    progress.set(withTiming(isActive ? 1 : 0, { duration: duration.screen, easing: easeInOut }));
   }, [isActive, progress]);
 
   const dotStyle = useAnimatedStyle(() => ({
