@@ -22,7 +22,7 @@ import { nicknameLength } from '@/features/auth/utils/signup-rules';
  * 제목 아래 간격도 Figma처럼 설명이 없는 1·2단계는 40, 설명이 있는 3·4단계는 24다.
  */
 export function SignupScreen() {
-  const { step, setStep, form, update, errors, successes, markLeft, canGoNext, goNext } = useSignup();
+  const { step, setStep, form, update, errors, successes, startEditing, finishEditing, canGoNext, goNext } = useSignup();
   // 화면에 처음 들어왔을 때는 첫 단계가 바로 보이게, 단계를 한 번이라도 옮긴 뒤부터 움직인다
   const [hasMoved, setHasMoved] = useState(false);
   const goBack = () => {
@@ -54,7 +54,8 @@ export function SignupScreen() {
               value={form.email}
               onChangeText={(email) => update({ email })}
               error={errors.email}
-              onBlur={() => markLeft('email')}
+              onFocus={() => startEditing('email')}
+              onBlur={() => finishEditing('email')}
               keyboardType="email-address"
               autoCapitalize="none"
               autoComplete="email"
@@ -73,7 +74,8 @@ export function SignupScreen() {
                 value={form.password}
                 onChangeText={(password) => update({ password })}
                 error={errors.password}
-                onBlur={() => markLeft('password')}
+                onFocus={() => startEditing('password')}
+                onBlur={() => finishEditing('password')}
                 isPassword
                 autoComplete="new-password"
               />
@@ -104,7 +106,8 @@ export function SignupScreen() {
               value={form.nickname}
               onChangeText={(nickname) => update({ nickname })}
               error={errors.nickname}
-              onBlur={() => markLeft('nickname')}
+              onFocus={() => startEditing('nickname')}
+              onBlur={() => finishEditing('nickname')}
               success={successes.nickname}
               maxLength={nicknameLength.max}
             />
