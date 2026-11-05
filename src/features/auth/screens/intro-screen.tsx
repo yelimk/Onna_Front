@@ -1,17 +1,22 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
+import Animated, { SlideInRight } from 'react-native-reanimated';
 
 import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
 import { ScreenContainer } from '@/components/screen-container';
-import { colors } from '@/constants/colors';
-import { radius, sectionGap, spacing } from '@/constants/layout';
+import { sectionGap, spacing } from '@/constants/layout';
+import { duration } from '@/constants/motion';
+import { IntroDots } from '@/features/auth/components/intro-dots';
 import { IntroIllustration } from '@/features/auth/components/intro-illustration';
 import { introSlides } from '@/features/auth/constants/intro-slides';
 import { markIntroSeen } from '@/features/auth/utils/intro-seen';
 
-/** 시작: 서비스 소개 3장. 처음 설치했을 때만 나오고, 마지막 장에서 '다음'을 누르면 로그인으로 간다. */
+/**
+ * 시작: 서비스 소개 3장. 처음 설치했을 때만 나오고, 마지막 장에서 '다음'을 누르면 로그인으로 간다.
+ * '다음'을 누르면 다음 장의 그림과 글이 오른쪽에서 밀려 들어온다 (Figma 애니메이션: 화면 전환 시 slide in).
+ */
 export function IntroScreen() {
   const [slideIndex, setSlideIndex] = useState(0);
   const slide = introSlides[slideIndex];
@@ -32,14 +37,16 @@ export function IntroScreen() {
       footer={
         <>
           <View style={styles.dots}>
-            {introSlides.map((item, index) => (
-              <View key={item.title} style={[styles.dot, index === slideIndex && styles.activeDot]} />
-            ))}
+            <IntroDots count={introSlides.length} activeIndex={slideIndex} />
           </View>
           <Button label="다음" variant="primary" onPress={handleNext} />
         </>
       }>
-      <View style={styles.content}>
+      {/* 장이 바뀌면 key가 바뀌어 새로 그려지면서 들어오는 움직임이 다시 나온다. 첫 장은 앱을 켤 때 바로 보이게 움직이지 않는다 */}
+      <Animated.View
+        key={slideIndex}
+        entering={slideIndex === 0 ? undefined : SlideInRight.duration(duration.normal)}
+        style={styles.content}>
         <View style={styles.illustration}>
           <IntroIllustration name={slide.illustration} />
         </View>
@@ -51,7 +58,7 @@ export function IntroScreen() {
             {slide.description}
           </AppText>
         </View>
-      </View>
+      </Animated.View>
     </ScreenContainer>
   );
 }
@@ -77,18 +84,5 @@ const styles = StyleSheet.create({
   // Figma 온보딩: 점과 '다음' 버튼 사이 40
   dots: {
     marginBottom: sectionGap,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: spacing.xs,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: radius.full,
-    backgroundColor: colors.placeholderBox,
-  },
-  activeDot: {
-    width: 24,
-    backgroundColor: colors.primary,
   },
 });
