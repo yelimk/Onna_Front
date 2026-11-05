@@ -1,11 +1,12 @@
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { deletePost } from '@/api/posts';
 import { AppText } from '@/components/app-text';
 import { Icon } from '@/components/icon';
+import { PressHighlight } from '@/components/press-highlight';
 import { ScreenContainer } from '@/components/screen-container';
 import { ScreenHeader } from '@/components/screen-header';
 import { showToast } from '@/components/toast';
@@ -20,6 +21,8 @@ import { showApiError } from '@/utils/show-api-error';
 
 // Figma 기록 상세 오른쪽 위 삭제 버튼(동그라미) 크기
 const deleteButtonSize = 36;
+// Figma 기록탭 프로토타입: '삭제되었습니다' 토스트를 보여 준 뒤 목록으로 돌아가기까지 (지연 1.2초)
+const deletedToastMs = 1200;
 
 /**
  * ② 기록 탭: 내 기록 상세. 사진은 앱 카메라 비율(세로 3:4) 그대로 크게 보여준다.
@@ -44,9 +47,9 @@ export function RecordDetailScreen() {
     setIsConfirmingDelete(false);
     try {
       await deletePost(post.postId);
-      // Figma 기록탭 애니메이션: 지운 뒤 목록으로 돌아가며 위에 초록 토스트가 뜬다
+      // Figma 기록탭 프로토타입: 지우면 상세 화면 위에 초록 토스트가 뜨고, 1.2초 뒤 목록으로 돌아간다
       showToast('삭제되었습니다', 'success');
-      router.back();
+      setTimeout(() => router.back(), deletedToastMs);
     } catch (error) {
       showApiError(error);
     }
@@ -65,13 +68,14 @@ export function RecordDetailScreen() {
             ) : undefined
           }
           right={
-            <Pressable
+            // 누르고 있으면 옅은 회색 동그라미가 100ms 동안 서서히 깔린다 (Figma 삭제 버튼 pressed: 디졸브 100ms)
+            <PressHighlight
               accessibilityRole="button"
               accessibilityLabel="기록 삭제"
               onPress={() => setIsConfirmingDelete(true)}
-              style={({ pressed }) => [styles.deleteButton, pressed && styles.deleteButtonPressed]}>
+              style={styles.deleteButton}>
               <Icon name="trash" />
-            </Pressable>
+            </PressHighlight>
           }
         />
       }>
@@ -119,10 +123,6 @@ const styles = StyleSheet.create({
     borderRadius: radius.full,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  // 누르고 있으면 옅은 회색 동그라미 (Figma 삭제 버튼 pressed)
-  deleteButtonPressed: {
-    backgroundColor: colors.background02,
   },
   texts: {
     marginTop: spacing.md,

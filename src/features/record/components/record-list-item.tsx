@@ -1,11 +1,14 @@
 import { Image } from 'expo-image';
 import { Pressable, StyleSheet, View } from 'react-native';
+import Animated, { interpolate, interpolateColor, useAnimatedStyle } from 'react-native-reanimated';
 
 import { AppText } from '@/components/app-text';
 import { Icon } from '@/components/icon';
 import { colors } from '@/constants/colors';
 import { radius, spacing } from '@/constants/layout';
+import { duration } from '@/constants/motion';
 import type { TypographyVariant } from '@/constants/typography';
+import { usePressProgress } from '@/hooks/use-press-progress';
 import type { MyPost } from '@/types/api';
 import { formatDate } from '@/utils/format-date';
 import { formatHashtag } from '@/utils/format-hashtag';
@@ -27,53 +30,65 @@ const sizes = {
  * 내 기록 한 줄 (Figma list): 사진, 굵은 제목(한 줄), 한 줄 코멘트(두 줄까지, 넘치면 '…'), 해시태그, 날짜, 받은 좋아요 수.
  * 서버에 아직 제목이 없어서 제목이 없는 기록은 제목 줄 없이 코멘트부터 보여준다.
  * 누르고 있으면 회색 칸 안으로 줄어든다. 줄 높이는 그대로라 아래 목록이 흔들리지 않는다.
+ * 줄어드는 움직임은 100ms 동안 이어진다 (Figma 프로토타입 list pressed: 스마트 애니메이트 100ms, Ease out).
+ * 글자 크기는 앱에서 부드럽게 바꿀 수 없어서 누르는 순간 바뀐다.
  */
 export function RecordListItem({ post, onPress, showMeta = true }: RecordListItemProps) {
+  const { progress, isPressed, pressHandlers } = usePressProgress(duration.press);
+  const size = sizes[isPressed ? 'pressed' : 'default'];
+
+  const contentStyle = useAnimatedStyle(() => ({
+    marginHorizontal: progress.get() * spacing.xs,
+    padding: progress.get() * spacing.xs,
+    backgroundColor: interpolateColor(progress.get(), [0, 1], [colors.background01, colors.background02]),
+  }));
+  const photoStyle = useAnimatedStyle(() => {
+    const photoSize = interpolate(progress.get(), [0, 1], [sizes.default.photo, sizes.pressed.photo]);
+    return { width: photoSize, height: photoSize };
+  });
+  // 글 칸도 사진과 같은 높이로 같이 줄인다
+  const bodyStyle = useAnimatedStyle(() => ({
+    height: interpolate(progress.get(), [0, 1], [sizes.default.photo, sizes.pressed.photo]),
+  }));
+
   return (
-    <Pressable accessibilityRole="button" onPress={onPress} style={styles.row}>
-      {({ pressed }) => {
-        const size = sizes[pressed ? 'pressed' : 'default'];
-        return (
-          <View style={[styles.content, pressed && styles.pressedContent]}>
-            <Image
-              source={{ uri: post.imageUrl }}
-              style={[styles.photo, { width: size.photo, height: size.photo }]}
-              contentFit="cover"
-            />
-            <View style={[styles.body, { height: size.photo }]}>
-              {/* 날짜는 제목 줄 옆에만 둔다. 글 전체 옆에 두면 날짜(2026.08.28) 너비만큼 코멘트 칸이 좁아져 줄이 일찍 꺾인다 */}
-              <View style={styles.titleRow}>
-                <View style={styles.title}>
-                  {post.title && (
-                    <AppText variant={size.title} numberOfLines={1}>
-                      {post.title}
-                    </AppText>
-                  )}
-                </View>
-                {showMeta && (
-                  <AppText variant={size.meta} color="textDeactivated" style={styles.date}>
-                    {formatDate(post.createdAt)}
-                  </AppText>
-                )}
-              </View>
-              <AppText variant={size.comment} numberOfLines={2}>
-                {post.oneLine}
-              </AppText>
-              <AppText variant={size.meta} color="textTertiary" style={styles.hashtags}>
-                {post.tags.map(formatHashtag).join(' ')}
-              </AppText>
-              {showMeta && (
-                <View style={styles.likes}>
-                  <Icon name="heartSmall" size={16} color="textDeactivated" />
-                  <AppText variant={size.meta} color="textDeactivated">
-                    {post.likeCount}
-                  </AppText>
-                </View>
+    <Pressable accessibilityRole="button" onPress={onPress} style={styles.row} {...pressHandlers}>
+      <Animated.View style={[styles.content, contentStyle]}>
+        <Animated.View style={[styles.photo, photoStyle]}>
+          <Image source={{ uri: post.imageUrl }} style={styles.photoImage} contentFit="cover" />
+        </Animated.View>
+        <Animated.View style={[styles.body, bodyStyle]}>
+          {/* 날짜는 제목 줄 옆에만 둔다. 글 전체 옆에 두면 날짜(2026.08.28) 너비만큼 코멘트 칸이 좁아져 줄이 일찍 꺾인다 */}
+          <View style={styles.titleRow}>
+            <View style={styles.title}>
+              {post.title && (
+                <AppText variant={size.title} numberOfLines={1}>
+                  {post.title}
+                </AppText>
               )}
             </View>
+            {showMeta && (
+              <AppText variant={size.meta} color="textDeactivated" style={styles.date}>
+                {formatDate(post.createdAt)}
+              </AppText>
+            )}
           </View>
-        );
-      }}
+          <AppText variant={size.comment} numberOfLines={2}>
+            {post.oneLine}
+          </AppText>
+          <AppText variant={size.meta} color="textTertiary" style={styles.hashtags}>
+            {post.tags.map(formatHashtag).join(' ')}
+          </AppText>
+          {showMeta && (
+            <View style={styles.likes}>
+              <Icon name="heartSmall" size={16} color="textDeactivated" />
+              <AppText variant={size.meta} color="textDeactivated">
+                {post.likeCount}
+              </AppText>
+            </View>
+          )}
+        </Animated.View>
+      </Animated.View>
     </Pressable>
   );
 }
@@ -84,19 +99,18 @@ const styles = StyleSheet.create({
     height: 120 + spacing.sm * 2,
     justifyContent: 'center',
   },
+  // Figma pressed: 줄 양옆을 8씩 줄인 회색 칸, 안쪽 여백 8 (contentStyle이 0에서 이 값까지 움직인다)
   content: {
     flexDirection: 'row',
     gap: spacing.md,
-  },
-  // Figma pressed: 줄 양옆을 8씩 줄인 회색 칸, 안쪽 여백 8
-  pressedContent: {
-    marginHorizontal: spacing.xs,
-    padding: spacing.xs,
     borderRadius: radius.md,
-    backgroundColor: colors.background02,
   },
   photo: {
     borderRadius: radius.md,
+    overflow: 'hidden',
+  },
+  photoImage: {
+    flex: 1,
   },
   // 글 칸 높이를 사진과 똑같이 고정해서, 글이 길든 짧든 줄마다 높이와 좋아요 위치가 같게 한다
   body: {

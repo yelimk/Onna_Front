@@ -7,15 +7,15 @@ import { AppText } from '@/components/app-text';
 import { Icon } from '@/components/icon';
 import { colors } from '@/constants/colors';
 import { radius, spacing, toastShadow } from '@/constants/layout';
-import { duration } from '@/constants/motion';
+import { duration, easeIn, easeOut } from '@/constants/motion';
 
 /** 실패(빨간 X), 성공(초록 체크), 아이콘 없는 안내 (Figma 공통 컴포넌트 토스트 3종) */
 export type ToastType = 'error' | 'success' | 'plain';
 
 type ToastMessage = { id: number; message: string; type: ToastType };
 
-// 잠깐 읽고 지나가는 한 줄이라 2초면 충분하고, 더 길면 다음 동작을 가린다
-const visibleMs = 2000;
+// Figma 로그인 오류 토스트: 다 나타난 뒤 1.5초 보이다가 사라진다
+const visibleMs = duration.toast + 1500;
 // 나타날 때 위에서 이만큼 내려오며 떠오른다 (Figma 애니메이션: 상단 토스트 메시지 팝업)
 const dropDistance = spacing.md;
 
@@ -39,8 +39,9 @@ export function ToastHost() {
   const [isVisible, setIsVisible] = useState(false);
   const progress = useSharedValue(0);
 
+  // Figma 로그인 오류: 나타날 때는 Ease out(빠르게 내려와 천천히 멈춤), 사라질 때는 Ease in(천천히 떠나 빠르게 사라짐)
   useEffect(() => {
-    progress.set(withTiming(isVisible ? 1 : 0, { duration: duration.normal }));
+    progress.set(withTiming(isVisible ? 1 : 0, { duration: duration.toast, easing: isVisible ? easeOut : easeIn }));
   }, [isVisible, progress]);
 
   const popupStyle = useAnimatedStyle(() => ({

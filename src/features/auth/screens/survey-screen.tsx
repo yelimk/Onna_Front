@@ -1,15 +1,16 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import Animated, { SlideInLeft, SlideInRight } from 'react-native-reanimated';
+import Animated, { SlideInRight } from 'react-native-reanimated';
 
 import { getMe, saveMyTags } from '@/api/users';
 import { Button } from '@/components/button';
 import { ScreenContainer } from '@/components/screen-container';
 import { showToast } from '@/components/toast';
 import { spacing } from '@/constants/layout';
-import { duration } from '@/constants/motion';
+import { duration, easeOut } from '@/constants/motion';
 import { PlaceStep } from '@/features/auth/components/place-step';
 import { RelationStep } from '@/features/auth/components/relation-step';
+import { StepTransition } from '@/features/auth/components/step-transition';
 import { SurveyDone } from '@/features/auth/components/survey-done';
 import { SurveyHeader } from '@/features/auth/components/survey-header';
 import { WalkStep } from '@/features/auth/components/walk-step';
@@ -27,15 +28,16 @@ const previewNearbySpotCount = 12;
  * 시작: 온보딩 설문.
  * 1/3~3/3과 완료 화면을 한 화면에서 단계(step)만 바꿔 보여준다. step이 totalSteps보다 크면 완료 화면.
  * '완료'를 누르면 고른 자리 해시태그를 서버에 저장한다. 저장하면 다음 로그인부터 설문을 건너뛴다.
- * 단계가 바뀌면 다음 단계는 오른쪽에서, 뒤로 가면 이전 단계는 왼쪽에서 밀려 들어온다 (Figma 애니메이션: 화면 전환 시 슬라이드).
+ * 단계가 바뀌면 300ms 동안 다음 단계로 서서히 바뀐다 (Figma 프로토타입: 스마트 애니메이트 300ms, Ease out).
+ * 마지막 단계에서 완료 화면은 오른쪽에서 밀려 들어온다 (Figma 프로토타입: 슬라이드 인 300ms, Ease out).
  */
 export function SurveyScreen() {
   const [step, setStep] = useState(1);
   const [answers, setAnswers] = useState<SurveyAnswers>({ placeTagIds: [], walkTimes: [] });
   const [nickname, setNickname] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-  // 어느 쪽으로 넘어가는지. 처음 들어왔을 때는 움직이지 않게 비워 둔다
-  const [direction, setDirection] = useState<'forward' | 'back'>();
+  // 화면에 처음 들어왔을 때는 첫 단계가 바로 보이게, 단계를 한 번이라도 옮긴 뒤부터 움직인다
+  const [hasMoved, setHasMoved] = useState(false);
   const { tags, hasFailed, reload } = useTags();
 
   useEffect(() => {
@@ -58,11 +60,9 @@ export function SurveyScreen() {
       router.back();
       return;
     }
-    setDirection('back');
+    setHasMoved(true);
     setStep(step - 1);
   };
-  const slideIn = direction === 'forward' ? SlideInRight : direction === 'back' ? SlideInLeft : undefined;
-  const entering = slideIn?.duration(duration.normal);
   const update = (patch: Partial<SurveyAnswers>) => setAnswers({ ...answers, ...patch });
 
   const goNext = async () => {
@@ -71,7 +71,7 @@ export function SurveyScreen() {
       return;
     }
     if (step < totalSteps) {
-      setDirection('forward');
+      setHasMoved(true);
       setStep(step + 1);
       return;
     }
@@ -80,7 +80,6 @@ export function SurveyScreen() {
     setIsSaving(true);
     try {
       await saveMyTags(answers.placeTagIds);
-      setDirection('forward');
       setStep(step + 1);
     } catch (error) {
       showApiError(error);
@@ -95,7 +94,7 @@ export function SurveyScreen() {
       .map((tag) => formatHashtag(tag.name));
     return (
       <ScreenContainer footer={<Button label="지도 열기" variant="primary" onPress={goToMap} />}>
-        <Animated.View entering={entering}>
+        <Animated.View entering={SlideInRight.duration(duration.screen).easing(easeOut)}>
           <SurveyDone
             answers={answers}
             placeNames={placeNames}
@@ -118,8 +117,7 @@ export function SurveyScreen() {
           onPress={goNext}
         />
       }>
-      {/* 단계가 바뀌면 key가 바뀌어 새로 그려지면서 밀려 들어오는 움직임이 다시 나온다 */}
-      <Animated.View key={step} entering={entering}>
+      <StepTransition stepKey={step} animate={hasMoved}>
         {step === 1 && <RelationStep value={answers.relation} onChange={(relation) => update({ relation })} />}
         {step === 2 && (
           <PlaceStep
@@ -138,7 +136,7 @@ export function SurveyScreen() {
             onChangeWalkDuration={(walkDuration) => update({ walkDuration })}
           />
         )}
-      </Animated.View>
+      </StepTransition>
     </ScreenContainer>
   );
 }

@@ -1,11 +1,12 @@
 import { Pressable, StyleSheet, View } from 'react-native';
-import Animated from 'react-native-reanimated';
+import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 
 import { AppText } from '@/components/app-text';
 import { Icon } from '@/components/icon';
 import { Radio } from '@/components/radio';
 import { spacing } from '@/constants/layout';
-import { usePopStyle } from '@/hooks/use-pop-style';
+import { duration } from '@/constants/motion';
+import { useTransitionProgress } from '@/hooks/use-transition-progress';
 
 export const requiredTerms = ['이용약관', '개인정보 수집·이용', '위치기반 서비스 이용', '만 14세 이상이에요'] as const;
 export type TermName = (typeof requiredTerms)[number];
@@ -18,7 +19,7 @@ type TermsAgreementProps = {
 /**
  * 회원가입 마지막 단계의 약관 동의 목록. 모두 필수라 전부 골라야 다음으로 간다.
  * 줄을 누르면 동의가 바뀐다. 약관 전문이 아직 없어서 오른쪽 화살표는 모양만 두고 누를 수 없게 했다 (팀 결정).
- * 동의하는 순간 동그라미가 톡 튄다 (Figma 애니메이션: 약관동의 버튼 터치 시).
+ * 동의를 누르면 동그라미가 100ms 동안 서서히 채워진다 (Figma 프로토타입 checkbox: 디졸브 100ms, Ease out).
  */
 export function TermsAgreement({ agreed, onChange }: TermsAgreementProps) {
   const toggle = (term: TermName) =>
@@ -40,7 +41,8 @@ type TermRowProps = {
 };
 
 function TermRow({ term, selected, onToggle }: TermRowProps) {
-  const popStyle = usePopStyle(selected);
+  const progress = useTransitionProgress(selected, duration.press);
+  const checkedStyle = useAnimatedStyle(() => ({ opacity: progress.get() }));
 
   return (
     <View style={styles.row}>
@@ -49,9 +51,13 @@ function TermRow({ term, selected, onToggle }: TermRowProps) {
         accessibilityState={{ checked: selected }}
         onPress={onToggle}
         style={styles.label}>
-        <Animated.View style={popStyle}>
-          <Radio selected={selected} />
-        </Animated.View>
+        {/* 빈 동그라미 위에 채운 동그라미를 겹쳐 두고 투명도만 바꾼다. 그림이라 색을 직접 섞을 수 없어서다 */}
+        <View>
+          <Radio selected={false} />
+          <Animated.View style={[StyleSheet.absoluteFill, checkedStyle]}>
+            <Radio selected />
+          </Animated.View>
+        </View>
         <AppText variant="body01" color={selected ? 'textPrimary' : 'textTertiary'}>
           [필수] {term}
         </AppText>

@@ -1,8 +1,13 @@
-import { Modal, Pressable, StyleSheet, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Modal, StyleSheet, View } from 'react-native';
+import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 
 import { AppText } from '@/components/app-text';
+import { PressHighlight } from '@/components/press-highlight';
 import { colors } from '@/constants/colors';
 import { radius, spacing } from '@/constants/layout';
+import { duration } from '@/constants/motion';
+import { useTransitionProgress } from '@/hooks/use-transition-progress';
 
 type DeleteConfirmDialogProps = {
   visible: boolean;
@@ -13,11 +18,28 @@ type DeleteConfirmDialogProps = {
 // Figma 삭제 확인 창의 '취소 | 삭제' 버튼 줄 높이 (사이 세로선도 이 높이)
 const actionHeight = 40;
 
-/** 내 기록 삭제 전에 한 번 묻는 창 (Figma 기록 상세 > 삭제). 지운 기록은 되돌릴 수 없어서 꼭 묻는다. */
+/**
+ * 내 기록 삭제 전에 한 번 묻는 창 (Figma 기록 상세 > 삭제). 지운 기록은 되돌릴 수 없어서 꼭 묻는다.
+ * 창은 180ms 동안 서서히 나타나고 사라진다 (Figma 프로토타입: 디졸브 180ms, Ease out).
+ * Modal의 기본 서서히 나타나기는 시간을 바꿀 수 없어서, Modal은 바로 띄우고 안쪽을 직접 서서히 바꾼다.
+ */
 export function DeleteConfirmDialog({ visible, onCancel, onDelete }: DeleteConfirmDialogProps) {
+  const progress = useTransitionProgress(visible, duration.change);
+  const fadeStyle = useAnimatedStyle(() => ({ opacity: progress.get() }));
+  // 닫을 때 사라지는 움직임이 끝날 때까지 Modal을 남겨 둔다
+  const [isMounted, setIsMounted] = useState(visible);
+  // 열 때는 그리는 중에 바로 띄운다 (React 권장: 받은 값이 바뀌면 그리는 중에 상태를 맞춘다)
+  if (visible && !isMounted) setIsMounted(true);
+
+  useEffect(() => {
+    if (visible) return;
+    const timer = setTimeout(() => setIsMounted(false), duration.change);
+    return () => clearTimeout(timer);
+  }, [visible]);
+
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
-      <View style={styles.dim}>
+    <Modal visible={isMounted} transparent animationType="none" onRequestClose={onCancel}>
+      <Animated.View style={[styles.dim, fadeStyle]}>
         <View style={styles.dialog}>
           <View style={styles.texts}>
             <AppText variant="subtitle03" style={styles.center}>
@@ -27,21 +49,22 @@ export function DeleteConfirmDialog({ visible, onCancel, onDelete }: DeleteConfi
               삭제한 기록은 다시 복구할 수 없어요
             </AppText>
           </View>
+          {/* Figma: 누르고 있으면 버튼 칸에 옅은 회색이 100ms 동안 깔린다 */}
           <View style={styles.actions}>
-            <Pressable accessibilityRole="button" onPress={onCancel} style={styles.action}>
+            <PressHighlight accessibilityRole="button" onPress={onCancel} disabled={!visible} style={styles.action}>
               <AppText variant="button04" color="textDeactivated">
                 취소
               </AppText>
-            </Pressable>
+            </PressHighlight>
             <View style={styles.actionDivider} />
-            <Pressable accessibilityRole="button" onPress={onDelete} style={styles.action}>
+            <PressHighlight accessibilityRole="button" onPress={onDelete} disabled={!visible} style={styles.action}>
               <AppText variant="button04" color="error">
                 삭제
               </AppText>
-            </Pressable>
+            </PressHighlight>
           </View>
         </View>
-      </View>
+      </Animated.View>
     </Modal>
   );
 }

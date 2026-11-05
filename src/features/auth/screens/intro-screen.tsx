@@ -1,21 +1,22 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, { SlideInRight } from 'react-native-reanimated';
 
 import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
 import { ScreenContainer } from '@/components/screen-container';
 import { sectionGap, spacing } from '@/constants/layout';
-import { duration, easeInOut } from '@/constants/motion';
+import { easeInOut } from '@/constants/motion';
 import { IntroDots } from '@/features/auth/components/intro-dots';
 import { IntroIllustration } from '@/features/auth/components/intro-illustration';
+import { StepTransition } from '@/features/auth/components/step-transition';
 import { introSlides } from '@/features/auth/constants/intro-slides';
 import { markIntroSeen } from '@/features/auth/utils/intro-seen';
 
 /**
  * 시작: 서비스 소개 3장. 처음 설치했을 때만 나오고, 마지막 장에서 '다음'을 누르면 로그인으로 간다.
- * '다음'을 누르면 다음 장의 그림과 글이 오른쪽에서 밀려 들어온다 (Figma 애니메이션: 화면 전환 시 slide in).
+ * '다음'을 누르면 그림과 글이 300ms 동안 다음 장으로 서서히 바뀐다 (Figma 프로토타입: 스마트 애니메이트 300ms, Ease in and out).
+ * 마지막 장에서 로그인으로 가는 움직임(Figma 슬라이드 인 300ms)은 휴대폰 기본 화면 넘김이라 Figma 값으로 바꿀 수 없다.
  */
 export function IntroScreen() {
   const [slideIndex, setSlideIndex] = useState(0);
@@ -42,11 +43,8 @@ export function IntroScreen() {
           <Button label="다음" variant="primary" onPress={handleNext} />
         </>
       }>
-      {/* 장이 바뀌면 key가 바뀌어 새로 그려지면서 들어오는 움직임이 다시 나온다. 첫 장은 앱을 켤 때 바로 보이게 움직이지 않는다 */}
-      <Animated.View
-        key={slideIndex}
-        entering={slideIndex === 0 ? undefined : SlideInRight.duration(duration.screen).easing(easeInOut)}
-        style={styles.content}>
+      {/* 첫 장은 앱을 켤 때 바로 보이게 움직이지 않는다 */}
+      <StepTransition stepKey={slideIndex} animate={slideIndex > 0} easing={easeInOut} style={styles.content}>
         <View style={styles.illustration}>
           <IntroIllustration name={slide.illustration} />
         </View>
@@ -58,7 +56,7 @@ export function IntroScreen() {
             {slide.description}
           </AppText>
         </View>
-      </Animated.View>
+      </StepTransition>
     </ScreenContainer>
   );
 }

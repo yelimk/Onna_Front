@@ -4,7 +4,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 
 import { colors } from '@/constants/colors';
 import { radius } from '@/constants/layout';
-import { duration } from '@/constants/motion';
+import { duration, easeOut } from '@/constants/motion';
 
 type StepProgressProps = {
   step: number;
@@ -13,7 +13,7 @@ type StepProgressProps = {
 
 /**
  * 설문·회원가입 머리 아래 진행 막대. 지금 단계만큼 검정으로 채운다.
- * 단계가 바뀌면 검정 막대가 늘어나거나 줄어든다 (Figma 애니메이션: 상단 진행바).
+ * 단계가 바뀌면 검정 막대가 300ms 동안 늘어나거나 줄어든다 (Figma 프로토타입 '다음': 스마트 애니메이트 300ms, Ease out).
  * 퍼센트 너비는 움직일 수 없어서, 막대 칸 너비를 재서 그만큼의 숫자로 늘린다.
  */
 export function StepProgress({ step, totalSteps }: StepProgressProps) {
@@ -21,7 +21,7 @@ export function StepProgress({ step, totalSteps }: StepProgressProps) {
   const ratio = useSharedValue(step / totalSteps);
 
   useEffect(() => {
-    ratio.set(withTiming(step / totalSteps, { duration: duration.normal }));
+    ratio.set(withTiming(step / totalSteps, { duration: duration.screen, easing: easeOut }));
   }, [step, totalSteps, ratio]);
 
   const fillStyle = useAnimatedStyle(() => ({ width: trackWidth * ratio.get() }));
