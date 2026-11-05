@@ -175,7 +175,7 @@ GUI 디자인을 입힌 화면: 시작 화면(스플래시, 주황 배경), 소�
 
 가짜 데이터는 `src/mock/`와 각 기능의 `constants/preview-*.ts`에 있어요. 백엔드 API가 나오면 이 값을 서버 데이터로 바꿔요.
 
-지도 API는 **카카오맵**이에요. Expo Go에서도 열리도록 네이티브 SDK 대신 WebView 안에 카카오맵 JavaScript SDK를 띄워요. 지금은 지도 홈(`/map`), 검색결과(`/map/results`), 묶음 목록(`/map/cluster/[id]`), 남기기 위치 확인(`/upload/confirm`의 작은 지도, `features/map/components/place-preview-map.tsx`)이 카카오맵이고, 나머지 지도 화면과 내 기록 지도는 아직 회색 지도(`components/map-placeholder.tsx`)예요.
+지도 API는 **카카오맵**이에요. Expo Go에서도 열리도록 네이티브 SDK 대신 WebView 안에 카카오맵 JavaScript SDK를 띄워요. 지금은 지도 홈(`/map`), 검색결과(`/map/results`), 묶음 목록(`/map/cluster/[id]`), 길안내(`/map/navigation`), 남기기 위치 확인(`/upload/confirm`의 작은 지도, `features/map/components/place-preview-map.tsx`)이 카카오맵이고, 나머지 지도 화면(산책 경로 `/map/walk`, 자리 상세 `/map/spot/[id]`)과 내 기록 지도는 아직 회색 지도(`components/map-placeholder.tsx`)예요.
 
 지도 홈은 Figma GUI 디자인(비탐색 모드, 탐색 모드)으로 바뀌었어요. 카카오맵 코드는 `features/map/kakao-map/`에 모여 있어요.
 
@@ -255,17 +255,18 @@ GUI 디자인을 입힌 화면: 시작 화면(스플래시, 주황 배경), 소�
 
 - [x] **지도 API 정하기** → 카카오맵 (WebView + JavaScript SDK, Expo Go에서 동작)
 - [x] 지도 홈을 카카오맵으로 바꾸기 → `features/map/kakao-map/`
-- [ ] 나머지 지도 화면의 회색 지도를 카카오맵으로 바꾸기 → `components/map-placeholder.tsx`를 쓰는 화면들
+- [ ] 나머지 지도 화면의 회색 지도를 카카오맵으로 바꾸기 → 남은 곳: 산책 경로(`walk-screen.tsx`), 자리 상세(`spot-screen.tsx`)
 - [ ] 마커·경로를 화면 좌표에서 위도·경도로 바꾸기 → `features/map/constants/preview-*.ts`는 서버 데이터가 오면 지우기
 - [x] 위치 권한 확인·요청, 내 위치 가져오기 (앱 전체가 GPS 하나를 같이 씀) → `features/map/hooks/use-my-location.ts`
 - [ ] 남기기 화면에서도 내 위치가 필요하면 `use-my-location.ts`를 `src/hooks/`로 옮기기
 - [x] 지도 홈 탐색 모드 (열림 반경, 가장 가까운 기록 패널) → `features/map/components/explore-sheet.tsx`
 - [x] 열림 반경을 서버 사진 열기 기준(25m)과 맞추기 → `features/map/constants/map-config.ts`
 - [x] 탐색 모드 스위치에 눈 아이콘 넣기 → `features/map/components/explore-mode-toggle.tsx`
-- [ ] 거리 계산 함수 → `src/utils/`
+- [x] 거리 계산 함수 → `features/map/utils/get-distance-meters.ts` (지금은 지도만 써요. 다른 기능도 쓰게 되면 `src/utils/`로 옮기기)
 - [ ] 거리에 따라 열림 단계가 자동으로 바뀌게 하기. 캠퍼스에서 걸어보고 거리 값 정하기 → `features/map/constants/approach-stages.ts`
-- [ ] 걸어서 길 안내, AI 산책 경로 받아와서 그리기 (TMAP 보행자 경로 등)
-- [ ] 바텀시트를 손으로 끌어 올리고 내리기 (필요하면) → `features/map/components/bottom-panel.tsx`
+- [x] 걸어서 길 안내, AI 경로 받아와서 그리기 → 검색결과 경로 카드 → 길안내(`/map/navigation`), 서버 경로 추천 + TMAP 보행자 경로
+- [ ] 산책 경로 화면(`/map/walk`, 지도 홈 '산책 경로 추천' 버튼)도 서버 경로 추천·카카오맵으로 바꾸기 → 지금은 `preview-walk-route.ts` 가짜 데이터
+- [x] 바텀시트를 손으로 끌어 올리고 내리기 → `features/map/components/map-bottom-sheet.tsx`(검색결과·묶음 목록), `explore-sheet.tsx`(탐색 모드), `records-in-range-sheet.tsx`(길안내). 옛 와이어프레임 화면의 `bottom-panel.tsx`는 아직 고정
 
 ### 화면 담당
 
