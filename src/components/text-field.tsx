@@ -1,10 +1,12 @@
 import { useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { AppText } from '@/components/app-text';
 import { Icon } from '@/components/icon';
 import { colors, type ColorName } from '@/constants/colors';
 import { radius, spacing } from '@/constants/layout';
+import { duration } from '@/constants/motion';
 import { typography } from '@/constants/typography';
 
 type TextFieldProps = Omit<TextInputProps, 'secureTextEntry'> & {
@@ -96,9 +98,12 @@ export function TextField({
       </View>
       {(bottomText || count) && (
         <View style={styles.bottomRow}>
-          <AppText variant="caption02" color={getHelperColor(error, success)} style={styles.helper}>
-            {bottomText}
-          </AppText>
+          {/* 문구가 바뀔 때마다 서서히 나타난다 ('비밀번호가 일치합니다', '사용할 수 있어요' 등, Figma 애니메이션 회원가입) */}
+          <Animated.View key={bottomText ?? ''} entering={FadeIn.duration(duration.normal)} style={styles.helper}>
+            <AppText variant="caption02" color={getHelperColor(error, success)}>
+              {bottomText}
+            </AppText>
+          </Animated.View>
           {count && (
             <AppText variant="caption04" color={isOverLimit ? 'error' : 'textDeactivated'}>
               {isOverLimit ? '글자수 초과' : count}
