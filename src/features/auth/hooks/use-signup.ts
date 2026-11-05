@@ -47,15 +47,16 @@ export function useSignup() {
   };
 
   // Figma 회원가입: 규칙에 맞으면 초록 글자로 알려준다 (비밀번호 일치, 닉네임 사용 가능)
+  // 비밀번호 확인은 치는 중에는 에러도 없어서, 둘이 똑같을 때만 초록 문구를 띄운다
+  const isPasswordConfirmed = form.passwordConfirm.length > 0 && form.passwordConfirm === form.password;
   const successes = {
-    passwordConfirm:
-      form.passwordConfirm.length > 0 && !errors.passwordConfirm ? '비밀번호가 일치합니다' : undefined,
+    passwordConfirm: isPasswordConfirmed ? '비밀번호가 일치합니다' : undefined,
     nickname: form.nickname.trim().length > 0 && !errors.nickname ? '사용할 수 있어요' : undefined,
   };
 
   const isStepDone = [
     form.email.length > 0 && !errors.email,
-    form.password.length > 0 && form.passwordConfirm.length > 0 && !errors.password && !errors.passwordConfirm,
+    form.password.length > 0 && !errors.password && isPasswordConfirmed,
     form.nickname.trim().length > 0 && !errors.nickname,
     form.agreedTerms.length === requiredTerms.length,
   ][step - 1];

@@ -20,9 +20,16 @@ export function getPasswordError(password: string) {
   return isValid ? undefined : `${passwordLength.min}~${passwordLength.max}자로 입력해 주세요`;
 }
 
+/**
+ * 아직 맞게 치는 중(비밀번호 앞부분과 같음)이면 틀렸다고 하지 않는다.
+ * 그래야 다 쳤을 때 '비밀번호가 일치합니다'가 닉네임 '사용할 수 있어요'처럼 빈 자리에서 내려오며 나타난다 (Figma: 비밀번호 확인도 동일).
+ * 한 글자라도 다르게 치거나 더 길게 치면 바로 알려준다.
+ */
 export function getPasswordConfirmError(password: string, passwordConfirm: string) {
   if (passwordConfirm.length === 0) return undefined;
-  return password === passwordConfirm ? undefined : '비밀번호가 일치하지 않습니다';
+  if (password === passwordConfirm) return undefined;
+  const isStillTyping = passwordConfirm.length < password.length && password.startsWith(passwordConfirm);
+  return isStillTyping ? undefined : '비밀번호가 일치하지 않습니다';
 }
 
 export function getNicknameError(nickname: string) {
