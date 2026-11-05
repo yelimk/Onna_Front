@@ -26,6 +26,17 @@ const bookGlowRise = 10;
 const farGlowOpacity = 0.6;
 const farGlowScale = 1.15;
 
+/*
+ * 그림 칸 아래 끝에서 그림자 가운데까지 거리 (Figma 처음 프레임에서 잰 값).
+ * 돋보기는 Figma에서 11도 돌린 그림이라 겉 상자(215)가 그림 칸(182)보다 커서, 그림 칸 가운데를 기준으로 다시 쟀다.
+ * 돋보기: 그림 가운데 → 그림자 가운데 137, 그림 칸 절반 91 → 46
+ * 책: 그림 아래 끝(401) → 그림자 가운데(431.5) → 30
+ */
+const searchGlowGap = 46;
+const bookGlowGap = 30;
+// 그림자 그림(PNG)은 흐림이 퍼진 자리까지 담아서 높이가 79이고, 그림자 가운데는 그 절반(39.5)에 있다
+const glowHalfHeight = 79 / 2;
+
 type IntroIllustrationProps = {
   name: IntroIllustrationName;
 };
@@ -41,6 +52,7 @@ export function IntroIllustration({ name }: IntroIllustrationProps) {
         source={name === 'search' ? searchImage : bookImage}
         imageStyle={name === 'search' ? styles.search : styles.book}
         glowRise={name === 'search' ? searchGlowRise : bookGlowRise}
+        glowGap={name === 'search' ? searchGlowGap : bookGlowGap}
       />
     );
   }
@@ -53,10 +65,11 @@ type FloatingObjectProps = {
   source: number;
   imageStyle: ImageStyle;
   glowRise: number;
+  glowGap: number;
 };
 
 /** 돋보기·책처럼 그림 하나와 그 아래 주황 그림자. 그림이 내려오면 그림자가 다가와 진해진다 */
-function FloatingObject({ progress, source, imageStyle, glowRise }: FloatingObjectProps) {
+function FloatingObject({ progress, source, imageStyle, glowRise, glowGap }: FloatingObjectProps) {
   const objectStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: interpolate(progress.get(), [0, 1], [0, objectDrop]) }],
   }));
@@ -73,7 +86,7 @@ function FloatingObject({ progress, source, imageStyle, glowRise }: FloatingObje
       <Animated.View style={objectStyle}>
         <Image source={source} style={imageStyle} />
       </Animated.View>
-      <Animated.View style={[styles.glowBox, glowStyle]}>
+      <Animated.View style={[{ marginTop: glowGap - glowHalfHeight }, glowStyle]}>
         <Image source={glowImage} style={styles.glow} />
       </Animated.View>
     </View>
@@ -117,10 +130,6 @@ const styles = StyleSheet.create({
     width: 182,
     height: 182,
     transform: [{ rotate: '-11deg' }],
-  },
-  // 그림과 그림자 사이는 Figma처럼 돋보기·책 모두 같게 둔다
-  glowBox: {
-    marginTop: -spacing.xl,
   },
   glow: {
     width: 174,
