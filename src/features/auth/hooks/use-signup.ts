@@ -5,6 +5,7 @@ import { login, signup } from '@/api/auth';
 import { requiredTerms, type TermName } from '@/features/auth/components/terms-agreement';
 import { useFieldErrorTiming } from '@/features/auth/hooks/use-field-error-timing';
 import { goAfterLogin } from '@/features/auth/utils/go-after-login';
+import { useSettledValue } from '@/hooks/use-settled-value';
 import {
   getEmailError,
   getNicknameError,
@@ -27,6 +28,13 @@ type SignupForm = {
 /** 칸을 떠날 때 틀렸다고 알려주는 칸 (언제 보여줄지는 use-field-error-timing.ts) */
 type CheckedField = 'email' | 'password' | 'nickname';
 const checkedFields: CheckedField[] = ['email', 'password', 'nickname'];
+
+/**
+ * 닉네임을 다 쳤다고 보는 시간. 이만큼 손을 멈추면 '사용할 수 있어요'를 띄운다.
+ * 두 글자만 쳐도 규칙에는 맞아서, 바로 띄우면 다 쓰기도 전에 문구가 나온다.
+ * Figma는 '다 친 화면 → 0.1초 뒤 문구'만 있고 언제 다 친 건지는 없어서 프론트가 정했다.
+ */
+const nicknameSettleMs = 500;
 
 /** 칸이 규칙에 맞는지. 화면에 보여줄지와 상관없이 늘 검사한다 ('다음' 버튼을 켤지 정할 때 쓴다) */
 function getRuleErrors(form: SignupForm) {
@@ -76,9 +84,12 @@ export function useSignup() {
   // Figma 회원가입: 규칙에 맞으면 초록 글자로 알려준다 (비밀번호 일치, 닉네임 사용 가능)
   // 비밀번호 확인은 치는 중에는 에러도 없어서, 둘이 똑같을 때만 초록 문구를 띄운다
   const isPasswordConfirmed = form.passwordConfirm.length > 0 && form.passwordConfirm === form.password;
+  const settledNickname = useSettledValue(form.nickname, nicknameSettleMs);
+  const hasFinishedNickname = settledNickname === form.nickname;
   const successes = {
     passwordConfirm: isPasswordConfirmed ? '비밀번호가 일치합니다' : undefined,
-    nickname: form.nickname.trim().length > 0 && !ruleErrors.nickname ? '사용할 수 있어요' : undefined,
+    nickname:
+      hasFinishedNickname && form.nickname.trim().length > 0 && !ruleErrors.nickname ? '사용할 수 있어요' : undefined,
   };
 
   const isStepDone = [
