@@ -8,6 +8,7 @@ import { AppText } from '@/components/app-text';
 import { Icon } from '@/components/icon';
 import { ScreenContainer } from '@/components/screen-container';
 import { ScreenHeader } from '@/components/screen-header';
+import { showToast } from '@/components/toast';
 import { colors } from '@/constants/colors';
 import { radius, spacing } from '@/constants/layout';
 import { DeleteConfirmDialog } from '@/features/record/components/delete-confirm-dialog';
@@ -43,6 +44,8 @@ export function RecordDetailScreen() {
     setIsConfirmingDelete(false);
     try {
       await deletePost(post.postId);
+      // Figma 기록탭 애니메이션: 지운 뒤 목록으로 돌아가며 위에 초록 토스트가 뜬다
+      showToast('삭제되었습니다', 'success');
       router.back();
     } catch (error) {
       showApiError(error);
