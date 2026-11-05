@@ -3,7 +3,7 @@ import { StyleSheet, View, type ImageStyle, type ViewStyle } from 'react-native'
 import Animated, { interpolate, useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 
 import { Badge } from '@/components/badge';
-import { spacing } from '@/constants/layout';
+import { radius, spacing } from '@/constants/layout';
 import { BlurPhoto } from '@/features/auth/components/blur-photo';
 import type { IntroIllustrationName } from '@/features/auth/constants/intro-slides';
 import { useFloatProgress } from '@/features/auth/hooks/use-float-progress';
@@ -140,9 +140,10 @@ const styles = StyleSheet.create({
     height: 210,
   },
   // 두 사진을 비스듬히 겹쳐 놓으려고 Figma 배치 비율대로 절대 위치를 쓴다
+  // Figma 소개 1장 두 사진 묶음 크기 (큰 사진 위 97 + 사진 118 + 간격 8 + 해시태그 21 = 244)
   blurPhotos: {
     width: 240,
-    height: 250,
+    height: 244,
   },
   smallPhoto: {
     position: 'absolute',
@@ -158,7 +159,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.xs,
   },
+  // Figma 소개 1장 해시태그는 높이 21에 모서리 12라 지도 이름표(8)보다 둥글다
   hashtag: {
     alignSelf: 'center',
+    borderRadius: radius.md,
   },
 });

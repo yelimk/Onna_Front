@@ -36,12 +36,10 @@ export function IntroScreen() {
   return (
     <ScreenContainer
       footer={
-        <>
-          <View style={styles.dots}>
-            <IntroDots count={introSlides.length} activeIndex={slideIndex} />
-          </View>
+        <View style={styles.footer}>
+          <IntroDots count={introSlides.length} activeIndex={slideIndex} />
           <Button label="다음" variant="primary" onPress={handleNext} />
-        </>
+        </View>
       }>
       {/* 첫 장은 앱을 켤 때 바로 보이게 움직이지 않는다 */}
       <StepTransition stepKey={slideIndex} animate={slideIndex > 0} easing={easeInOut} style={styles.content}>
@@ -67,11 +65,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.xxxl,
   },
-  // 장마다 그림 크기가 달라도 글자 위치가 흔들리지 않게 그림 칸 높이를 고정한다
+  // 장마다 그림 크기가 달라도 글자 위치가 흔들리지 않게 그림 칸 높이를 고정한다.
+  // Figma 세 장 모두 그림 위쪽 끝이 제목보다 약 298 위에 있어서, 위쪽에 맞춰 놓는다 (250 + 아래 간격 48).
+  // 돋보기·책의 그림자는 이 칸 아래로 조금 넘친다.
   illustration: {
-    height: 260,
+    height: 250,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
   },
   texts: {
     gap: spacing.md,
@@ -79,8 +79,8 @@ const styles = StyleSheet.create({
   center: {
     textAlign: 'center',
   },
-  // Figma 온보딩: 점과 '다음' 버튼 사이 40
-  dots: {
-    marginBottom: sectionGap,
+  // Figma 온보딩: 점과 '다음' 버튼 사이 40. 아래 고정 영역의 기본 간격(12) 대신 이 값을 쓰려고 한 묶음으로 둔다
+  footer: {
+    gap: sectionGap,
   },
 });
