@@ -1,20 +1,34 @@
+import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { colors } from '@/constants/colors';
 import { radius } from '@/constants/layout';
+import { duration } from '@/constants/motion';
 
 type StepProgressProps = {
   step: number;
   totalSteps: number;
 };
 
-/** 설문·회원가입 머리 아래 진행 막대. 지금 단계만큼 검정으로 채운다. */
+/**
+ * 설문·회원가입 머리 아래 진행 막대. 지금 단계만큼 검정으로 채운다.
+ * 단계가 바뀌면 검정 막대가 늘어나거나 줄어든다 (Figma 애니메이션: 상단 진행바).
+ * 퍼센트 너비는 움직일 수 없어서, 막대 칸 너비를 재서 그만큼의 숫자로 늘린다.
+ */
 export function StepProgress({ step, totalSteps }: StepProgressProps) {
-  const progress = `${(step / totalSteps) * 100}%` as const;
+  const [trackWidth, setTrackWidth] = useState(0);
+  const ratio = useSharedValue(step / totalSteps);
+
+  useEffect(() => {
+    ratio.set(withTiming(step / totalSteps, { duration: duration.normal }));
+  }, [step, totalSteps, ratio]);
+
+  const fillStyle = useAnimatedStyle(() => ({ width: trackWidth * ratio.get() }));
 
   return (
-    <View style={styles.track}>
-      <View style={[styles.fill, { width: progress }]} />
+    <View style={styles.track} onLayout={(event) => setTrackWidth(event.nativeEvent.layout.width)}>
+      <Animated.View style={[styles.fill, fillStyle]} />
     </View>
   );
 }
