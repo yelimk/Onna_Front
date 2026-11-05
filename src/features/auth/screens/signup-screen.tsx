@@ -15,14 +15,14 @@ import { nicknameLength } from '@/features/auth/utils/signup-rules';
 
 /**
  * 시작: 회원가입 4단계 (이메일 → 비밀번호 → 닉네임 → 약관).
- * 칸마다 규칙을 바로 검사해 빨간 문구로 알려주고, 마지막 단계에서 서버에 가입한 뒤 바로 로그인한다.
+ * 칸마다 규칙을 검사해 칸을 떠날 때 빨간 문구로 알려주고, 마지막 단계에서 서버에 가입한 뒤 바로 로그인한다.
  * 이미 가입된 이메일이면 1단계로 돌아가 이메일 칸에 알려준다.
  * 단계가 바뀌면 300ms 동안 다음 단계로 서서히 바뀐다 (Figma 프로토타입: 스마트 애니메이트·디졸브 300ms, Ease out).
  * Figma처럼 1단계만 '다음' 버튼이 입력칸 바로 아래에 있고(키보드에 가리지 않게), 2~4단계는 화면 아래에 있다.
  * 제목 아래 간격도 Figma처럼 설명이 없는 1·2단계는 40, 설명이 있는 3·4단계는 24다.
  */
 export function SignupScreen() {
-  const { step, setStep, form, update, errors, successes, canGoNext, goNext } = useSignup();
+  const { step, setStep, form, update, errors, successes, markLeft, canGoNext, goNext } = useSignup();
   // 화면에 처음 들어왔을 때는 첫 단계가 바로 보이게, 단계를 한 번이라도 옮긴 뒤부터 움직인다
   const [hasMoved, setHasMoved] = useState(false);
   const goBack = () => {
@@ -54,6 +54,7 @@ export function SignupScreen() {
               value={form.email}
               onChangeText={(email) => update({ email })}
               error={errors.email}
+              onBlur={() => markLeft('email')}
               keyboardType="email-address"
               autoCapitalize="none"
               autoComplete="email"
@@ -72,6 +73,7 @@ export function SignupScreen() {
                 value={form.password}
                 onChangeText={(password) => update({ password })}
                 error={errors.password}
+                onBlur={() => markLeft('password')}
                 isPassword
                 autoComplete="new-password"
               />
@@ -102,6 +104,7 @@ export function SignupScreen() {
               value={form.nickname}
               onChangeText={(nickname) => update({ nickname })}
               error={errors.nickname}
+              onBlur={() => markLeft('nickname')}
               success={successes.nickname}
               maxLength={nicknameLength.max}
             />
