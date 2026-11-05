@@ -9,18 +9,23 @@ const routeButtonSize = 48;
 const cameraButtonSize = 56;
 
 type MapActionButtonsProps = {
+  /**
+   * 경로 추천은 목적지(장소·해시태그)를 골라야 시작돼서, 경로 버튼은 검색을 연다.
+   * 검색창과 똑같이 지도 위 버튼을 흐리게 지우며 열도록 지도 홈의 열기 함수를 받는다.
+   */
+  onRoutePress: () => void;
   /** 탐색 모드에서 가장 가까운 기록을 펼치면 Figma대로 카메라 버튼을 숨긴다. */
   showCamera?: boolean;
 };
 
-/** 지도 오른쪽 아래 버튼: 산책 경로 추천, 지금 이 자리 남기기 */
-export function MapActionButtons({ showCamera = true }: MapActionButtonsProps) {
+/** 지도 오른쪽 아래 버튼: 산책 경로 추천(검색 열기), 지금 이 자리 남기기 */
+export function MapActionButtons({ onRoutePress, showCamera = true }: MapActionButtonsProps) {
   return (
     <View style={styles.column}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="산책 경로 추천"
-        onPress={() => router.push('/map/walk')}
+        onPress={onRoutePress}
         style={styles.routeButton}>
         <Icon name="route" size={24} />
       </Pressable>
