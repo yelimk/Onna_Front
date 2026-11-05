@@ -30,6 +30,3 @@ export const easeOut = Easing.bezier(0, 0, 0.58, 1);
 export const easeIn = Easing.bezier(0.42, 0, 1, 1);
 /** Figma 'Ease in and out': 천천히 시작해서 천천히 멈춘다 */
 export const easeInOut = Easing.bezier(0.42, 0, 0.58, 1);
-
-/** Figma 스프링 'Gentle' (질량 1, 강도 100, 감쇠 15). 회원가입 '사용할 수 있어요'에 쓴다 */
-export const gentleSpring = { mass: 1, stiffness: 100, damping: 15 } as const;

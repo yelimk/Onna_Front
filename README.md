@@ -332,7 +332,7 @@ Figma `디자인 시스템` 페이지의 값을 코드로 옮겨 두었어요.
 | `src/constants/typography.ts` | 글씨 스타일 (Heading, Subtitle, Body, Caption, Button) |
 | `src/components/app-text.tsx` | 글씨 부품 `AppText` |
 | `src/constants/layout.ts` | 간격(`spacing`), 모서리(`radius`), 화면 좌우 여백 |
-| `src/constants/motion.ts` | 애니메이션 시간(`duration`)과 곡선(`easeOut`, `easeIn`, `easeInOut`, 스프링 `gentleSpring`). Figma 프로토타입 설정 값을 옮겼어요 |
+| `src/constants/motion.ts` | 애니메이션 시간(`duration`)과 곡선(`easeOut`, `easeIn`, `easeInOut`). Figma 프로토타입 설정 값을 옮겼어요 |
 
 ### 공통 부품
 
