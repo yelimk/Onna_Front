@@ -1,5 +1,6 @@
 import { ApiError } from '@/api/api-error';
 import { apiBaseUrl } from '@/api/config';
+import { notifySessionExpired } from '@/api/session-events';
 import { clearTokens, getTokens, saveTokens, type Tokens } from '@/api/token-storage';
 
 type QueryValue = string | number | boolean | undefined;
@@ -52,8 +53,10 @@ let refreshing: Promise<Tokens | null> | null = null;
 async function refreshTokens(refreshToken: string) {
   const response = await send('/auth/refresh', { method: 'POST', body: { refreshToken } });
   if (!response.ok) {
-    // 재발급도 실패하면 다시 로그인해야 하므로 저장된 출입증을 지운다
+    // 재발급도 실패하면 다시 로그인해야 하므로 저장된 출입증을 지우고, 화면에 로그인이 풀렸다고 알린다.
+    // 동시에 여러 요청이 실패해도 재발급은 한 번만 하므로(refreshing) 신호도 한 번만 간다
     await clearTokens();
+    notifySessionExpired();
     return null;
   }
   const tokens = (await response.json()) as Tokens;
