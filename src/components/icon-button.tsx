@@ -1,8 +1,8 @@
-import { Pressable, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 
 import { Icon, type IconName } from '@/components/icon';
-import { colors } from '@/constants/colors';
+import { colors, type ColorName } from '@/constants/colors';
 import { floatingShadow, radius } from '@/constants/layout';
 import { duration } from '@/constants/motion';
 import { usePressProgress } from '@/hooks/use-press-progress';
@@ -24,7 +24,15 @@ type IconButtonProps = {
   flat?: boolean;
   /** 아이콘 크기. 기본은 버튼의 절반 (Figma 마이 알림 종은 48 버튼에 26 아이콘) */
   iconSize?: number;
+  /** 오른쪽 위 빨간 점 (예: 새 알림). 점 테두리는 버튼이 놓인 바탕색과 같게 칠해서 버튼과 떨어져 보이게 한다 */
+  badgeOutlineColor?: ColorName;
+  showBadge?: boolean;
 };
+
+// Figma 마이 알림 종: 점 12(바탕색 테두리 2 포함) 안에 빨간 점 8, 버튼 오른쪽 위에서 1씩 안쪽
+const badgeSize = 12;
+const badgeDotSize = 8;
+const badgeInset = 1;
 
 /** 지도 위에 떠 있는 동그란 아이콘 버튼 */
 export function IconButton({
@@ -36,6 +44,8 @@ export function IconButton({
   showPressed = false,
   flat = false,
   iconSize,
+  showBadge = false,
+  badgeOutlineColor = 'background01',
 }: IconButtonProps) {
   const { progress, pressHandlers } = usePressProgress(duration.change);
   const pressedStyle = useAnimatedStyle(() => ({ opacity: showPressed ? progress.get() : 0 }));
@@ -50,6 +60,11 @@ export function IconButton({
       {/* 흰 동그라미 위에 회색 동그라미를 겹쳐 두고 투명도만 바꾼다. 아이콘은 회색 위에 그대로 보인다 */}
       <Animated.View pointerEvents="none" style={[styles.pressed, pressedStyle]} />
       <Icon name={icon} size={iconSize ?? size / 2} />
+      {showBadge && (
+        <View pointerEvents="none" style={[styles.badge, { backgroundColor: colors[badgeOutlineColor] }]}>
+          <View style={styles.badgeDot} />
+        </View>
+      )}
     </Pressable>
   );
 }
@@ -63,6 +78,22 @@ const styles = StyleSheet.create({
   },
   emphasized: {
     backgroundColor: colors.primary,
+  },
+  badge: {
+    position: 'absolute',
+    top: badgeInset,
+    right: badgeInset,
+    width: badgeSize,
+    height: badgeSize,
+    borderRadius: radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeDot: {
+    width: badgeDotSize,
+    height: badgeDotSize,
+    borderRadius: radius.full,
+    backgroundColor: colors.error,
   },
   pressed: {
     ...StyleSheet.absoluteFill,

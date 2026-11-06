@@ -9,6 +9,7 @@ import { ActivityMenu } from '@/features/my/components/activity-menu';
 import { ProfileCard, StatsCard } from '@/features/my/components/profile-summary';
 import { profileBadges } from '@/features/my/constants/profile-badges';
 import { useMySummary } from '@/features/my/hooks/use-my-summary';
+import { useHasNewNotifications } from '@/features/notification/hooks/use-has-new-notifications';
 
 // Figma 마이 알림 종(bell_circle): 48 동그라미 안 아이콘 26
 const bellIconSize = 26;
@@ -19,6 +20,7 @@ const bellIconSize = 26;
  */
 export function MyScreen() {
   const { nickname, leftCount, openedCount, likedCount } = useMySummary();
+  const hasNewNotifications = useHasNewNotifications();
 
   return (
     <ScreenContainer withBottomInset={false} background="gray" contentTopGap={spacing.xs}>
@@ -32,7 +34,10 @@ export function MyScreen() {
           iconSize={bellIconSize}
           flat
           showPressed
-          accessibilityLabel="알림"
+          // Figma 마이 알림 종: 새 알림이 있으면 오른쪽 위 빨간 점. 테두리는 마이 회색 바탕색
+          showBadge={hasNewNotifications}
+          badgeOutlineColor="background02"
+          accessibilityLabel={hasNewNotifications ? "알림, 새 알림 있음" : "알림"}
           onPress={() => router.push('/my/notifications')}
         />
       </View>
