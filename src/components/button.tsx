@@ -3,6 +3,7 @@ import Animated, { interpolateColor, useAnimatedStyle } from 'react-native-reani
 
 import { AnimatedAppText } from '@/components/app-text';
 import { Icon, type IconName } from '@/components/icon';
+import { LoadingSpinner } from '@/components/loading-spinner';
 import { colors, type ColorName } from '@/constants/colors';
 import { radius, spacing } from '@/constants/layout';
 import { duration } from '@/constants/motion';
@@ -16,6 +17,8 @@ type ButtonProps = Omit<PressableProps, 'style' | 'children'> & {
   /** 글자 왼쪽 아이콘 */
   icon?: IconName;
   style?: ViewStyle;
+  /** 기다리는 중이면 글자 대신 도는 동그라미를 보여주고 누를 수 없게 한다. 색은 그대로 둔다 (Figma 사진 올릴 때 로딩) */
+  isLoading?: boolean;
 };
 
 const labelColor: Record<ButtonVariant, ColorName> = {
@@ -30,10 +33,20 @@ const labelColor: Record<ButtonVariant, ColorName> = {
  * 눌림 모양은 Figma 프로토타입처럼 100ms 동안 서서히 바뀐다 (디졸브, Ease out).
  * 비활성이면 어떤 버튼이든 회색 배경에 흰 글자 (Figma deactivated).
  */
-export function Button({ label, variant = 'dark', icon, disabled, style, onPressIn, onPressOut, ...rest }: ButtonProps) {
+export function Button({
+  label,
+  variant = 'dark',
+  icon,
+  disabled,
+  isLoading = false,
+  style,
+  onPressIn,
+  onPressOut,
+  ...rest
+}: ButtonProps) {
   const { progress, isPressed, pressHandlers } = usePressProgress(duration.press, { onPressIn, onPressOut });
   // outline 버튼은 Figma에 눌림 모양이 없다
-  const hasPressedLook = !disabled && variant !== 'outline';
+  const hasPressedLook = !disabled && !isLoading && variant !== 'outline';
   const baseColorName: ColorName = disabled ? 'textInverse' : labelColor[variant];
   const baseTextColor = colors[baseColorName];
   // 아이콘은 그림이라 색을 서서히 바꿀 수 없어서 눌림에 맞춰 바로 바꾼다
@@ -49,15 +62,22 @@ export function Button({ label, variant = 'dark', icon, disabled, style, onPress
   return (
     <Pressable
       accessibilityRole="button"
-      disabled={disabled}
+      disabled={disabled || isLoading}
+      accessibilityState={{ disabled: disabled || isLoading, busy: isLoading }}
       style={[styles.base, styles[variant], disabled && styles.disabled, style]}
       {...pressHandlers}
       {...rest}>
       <Animated.View pointerEvents="none" style={[styles.pressedOverlay, overlayStyle]} />
-      {icon && <Icon name={icon} size={18} color={iconColor} />}
-      <AnimatedAppText variant="button01" style={textStyle}>
-        {label}
-      </AnimatedAppText>
+      {isLoading ? (
+        <LoadingSpinner />
+      ) : (
+        <>
+          {icon && <Icon name={icon} size={18} color={iconColor} />}
+          <AnimatedAppText variant="button01" style={textStyle}>
+            {label}
+          </AnimatedAppText>
+        </>
+      )}
     </Pressable>
   );
 }

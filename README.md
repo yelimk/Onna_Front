@@ -359,6 +359,7 @@ Figma `디자인 시스템` 페이지의 값을 코드로 옮겨 두었어요.
 | `LikeButton` | 사진 상세 아래 '좋아요' 버튼 (누르면 빨간 하트·테두리) |
 | `PressHighlight` | 누르고 있으면 뒤에 옅은 회색이 서서히 깔리는 누름 영역 (휴지통, 확인 창 버튼 등) |
 | `ConfirmDialog` | 되돌릴 수 없는 일 전에 한 번 묻는 창 (기록 삭제, 회원 탈퇴). 제목·설명·빨간 버튼 글자를 넘긴다 |
+| `LoadingSpinner` | 기다리는 동안 도는 동그라미. `Button`의 `isLoading`으로 쓴다 (사진 올리는 중) |
 
 앱을 켜 둔 채로 로그인이 풀리면(출입증 재발급 실패) `api/session-events.ts` 신호를 받아 어느 화면에서든 로그인 화면으로 보내요 (`hooks/use-session-expired-redirect.ts`, 루트 레이아웃에 한 번).
 

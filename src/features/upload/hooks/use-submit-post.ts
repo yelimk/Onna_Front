@@ -37,7 +37,7 @@ export function useSubmitPost() {
   };
 
   const submit = async () => {
-    // 올리는 동안 버튼 모양은 그대로 두고(Figma에 기다리는 모양이 없음), 두 번 눌러도 한 번만 보낸다
+    // 올리는 동안 버튼에 도는 동그라미를 보여주고(Figma 사진 올릴 때 로딩), 두 번 눌러도 한 번만 보낸다
     if (isSubmitting) return;
     if (!draft.photoUri || !draft.location || draft.questionId === undefined) return;
     setIsSubmitting(true);
@@ -68,5 +68,5 @@ export function useSubmitPost() {
     }
   };
 
-  return { canSubmit, isLocating, relocate, submit };
+  return { canSubmit, isLocating, isSubmitting, relocate, submit };
 }
