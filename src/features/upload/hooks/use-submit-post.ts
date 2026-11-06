@@ -37,7 +37,7 @@ export function useSubmitPost() {
   };
 
   const submit = async () => {
-    // 올리는 동안 버튼 모양은 그대로 두고(Figma에 기다리는 모양이 없음), 두 번 눌러도 한 번만 보낸다
+    // 올리는 동안 버튼에 도는 동그라미를 보여주고(Figma 사진 올릴 때 로딩), 두 번 눌러도 한 번만 보낸다
     if (isSubmitting) return;
     if (!draft.photoUri || !draft.location || draft.questionId === undefined) return;
     setIsSubmitting(true);
@@ -53,7 +53,7 @@ export function useSubmitPost() {
       router.dismissTo('/record');
     } catch (error) {
       if (isApiError(error, 'FACE_DETECTED')) {
-        showToast('얼굴이 보여요. 얼굴이 나오지 않게 다시 찍어 주세요', 'error');
+        showToast('얼굴이 포함되어 있어요. 다시 찍어 주세요', 'error');
         // 다시 찍을 버튼이 이 화면에 없어서 촬영 화면으로 바로 돌려보낸다.
         // 처음부터 다시 올리는 것과 같게 질문·제목·한 줄·해시태그를 모두 비운다 (팀 결정). 질문이 비면 한 줄 남기기에서 새로 받는다.
         updateDraft({ questionId: undefined, question: undefined, title: '', oneLine: '', hashtags: [] });
@@ -68,5 +68,5 @@ export function useSubmitPost() {
     }
   };
 
-  return { canSubmit, isLocating, relocate, submit };
+  return { canSubmit, isLocating, isSubmitting, relocate, submit };
 }

@@ -25,7 +25,7 @@ const maxOneLineLength = 40;
 export function WriteScreen() {
   const { draft, updateDraft } = useUploadDraft();
   const { question, hasFailed: questionFailed, reload: reloadQuestion } = useWriteQuestion();
-  const { suggestions, hasFailed, requestSuggestions, clearSuggestions } = useHashtagSuggestions();
+  const { suggestions, hasFailed, isLoading, requestSuggestions, clearSuggestions } = useHashtagSuggestions();
 
   // 한 줄을 고치면 그 한 줄로 고른 해시태그도 더는 맞지 않으니 함께 지운다
   const changeOneLine = (oneLine: string) => {
@@ -90,9 +90,10 @@ export function WriteScreen() {
               </AppText>
             </Pressable>
           )}
-          {/* 후보를 받아 오기 전에는 칸을 아예 숨긴다 */}
-          {suggestions.length > 0 && (
+          {/* 한 줄을 쓰기 전에는 칸을 아예 숨기고, AI를 기다리는 동안은 '생성하고 있어요' 상자를 보여준다 */}
+          {(isLoading || suggestions.length > 0) && (
             <AiHashtagPicker
+              isLoading={isLoading}
               suggestions={suggestions}
               selected={draft.hashtags}
               onChange={(hashtags) => updateDraft({ hashtags })}

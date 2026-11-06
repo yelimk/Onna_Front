@@ -10,7 +10,7 @@ import { duration } from '@/constants/motion';
 import type { TypographyVariant } from '@/constants/typography';
 import { usePressProgress } from '@/hooks/use-press-progress';
 import type { MyPost } from '@/types/api';
-import { formatDate } from '@/utils/format-date';
+import { formatShortDate } from '@/utils/format-date';
 import { formatHashtag } from '@/utils/format-hashtag';
 
 type RecordListItemProps = {
@@ -61,7 +61,8 @@ export function RecordListItem({ post, onPress, showMeta = true }: RecordListIte
         </Animated.View>
         <Animated.View style={[styles.body, bodyStyle]}>
           <View>
-            {/* 날짜는 제목 줄 옆에만 둔다. 글 전체 옆에 두면 날짜(2026.08.28) 너비만큼 코멘트 칸이 좁아져 줄이 일찍 꺾인다 */}
+            {/* 날짜는 제목 줄 옆에만 둔다. 글 전체 옆에 두면 날짜 너비만큼 코멘트 칸이 좁아져 줄이 일찍 꺾인다.
+                제목이 길어서 겹치면 날짜가 먼저다: 날짜는 줄어들지 않고, 제목이 '…'로 잘린다 (디자이너 요청) */}
             <View style={styles.titleRow}>
               <View style={styles.title}>
                 {post.title && (
@@ -72,7 +73,7 @@ export function RecordListItem({ post, onPress, showMeta = true }: RecordListIte
               </View>
               {showMeta && (
                 <AppText variant={size.meta} color="textDeactivated" style={styles.date}>
-                  {formatDate(post.createdAt)}
+                  {formatShortDate(post.createdAt)}
                 </AppText>
               )}
             </View>
@@ -136,6 +137,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.xxs,
   },
   date: {
+    flexShrink: 0,
     paddingLeft: spacing.xs,
   },
   // 좋아요 수는 오른쪽 아래 끝에 붙인다. 글 아래에 따로 자리를 차지해서 해시태그와 겹치지 않는다 (Figma list)

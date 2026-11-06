@@ -4,8 +4,8 @@ import { getMyNotifications } from '@/api/users';
 import { getNotificationsSeenAt, markNotificationsSeen } from '@/features/notification/utils/notification-seen-at';
 import { mockNotifications } from '@/mock/notifications';
 import type { AppNotification } from '@/types/api';
+import { formatRelativeTime } from '@/utils/format-relative-time';
 import { parseServerDate } from '@/utils/parse-server-date';
-import { getStartOfToday, getStartOfWeek } from '@/utils/week-range';
 
 export type NotificationItem = AppNotification & {
   /** 서버 알림에 번호가 없어서 종류·기록·시각으로 만든 이름표. 같은 자리가 여러 번 열려도 겹치지 않는다 */
@@ -15,23 +15,16 @@ export type NotificationItem = AppNotification & {
 export type NotificationGroup = { label: string; items: NotificationItem[] };
 
 /**
- * 서버는 최근 순으로 주고, '오늘'·'이번주' 묶음은 앱이 알림 시각으로 나눈다.
- * 이번주는 이번 주 월요일 0시부터다. Figma에 두 묶음만 있어서 그보다 오래된 알림은 보여주지 않는다 (팀 결정).
+ * 서버는 최근 순으로 주고(최대 50개), 앱이 알림 시각으로 묶는다.
+ * 묶음 제목은 '5분 전', '3시간 전', '2일 전', '일주일 전', '2주 전', '3달 전', '작년', '재작년', '2023'처럼
+ * 지금과의 차이로 쓰고, 같은 제목끼리 모은다 (디자이너 요청. 전에는 '오늘'·'이번주'만 보여줬다).
+ * 화면에 들어올 때의 시각으로 한 번 계산한다. 화면을 켜 둔 채로는 바뀌지 않고, 다시 들어오면 새로 계산한다.
  */
-function groupByPeriod(items: NotificationItem[]) {
-  const startOfToday = getStartOfToday();
-  const startOfWeek = getStartOfWeek();
-
-  const labelOf = (createdAt: string) => {
-    const time = parseServerDate(createdAt).getTime();
-    if (time >= startOfToday) return '오늘';
-    return time >= startOfWeek ? '이번주' : undefined;
-  };
-
+function groupByTime(items: NotificationItem[]) {
+  const now = new Date();
   const groups: NotificationGroup[] = [];
   for (const item of items) {
-    const label = labelOf(item.createdAt);
-    if (!label) continue;
+    const label = formatRelativeTime(item.createdAt, now);
     const last = groups.at(-1);
     if (last?.label === label) last.items.push(item);
     else groups.push({ label, items: [item] });
@@ -54,7 +47,7 @@ export function useNotifications() {
       // 비어 있으면 Figma 예시를 대신 보여준다 (시연 전에 지운다, mock/notifications.ts)
       const notifications = result.length === 0 ? mockNotifications : result;
       const items = notifications.map((item) => ({ ...item, key: `${item.type}-${item.postId}-${item.createdAt}` }));
-      setGroups(groupByPeriod(items));
+      setGroups(groupByTime(items));
       setUnreadKeys(items.filter((item) => parseServerDate(item.createdAt).getTime() > seenAt).map((item) => item.key));
     });
     return markNotificationsSeen;
