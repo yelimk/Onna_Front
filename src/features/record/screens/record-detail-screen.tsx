@@ -12,6 +12,7 @@ import { ScreenHeader } from '@/components/screen-header';
 import { showToast } from '@/components/toast';
 import { colors } from '@/constants/colors';
 import { radius, spacing } from '@/constants/layout';
+import { duration } from '@/constants/motion';
 import { DeleteConfirmDialog } from '@/features/record/components/delete-confirm-dialog';
 import { useMyPosts } from '@/hooks/use-my-posts';
 import { mockNotificationPosts } from '@/mock/notifications';
@@ -21,8 +22,8 @@ import { showApiError } from '@/utils/show-api-error';
 
 // Figma 기록 상세 오른쪽 위 삭제 버튼(동그라미) 크기
 const deleteButtonSize = 36;
-// Figma 기록탭 프로토타입: '삭제되었습니다' 토스트를 보여 준 뒤 목록으로 돌아가기까지 (지연 1.2초)
-const deletedToastMs = 1200;
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * ② 기록 탭: 내 기록 상세. 사진은 앱 카메라 비율(세로 3:4) 그대로 크게 보여준다.
@@ -46,10 +47,12 @@ export function RecordDetailScreen() {
   const removePost = async () => {
     setIsConfirmingDelete(false);
     try {
-      await deletePost(post.postId);
-      // Figma 기록탭 프로토타입: 지우면 상세 화면 위에 초록 토스트가 뜨고, 1.2초 뒤 목록으로 돌아간다
-      showToast('삭제되었습니다', 'success');
-      setTimeout(() => router.back(), deletedToastMs);
+      // Figma 기록탭 프로토타입: 확인 창이 180ms 동안 사라진 뒤 목록으로 돌아가고, 목록 위로 '삭제되었습니다'가 내려온다.
+      // 지우는 요청이 창이 사라지기 전에 끝나도 창이 다 사라질 때까지 기다린다
+      await Promise.all([deletePost(post.postId), wait(duration.change)]);
+      router.back();
+      // 목록은 화면에 돌아오면 다시 받아서, 지운 기록은 빠져 있다 (use-my-posts.ts)
+      showToast('삭제되었습니다', 'success', 'brief');
     } catch (error) {
       showApiError(error);
     }
