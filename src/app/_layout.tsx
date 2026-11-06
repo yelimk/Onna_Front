@@ -7,11 +7,13 @@ import { Fragment, useEffect } from 'react';
 import { ToastHost } from '@/components/toast';
 import { colors } from '@/constants/colors';
 import { fontFiles } from '@/constants/typography';
+import { useSessionExpiredRedirect } from '@/hooks/use-session-expired-redirect';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [loaded, error] = useFonts(fontFiles);
+  useSessionExpiredRedirect();
 
   useEffect(() => {
     if (loaded || error) {

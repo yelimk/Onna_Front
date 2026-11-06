@@ -1,12 +1,15 @@
 import { Image } from 'expo-image';
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import Animated, { interpolate, interpolateColor, useAnimatedStyle } from 'react-native-reanimated';
 
 import { AppText } from '@/components/app-text';
 import { colors } from '@/constants/colors';
 import { radius, spacing } from '@/constants/layout';
+import { duration } from '@/constants/motion';
 import type { TypographyVariant } from '@/constants/typography';
 import type { MySpotItem } from '@/features/my/hooks/use-my-spots';
+import { usePressProgress } from '@/hooks/use-press-progress';
 
 type PhotoListRowProps = {
   item: MySpotItem;
@@ -21,31 +24,43 @@ const sizes = {
   pressed: { photo: 60, title: 'listTitlePressed', caption: 'listCaptionPressed' },
 } satisfies Record<string, { photo: number; title: TypographyVariant; caption: TypographyVariant }>;
 
-/** Figma list_l, list_m. 좋아요 내역·연 자리 기록에서 쓰는 사진 한 줄. list_m은 오른쪽에 하트가 붙는다(right). */
+/**
+ * Figma list_l, list_m. 좋아요 내역·연 자리 기록에서 쓰는 사진 한 줄. list_m은 오른쪽에 하트가 붙는다(right).
+ * 누르면 80ms 동안 회색 칸 안으로 줄어든다 (Figma 프로토타입 list_m pressed: 스마트 애니메이트 80ms, Ease out).
+ * 글자 크기는 앱에서 부드럽게 바꿀 수 없어서 누르는 순간 바뀐다.
+ */
 export function PhotoListRow({ item, onPress, right }: PhotoListRowProps) {
+  const { progress, isPressed, pressHandlers } = usePressProgress(duration.listPress);
+  const size = sizes[isPressed ? 'pressed' : 'default'];
+
+  const contentStyle = useAnimatedStyle(() => ({
+    marginHorizontal: progress.get() * spacing.xxs,
+    padding: progress.get() * spacing.xs,
+    backgroundColor: interpolateColor(progress.get(), [0, 1], [colors.background01, colors.background02]),
+  }));
+  const photoStyle = useAnimatedStyle(() => {
+    const photoSize = interpolate(progress.get(), [0, 1], [sizes.default.photo, sizes.pressed.photo]);
+    return { width: photoSize, height: photoSize };
+  });
+
   return (
-    <Pressable accessibilityRole="button" onPress={onPress} style={styles.row}>
-      {({ pressed }) => {
-        const size = sizes[pressed ? 'pressed' : 'default'];
-        return (
-          <View style={[styles.content, pressed && styles.pressedContent]}>
-            <Image
-              source={item.photo}
-              style={[styles.photo, { width: size.photo, height: size.photo }]}
-              contentFit="cover"
-            />
-            <View style={styles.texts}>
-              <AppText variant={size.title} numberOfLines={1}>
-                {item.title}
-              </AppText>
-              <AppText variant={size.caption} color="textTertiary" numberOfLines={1}>
-                {item.hashtags.join(' ')}
-              </AppText>
-            </View>
-            {right}
+    <Pressable accessibilityRole="button" onPress={onPress} style={styles.row} {...pressHandlers}>
+      <Animated.View style={[styles.content, contentStyle]}>
+        <Animated.View style={[styles.photo, photoStyle]}>
+          <Image source={item.photo} style={styles.photoImage} contentFit="cover" />
+        </Animated.View>
+        <View style={styles.textsAndRight}>
+          <View style={styles.texts}>
+            <AppText variant={size.title} numberOfLines={1}>
+              {item.title}
+            </AppText>
+            <AppText variant={size.caption} color="textTertiary" numberOfLines={1}>
+              {item.hashtags.join(' ')}
+            </AppText>
           </View>
-        );
-      }}
+          {right}
+        </View>
+      </Animated.View>
     </Pressable>
   );
 }
@@ -61,20 +76,26 @@ const styles = StyleSheet.create({
     height: 64 + spacing.sm * 2,
     justifyContent: 'center',
   },
+  // Figma pressed: 줄 양옆을 4씩 줄인 회색 칸, 안쪽 여백 8 (contentStyle이 0에서 이 값까지 움직인다)
   content: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-  },
-  // Figma pressed: 줄 양옆을 4씩 줄인 회색 칸, 안쪽 여백 8
-  pressedContent: {
-    marginHorizontal: spacing.xxs,
-    padding: spacing.xs,
     borderRadius: radius.md,
-    backgroundColor: colors.background02,
   },
   photo: {
     borderRadius: radius.sm,
+    overflow: 'hidden',
+  },
+  photoImage: {
+    flex: 1,
+  },
+  // Figma list_m: 사진과 글 사이는 16이지만, 글과 오른쪽 하트 사이는 4라서 둘을 한 묶음으로 둔다
+  textsAndRight: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xxs,
   },
   // Figma list_l·list_m: 글 묶음 위아래 4
   texts: {

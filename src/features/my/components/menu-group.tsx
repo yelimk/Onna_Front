@@ -37,22 +37,43 @@ type MenuRowProps = {
   icon?: IconName;
   /** 오른쪽 끝: 글자 값, 스위치 등 */
   trailing?: ReactNode;
-  /** 있으면 오른쪽에 > 가 붙고 누를 수 있다 */
+  /** 있으면 누를 수 있고, 오른쪽에 > 가 붙는다 */
   onPress?: () => void;
+  /** 눌러도 > 를 숨긴다. Figma 설정의 권한 줄은 상태 글자만 있고 > 가 없다 */
+  hideArrow?: boolean;
+  /**
+   * 오른쪽 글자가 길 수 있는 줄 (예: 로그인 계정 이메일). 이름은 그대로 두고 오른쪽 글자를 한 줄로 자르고 끝을 '…'로 줄인다.
+   * 이름과 오른쪽 글자 사이는 8이다 (디자이너 요청)
+   */
+  truncateTrailing?: boolean;
 };
 
 /** 마이·설정의 한 줄. 마이 메뉴(아이콘 있음)는 Figma 52 높이, 설정 줄은 60 높이다. */
-export function MenuRow({ label, description, icon, trailing, onPress }: MenuRowProps) {
+export function MenuRow({
+  label,
+  description,
+  icon,
+  trailing,
+  onPress,
+  hideArrow = false,
+  truncateTrailing = false,
+}: MenuRowProps) {
+  const showsArrow = Boolean(onPress) && !hideArrow;
   // 오른쪽에 화살표나 스위치가 오면 그 자체에 여백이 있어서 오른쪽 안쪽 여백을 줄인다
-  const hasRightControl = Boolean(onPress) || typeof trailing === 'object';
+  const hasRightControl = showsArrow || typeof trailing === 'object';
 
   return (
     <Pressable
       disabled={!onPress}
       onPress={onPress}
-      style={[styles.row, icon ? styles.compactRow : styles.regularRow, hasRightControl && styles.rowWithControl]}>
+      style={[
+        styles.row,
+        icon ? styles.compactRow : styles.regularRow,
+        hasRightControl && styles.rowWithControl,
+        truncateTrailing && styles.truncatingRow,
+      ]}>
       {icon && <Icon name={icon} size={16} />}
-      <View style={styles.texts}>
+      <View style={[styles.texts, truncateTrailing && styles.fixedTexts]}>
         <AppText variant={icon ? 'subtitle04' : 'subtitle03'}>{label}</AppText>
         {description && (
           <AppText variant="caption04" color="textTertiary">
@@ -60,8 +81,17 @@ export function MenuRow({ label, description, icon, trailing, onPress }: MenuRow
           </AppText>
         )}
       </View>
-      {typeof trailing === 'string' ? <AppText variant="body02">{trailing}</AppText> : trailing}
-      {onPress && <Icon name="forwardSmall" />}
+      {typeof trailing === 'string' ? (
+        <AppText
+          variant="body02"
+          numberOfLines={truncateTrailing ? 1 : undefined}
+          style={truncateTrailing && styles.truncatedTrailing}>
+          {trailing}
+        </AppText>
+      ) : (
+        trailing
+      )}
+      {showsArrow && <Icon name="forwardSmall" />}
     </Pressable>
   );
 }
@@ -102,5 +132,17 @@ const styles = StyleSheet.create({
   texts: {
     flex: 1,
     gap: spacing.xxs,
+  },
+  truncatingRow: {
+    gap: spacing.xs,
+  },
+  // 이름은 제 길이를 지키고 남는 자리를 차지한다. 줄어드는 건 오른쪽 글자다
+  fixedTexts: {
+    flexBasis: 'auto',
+    flexShrink: 0,
+  },
+  truncatedTrailing: {
+    flexShrink: 1,
+    textAlign: 'right',
   },
 });

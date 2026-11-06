@@ -30,7 +30,7 @@ const pinShadowBelowTip = 8;
  */
 export function ConfirmScreen() {
   const { draft } = useUploadDraft();
-  const { canSubmit, isLocating, relocate, submit } = useSubmitPost();
+  const { canSubmit, isLocating, isSubmitting, relocate, submit } = useSubmitPost();
   const coordinate = useMemo(() => (draft.location ? fromServerCoordinate(draft.location) : null), [draft.location]);
 
   return (
@@ -42,6 +42,7 @@ export function ConfirmScreen() {
           label="기록 완료"
           variant="primary"
           disabled={!canSubmit}
+          isLoading={isSubmitting}
           onPress={submit}
         />
       }>

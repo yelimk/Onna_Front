@@ -1,11 +1,14 @@
 import { useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
+import Animated, { FadeIn, FadeInUp, interpolateColor, useAnimatedStyle } from 'react-native-reanimated';
 
 import { AppText } from '@/components/app-text';
 import { Icon } from '@/components/icon';
 import { colors, type ColorName } from '@/constants/colors';
 import { radius, spacing } from '@/constants/layout';
+import { duration, easeOut } from '@/constants/motion';
 import { typography } from '@/constants/typography';
+import { useTransitionProgress } from '@/hooks/use-transition-progress';
 
 type TextFieldProps = Omit<TextInputProps, 'secureTextEntry'> & {
   /** 입력창 위 이름. 없으면 입력창만 보여준다. */
@@ -34,6 +37,7 @@ type TextFieldProps = Omit<TextInputProps, 'secureTextEntry'> & {
 /**
  * Figma 로그인/회원가입 inputfield.
  * 기본은 회색 칸, 입력하는 중(포커스)에는 흰 칸에 검정 테두리, 에러면 빨간 테두리와 빨간 글자.
+ * Figma 프로토타입처럼 포커스 테두리는 100ms(디졸브), 빨간 테두리는 180ms 동안 서서히 바뀐다 (둘 다 Ease out).
  */
 export function TextField({
   label,
@@ -59,6 +63,18 @@ export function TextField({
   const hasError = error !== undefined || isOverLimit;
   const bottomText = error ?? success ?? helper;
 
+  const focusProgress = useTransitionProgress(isFocused, duration.press);
+  const errorProgress = useTransitionProgress(hasError, duration.change);
+  // 포커스(검정)를 먼저 섞고, 그 위에 에러(빨강)를 섞는다. 에러가 있으면 포커스와 상관없이 빨간 테두리라서다
+  const boxStyle = useAnimatedStyle(() => {
+    const focusBorder = interpolateColor(focusProgress.get(), [0, 1], [colors.background02, colors.textPrimary]);
+    const focusBackground = interpolateColor(focusProgress.get(), [0, 1], [colors.background02, colors.background01]);
+    return {
+      borderColor: interpolateColor(errorProgress.get(), [0, 1], [focusBorder, colors.error]),
+      backgroundColor: interpolateColor(errorProgress.get(), [0, 1], [focusBackground, colors.background01]),
+    };
+  });
+
   return (
     <View>
       {label && (
@@ -68,7 +84,7 @@ export function TextField({
         </AppText>
       )}
       <View style={styles.row}>
-        <View style={[styles.box, isFocused && styles.focusedBox, hasError && styles.errorBox]}>
+        <Animated.View style={[styles.box, boxStyle]}>
           <TextInput
             placeholderTextColor={colors.textPlaceholder}
             secureTextEntry={isPassword && !isPasswordVisible}
@@ -91,14 +107,17 @@ export function TextField({
               <Icon name={isPasswordVisible ? 'eyeOpen' : 'eyeClosed'} />
             </Pressable>
           )}
-        </View>
+        </Animated.View>
         {accessory}
       </View>
       {(bottomText || count) && (
         <View style={styles.bottomRow}>
-          <AppText variant="caption02" color={getHelperColor(error, success)} style={styles.helper}>
-            {bottomText}
-          </AppText>
+          {/* 문구가 바뀔 때마다 서서히 나타난다 */}
+          <Animated.View key={bottomText ?? ''} entering={getHelperEntering(error, success)} style={styles.helper}>
+            <AppText variant="caption02" color={getHelperColor(error, success)}>
+              {bottomText}
+            </AppText>
+          </Animated.View>
           {count && (
             <AppText variant="caption04" color={isOverLimit ? 'error' : 'textDeactivated'}>
               {isOverLimit ? '글자수 초과' : count}
@@ -108,6 +127,26 @@ export function TextField({
       )}
     </View>
   );
+}
+
+// Figma 회원가입 '사용할 수 있어요': 입력칸 바로 밑(24 위)에 투명하게 있다가 0.1초 뒤 300ms 동안 내려오며 나타난다
+const successHelperDrop = 24;
+const successHelperDelay = 100;
+
+/**
+ * 안내 문구가 나타나는 움직임. Figma 프로토타입 값:
+ * - 초록 문구('사용할 수 있어요', '비밀번호가 일치합니다'): 0.1초 뒤 위에서 24 내려오며 나타남 (스마트 애니메이트 300ms, Ease out)
+ * - 빨간 문구: 빨간 테두리와 같이 180ms
+ * - 회색 안내: Figma에 없어서 빨간 문구와 같이 둔다
+ */
+function getHelperEntering(error: string | undefined, success: string | undefined) {
+  if (error === undefined && success !== undefined) {
+    return FadeInUp.withInitialValues({ opacity: 0, transform: [{ translateY: -successHelperDrop }] })
+      .delay(successHelperDelay)
+      .duration(duration.screen)
+      .easing(easeOut);
+  }
+  return FadeIn.duration(duration.change);
 }
 
 function getHelperColor(error: string | undefined, success: string | undefined): ColorName {
@@ -136,16 +175,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderRadius: radius.md,
     borderWidth: 1.5,
-    borderColor: colors.background02,
-    backgroundColor: colors.background02,
-  },
-  focusedBox: {
-    borderColor: colors.textPrimary,
-    backgroundColor: colors.background01,
-  },
-  errorBox: {
-    borderColor: colors.error,
-    backgroundColor: colors.background01,
   },
   input: {
     ...typography.body01,

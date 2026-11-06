@@ -220,7 +220,7 @@ GUI 디자인을 입힌 화면: 시작 화면(스플래시, 주황 배경), 소�
 │                         → 묶음 목록 → 사진 카드 /photo/[id] (좋아요, 신고 창)
 │                         (옛 산책 경로 /map/walk는 코드만 남아 있고, 홈에서 들어가는 버튼은 없어요)
 ├─ 기록  /record         → 기록 상세 /record/[id]
-└─ 마이  /my             → 알림(오른쪽 위 종), 좋아요 내역·연 자리 기록 → 상세(/my/spot/[id]), 사용자 기호 설정, 설정 → 약관
+└─ 마이  /my             → 알림(오른쪽 위 종) → 기록 상세(/my/record/[id]), 좋아요 내역·연 자리 기록 → 상세(/my/spot/[id]), 사용자 기호 설정, 설정 → 약관
 
 남기기 (탭 바 없는 전체 화면)  /upload/camera → write → confirm → 내 기록
   지도의 카메라 버튼, 사진 카드의 '나도 이 자리에 남기기'에서 들어와요.
@@ -273,9 +273,9 @@ GUI 디자인을 입힌 화면: 시작 화면(스플래시, 주황 배경), 소�
 - [x] 카메라 화면 GUI, 찍은 사진을 가운데 3:4로 자르고 1080×1440으로 줄이기 → `features/upload/utils/normalize-photo.ts`
 - [x] 권한 안내 화면에서 실제 위치·카메라·알림 권한 요청 → `features/auth/utils/request-app-permissions.ts`
 - [ ] 로그인 여부에 따라 첫 화면 정하기 (지금은 항상 소개 화면) → `src/app/index.tsx`
-- [x] 설정의 권한 상태를 실제 값으로 → `features/my/hooks/use-permission-labels.ts`
-- [ ] 약관 실제 문장 확정 (Figma도 아직 제목만 있음) → `features/my/screens/terms-screen.tsx`
-- [ ] 회원 탈퇴 (계정 API가 나오면). 비밀번호 찾기는 Figma 보류
+- [x] 설정의 위치·카메라·알림 권한 상태를 실제 값으로 (누르면 폰 설정, 앱으로 돌아오면 다시 확인) → `features/my/hooks/use-permission-labels.ts`
+- [x] 약관 문장 (팀 노션 '약관' 페이지의 내용, 시연용 핵심 요약) → `constants/terms.ts`. 설정에서는 이용약관·위치기반 서비스 이용약관·개인정보 처리방침을 차례로, 회원가입 약관 줄 화살표로는 그 문서 하나만(`/terms?doc=...`) 보여준다. 문장을 고칠 때는 노션과 이 파일을 같이 고친다
+- [x] 회원 탈퇴: 확인 창 → `DELETE /users/me` → 출입증 지우고 로그인으로 (401이어도 로그인으로) → `features/my/screens/settings-screen.tsx`. 서버 API가 올라오기 전에는 오류 토스트가 뜬다. 비밀번호 찾기는 Figma 보류
 
 ### 서버 연결 (백엔드·AI API가 나오면)
 
@@ -296,6 +296,7 @@ GUI 디자인을 입힌 화면: 시작 화면(스플래시, 주황 배경), 소�
 - [x] 남기기: 셔터 순간 위치, 서버 질문, 제목(10자), AI 해시태그 추천(번호 없이 이름으로 주고받음), 업로드(얼굴·위치 거절 안내) → `features/upload/`
 - [x] 내 기록 목록·상세, 마이 탭 닉네임·남긴 자리·연 자리·좋아한 자리 수 → `hooks/use-my-posts.ts`, `features/my/hooks/use-my-summary.ts`
 - [x] 좋아요 내역·연 자리 기록 목록과 상세, 좋아요 누르기·취소 → `features/my/hooks/use-my-spots.ts`, `use-liked-spots.ts` (상세의 한 줄 코멘트는 목록 API에 없어서 비어 있음)
+- [ ] 시연 전에 지울 예시 데이터: 서버 목록이 비었을 때 대신 보여주는 내 기록(`mock/my-posts.ts`), 좋아요 내역·연 자리 기록(`mock/my-spots.ts`), 알림(`mock/notifications.ts`)
 - [x] 지도 홈 마커(`getMapZones`) → `features/map/hooks/use-map-zones.ts`, `utils/zones-to-markers.ts`
 - [x] 묶음 목록(`getZonePosts`) → `features/map/hooks/use-zone-posts.ts`
 - [x] 사진 카드 열기·좋아요(`openPost`, `likePost`, `unlikePost`) → `features/map/hooks/use-opened-posts.ts`, `use-record-detail.ts`
@@ -303,7 +304,8 @@ GUI 디자인을 입힌 화면: 시작 화면(스플래시, 주황 배경), 소�
 - [x] 산책 경로 추천(`getRouteRecommendation`) → `features/map/hooks/use-walk-route.ts` (목적지·고른 해시태그를 같이 보냄)
 - 지도 위치는 서버 모양(`lat`, `lng`, `accuracy`)으로 바꿔 보내요 (`features/map/utils/to-coordinate.ts`, 오차는 `use-my-location.ts`의 `useLocationAccuracy`). 기록 id는 지도 안에서 문자열, 서버에 보낼 때 숫자로 바꿔요.
 - 흐림 단계·사진은 서버 `stage`·`imageUrl`을 그대로 써요. 사진 주소가 30분 뒤 만료돼서, 지도 구역·묶음·연 사진은 받은 지 25분이 지나면(앱이 다시 앞으로 올 때도) 다시 받아요. 위치를 모르면 위치 셋을 빼고 보내요 (`toMyLocation`).
-- [ ] 아직 가짜 데이터: 알림(서버 API는 있음, 아직 안 붙임), 좋아요 내역·연 자리 기록의 '지도' 보기, 회원 탈퇴 (칭호는 서버 없이 `features/my/constants/profile-badges.ts`에 고정)
+- [x] 알림 목록('5분 전', '3시간 전', '작년'처럼 지금과의 차이로 묶음, `utils/format-relative-time.ts`), 새 알림 빨간 점(알림 화면과 마이 탭 종), 누르면 기록 상세 → `features/notification/hooks/use-notifications.ts`, `use-has-new-notifications.ts` (빨간 점은 서버가 주지 않아서 알림 화면을 마지막으로 나간 시각을 폰에 적어 두고 비교: `utils/notification-seen-at.ts`)
+- [ ] 아직 가짜 데이터: 좋아요 내역·연 자리 기록의 '지도' 보기 (칭호는 서버 없이 `features/my/constants/profile-badges.ts`에 고정)
 - [x] 장소 검색 → 카카오 로컬 API (`features/map/api/search-places.ts`)
 - [x] 해시태그 검색 → 서버 `GET /search/hashtags` (`features/map/hooks/use-hashtag-search.ts`)
 - [ ] 신고 보내기 (명세에 아직 없음, 백엔드에 요청함) → `features/map/components/report-sheet.tsx` (사진 카드의 신고 창. 지금은 접수 안내만 보여줘요)
@@ -332,6 +334,7 @@ Figma `디자인 시스템` 페이지의 값을 코드로 옮겨 두었어요.
 | `src/constants/typography.ts` | 글씨 스타일 (Heading, Subtitle, Body, Caption, Button) |
 | `src/components/app-text.tsx` | 글씨 부품 `AppText` |
 | `src/constants/layout.ts` | 간격(`spacing`), 모서리(`radius`), 화면 좌우 여백 |
+| `src/constants/motion.ts` | 애니메이션 시간(`duration`)과 곡선(`easeOut`, `easeIn`, `easeInOut`). Figma 프로토타입 설정 값을 옮겼어요 |
 
 ### 공통 부품
 
@@ -356,6 +359,15 @@ Figma `디자인 시스템` 페이지의 값을 코드로 옮겨 두었어요.
 | `AppTabBar` | 아래 탭 바 (지도·기록·마이, 고른 탭 위 주황 막대). 마이 탭 안쪽 화면에서는 숨김, 지도 검색 화면에서는 흐리게 사라짐 |
 | `Toast` | 화면 위에 잠깐 뜨는 알림. `showToast('신고가 접수되었습니다', 'success')`로 부른다 (`error` / `success` / `plain`). 루트 레이아웃에 `ToastHost`가 있음 |
 | `LikeButton` | 사진 상세 아래 '좋아요' 버튼 (누르면 빨간 하트·테두리) |
+| `PressHighlight` | 누르고 있으면 뒤에 옅은 회색이 서서히 깔리는 누름 영역 (휴지통, 확인 창 버튼 등) |
+| `ConfirmDialog` | 되돌릴 수 없는 일 전에 한 번 묻는 창 (기록 삭제, 회원 탈퇴). 제목·설명·빨간 버튼 글자를 넘긴다 |
+| `LoadingSpinner` | 기다리는 동안 도는 동그라미. `Button`의 `isLoading`으로 쓴다 (사진 올리는 중) |
+
+앱을 켜 둔 채로 로그인이 풀리면(출입증 재발급 실패) `api/session-events.ts` 신호를 받아 어느 화면에서든 로그인 화면으로 보내요 (`hooks/use-session-expired-redirect.ts`, 루트 레이아웃에 한 번).
+
+서버 날짜(createdAt 등)는 시간대 없이 한국 시각으로 와서, 꼭 `utils/parse-server-date.ts`의 `parseServerDate`로 읽어요 (`new Date()`로 바로 읽으면 폰 시간대에 따라 틀려요).
+
+누름·고름 모양은 Figma 프로토타입처럼 서서히 바뀌어요. 새 부품에서 같은 움직임이 필요하면 `hooks/use-press-progress.ts`(누르고 있는 동안), `hooks/use-transition-progress.ts`(켜짐·고름이 바뀔 때)를 써요. 글자색을 서서히 바꿀 때는 `AnimatedAppText`를 써요.
 
 ### 사용법
 
