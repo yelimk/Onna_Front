@@ -6,6 +6,14 @@ export function getMe() {
   return apiRequest<Me>('/users/me');
 }
 
+/**
+ * 회원 탈퇴. 성공하면 204. 탈퇴하면 남긴 기록은 지도·검색에서 모두 사라지고, 같은 이메일로 다시 가입할 수 있다.
+ * 출입증이 이미 만료돼 다시 받을 수도 없으면 401이다 (백엔드 11월 답변).
+ */
+export function deleteMe() {
+  return apiRequest<void>('/users/me', { method: 'DELETE' });
+}
+
 /** 지금 고른 선호 태그. 온보딩 전이면 빈 목록 */
 export function getMyTags() {
   return apiRequest<Tag[]>('/users/me/tags');

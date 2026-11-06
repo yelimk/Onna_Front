@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 
@@ -6,10 +7,22 @@ import { Icon } from '@/components/icon';
 import { Radio } from '@/components/radio';
 import { spacing } from '@/constants/layout';
 import { duration } from '@/constants/motion';
+import type { TermsDocumentId } from '@/constants/terms';
 import { useTransitionProgress } from '@/hooks/use-transition-progress';
 
 export const requiredTerms = ['이용약관', '개인정보 수집·이용', '위치기반 서비스 이용', '만 14세 이상이에요'] as const;
 export type TermName = (typeof requiredTerms)[number];
+
+/** 줄마다 화살표를 누르면 여는 약관 문서 (constants/terms.ts) */
+const termDocumentIds: Record<TermName, TermsDocumentId> = {
+  이용약관: 'service',
+  '개인정보 수집·이용': 'privacyConsent',
+  '위치기반 서비스 이용': 'location',
+  '만 14세 이상이에요': 'age',
+};
+
+// Figma 약관 줄 오른쪽 화살표(24)보다 누르는 영역을 넓힌다
+const arrowHitSlop = spacing.sm;
 
 type TermsAgreementProps = {
   agreed: TermName[];
@@ -18,7 +31,7 @@ type TermsAgreementProps = {
 
 /**
  * 회원가입 마지막 단계의 약관 동의 목록. 모두 필수라 전부 골라야 다음으로 간다.
- * 줄을 누르면 동의가 바뀐다. 약관 전문이 아직 없어서 오른쪽 화살표는 모양만 두고 누를 수 없게 했다 (팀 결정).
+ * 줄을 누르면 동의가 바뀌고, 오른쪽 화살표를 누르면 그 약관 문서가 열린다 (/terms?doc=...).
  * 동의를 누르면 동그라미가 100ms 동안 서서히 채워진다 (Figma 프로토타입 checkbox: 디졸브 100ms, Ease out).
  */
 export function TermsAgreement({ agreed, onChange }: TermsAgreementProps) {
@@ -62,7 +75,13 @@ function TermRow({ term, selected, onToggle }: TermRowProps) {
           [필수] {term}
         </AppText>
       </Pressable>
-      <Icon name="forwardSmall" />
+      <Pressable
+        accessibilityRole="link"
+        accessibilityLabel={`${term} 보기`}
+        hitSlop={arrowHitSlop}
+        onPress={() => router.push({ pathname: '/terms', params: { doc: termDocumentIds[term] } })}>
+        <Icon name="forwardSmall" />
+      </Pressable>
     </View>
   );
 }

@@ -272,8 +272,8 @@ GUI 디자인을 입힌 화면: 시작 화면(스플래시, 주황 배경), 소�
 - [x] 권한 안내 화면에서 실제 위치·카메라·알림 권한 요청 → `features/auth/utils/request-app-permissions.ts`
 - [ ] 로그인 여부에 따라 첫 화면 정하기 (지금은 항상 소개 화면) → `src/app/index.tsx`
 - [x] 설정의 위치·카메라·알림 권한 상태를 실제 값으로 (누르면 폰 설정, 앱으로 돌아오면 다시 확인) → `features/my/hooks/use-permission-labels.ts`
-- [ ] 약관 실제 문장 확정 (Figma도 아직 제목만 있음) → `features/my/screens/terms-screen.tsx`
-- [ ] 회원 탈퇴 (계정 API가 나오면). 비밀번호 찾기는 Figma 보류
+- [x] 약관 문장 (팀 노션 '약관' 페이지의 내용, 시연용 핵심 요약) → `constants/terms.ts`. 설정에서는 이용약관·위치기반 서비스 이용약관·개인정보 처리방침을 차례로, 회원가입 약관 줄 화살표로는 그 문서 하나만(`/terms?doc=...`) 보여준다. 문장을 고칠 때는 노션과 이 파일을 같이 고친다
+- [x] 회원 탈퇴: 확인 창 → `DELETE /users/me` → 출입증 지우고 로그인으로 (401이어도 로그인으로) → `features/my/screens/settings-screen.tsx`. 서버 API가 올라오기 전에는 오류 토스트가 뜬다. 비밀번호 찾기는 Figma 보류
 
 ### 서버 연결 (백엔드·AI API가 나오면)
 
@@ -303,7 +303,7 @@ GUI 디자인을 입힌 화면: 시작 화면(스플래시, 주황 배경), 소�
 - 지도 위치는 서버 모양(`lat`, `lng`, `accuracy`)으로 바꿔 보내요 (`features/map/utils/to-coordinate.ts`, 오차는 `use-my-location.ts`의 `useLocationAccuracy`). 기록 id는 지도 안에서 문자열, 서버에 보낼 때 숫자로 바꿔요.
 - 흐림 단계·사진은 서버 `stage`·`imageUrl`을 그대로 써요. 사진 주소가 5분 뒤 만료돼서, 지도 구역·묶음·연 사진은 받은 지 4분이 지나면(앱이 다시 앞으로 올 때도) 다시 받아요.
 - [x] 알림 목록, 오늘·이번주 묶음, 새 알림 빨간 점, 누르면 기록 상세 → `features/notification/hooks/use-notifications.ts` (빨간 점은 서버가 주지 않아서 알림 화면을 마지막으로 나간 시각을 폰에 적어 두고 비교: `utils/notification-seen-at.ts`)
-- [ ] 아직 가짜 데이터: 좋아요 내역·연 자리 기록의 '지도' 보기, 회원 탈퇴 (칭호는 서버 없이 `features/my/constants/profile-badges.ts`에 고정)
+- [ ] 아직 가짜 데이터: 좋아요 내역·연 자리 기록의 '지도' 보기 (칭호는 서버 없이 `features/my/constants/profile-badges.ts`에 고정)
 - [x] 장소 검색 → 카카오 로컬 API (`features/map/api/search-places.ts`)
 - [x] 해시태그 검색 → 서버 `GET /search/hashtags` (`features/map/hooks/use-hashtag-search.ts`)
 - [ ] 신고 보내기 (명세에 아직 없음) → `report-screen.tsx`
@@ -358,6 +358,11 @@ Figma `디자인 시스템` 페이지의 값을 코드로 옮겨 두었어요.
 | `Toast` | 화면 위에 잠깐 뜨는 알림. `showToast('신고가 접수되었습니다', 'success')`로 부른다 (`error` / `success` / `plain`). 루트 레이아웃에 `ToastHost`가 있음 |
 | `LikeButton` | 사진 상세 아래 '좋아요' 버튼 (누르면 빨간 하트·테두리) |
 | `PressHighlight` | 누르고 있으면 뒤에 옅은 회색이 서서히 깔리는 누름 영역 (휴지통, 확인 창 버튼 등) |
+| `ConfirmDialog` | 되돌릴 수 없는 일 전에 한 번 묻는 창 (기록 삭제, 회원 탈퇴). 제목·설명·빨간 버튼 글자를 넘긴다 |
+
+앱을 켜 둔 채로 로그인이 풀리면(출입증 재발급 실패) `api/session-events.ts` 신호를 받아 어느 화면에서든 로그인 화면으로 보내요 (`hooks/use-session-expired-redirect.ts`, 루트 레이아웃에 한 번).
+
+서버 날짜(createdAt 등)는 시간대 없이 한국 시각으로 와서, 꼭 `utils/parse-server-date.ts`의 `parseServerDate`로 읽어요 (`new Date()`로 바로 읽으면 폰 시간대에 따라 틀려요).
 
 누름·고름 모양은 Figma 프로토타입처럼 서서히 바뀌어요. 새 부품에서 같은 움직임이 필요하면 `hooks/use-press-progress.ts`(누르고 있는 동안), `hooks/use-transition-progress.ts`(켜짐·고름이 바뀔 때)를 써요. 글자색을 서서히 바꿀 때는 `AnimatedAppText`를 써요.
 

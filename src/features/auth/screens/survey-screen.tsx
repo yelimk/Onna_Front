@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
+import { StyleSheet } from 'react-native';
 
 import { getMe, saveMyTags } from '@/api/users';
 import { Button } from '@/components/button';
@@ -93,7 +94,8 @@ export function SurveyScreen() {
       .map((tag) => formatHashtag(tag.name));
     return (
       <ScreenContainer footer={<Button label="지도 열기" variant="primary" onPress={goToMap} />}>
-        <StepTransition stepKey={step} animate>
+        {/* 완료 화면은 내용을 화면 가운데에 둔다(SurveyDone의 flex: 1). 감싸는 상자도 화면 높이를 채워야 가운데로 간다 */}
+        <StepTransition stepKey={step} animate style={styles.fill}>
           <SurveyDone
             answers={answers}
             placeNames={placeNames}
@@ -139,3 +141,9 @@ export function SurveyScreen() {
     </ScreenContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  fill: {
+    flex: 1,
+  },
+});
