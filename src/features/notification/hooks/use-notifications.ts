@@ -4,6 +4,7 @@ import { getMyNotifications } from '@/api/users';
 import { getNotificationsSeenAt, markNotificationsSeen } from '@/features/notification/utils/notification-seen-at';
 import { mockNotifications } from '@/mock/notifications';
 import type { AppNotification } from '@/types/api';
+import { parseServerDate } from '@/utils/parse-server-date';
 import { getStartOfToday, getStartOfWeek } from '@/utils/week-range';
 
 export type NotificationItem = AppNotification & {
@@ -22,7 +23,7 @@ function groupByPeriod(items: NotificationItem[]) {
   const startOfWeek = getStartOfWeek();
 
   const labelOf = (createdAt: string) => {
-    const time = new Date(createdAt).getTime();
+    const time = parseServerDate(createdAt).getTime();
     if (time >= startOfToday) return '오늘';
     return time >= startOfWeek ? '이번주' : undefined;
   };
@@ -54,7 +55,7 @@ export function useNotifications() {
       const notifications = result.length === 0 ? mockNotifications : result;
       const items = notifications.map((item) => ({ ...item, key: `${item.type}-${item.postId}-${item.createdAt}` }));
       setGroups(groupByPeriod(items));
-      setUnreadKeys(items.filter((item) => new Date(item.createdAt).getTime() > seenAt).map((item) => item.key));
+      setUnreadKeys(items.filter((item) => parseServerDate(item.createdAt).getTime() > seenAt).map((item) => item.key));
     });
     return markNotificationsSeen;
   }, []);

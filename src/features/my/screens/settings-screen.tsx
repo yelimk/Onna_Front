@@ -1,27 +1,54 @@
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { Linking, Pressable, StyleSheet, View } from 'react-native';
 
+import { isApiError } from '@/api/api-error';
 import { logout } from '@/api/auth';
+import { deleteMe } from '@/api/users';
 import { AppText } from '@/components/app-text';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import { ScreenContainer } from '@/components/screen-container';
 import { ScreenHeader } from '@/components/screen-header';
 import { spacing } from '@/constants/layout';
 import { MenuGroup, MenuRow } from '@/features/my/components/menu-group';
 import { usePermissionLabels } from '@/features/my/hooks/use-permission-labels';
+import { showApiError } from '@/utils/show-api-error';
 
 /**
  * ③ 마이 탭: 설정. 위치·카메라·알림은 휴대폰의 실제 권한 상태를 보여주고, 누르면 휴대폰 설정으로 간다.
  * 앱 안에서는 권한을 끌 수 없어서 스위치 대신 상태 글자로 둔다 (Figma의 '사진 위치·시간 저장', '다녀갔어요 알림' 스위치는 뺐다, 팀 결정).
- * 로그아웃은 폰에 저장한 출입증을 지운다. 탈퇴는 서버 API가 아직 없어서 화면만 있다.
+ * 로그아웃은 폰에 저장한 출입증을 지운다.
+ * 회원 탈퇴는 한 번 더 물은 뒤 서버에 탈퇴를 보내고, 출입증을 지우고 로그인 화면으로 간다.
+ * 비밀번호는 다시 묻지 않는다 (백엔드 11월 답변).
  */
 export function SettingsScreen() {
   const permissionLabels = usePermissionLabels();
   const openPhoneSettings = () => Linking.openSettings();
 
+  const [isConfirmingWithdraw, setIsConfirmingWithdraw] = useState(false);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
+
   const logOut = async () => {
     await logout();
     router.replace('/login');
+  };
+
+  const withdraw = async () => {
+    setIsConfirmingWithdraw(false);
+    // 두 번 눌러도 한 번만 보낸다
+    if (isWithdrawing) return;
+    setIsWithdrawing(true);
+    try {
+      await deleteMe();
+      await logOut();
+    } catch (error) {
+      // 401은 이미 로그아웃된 상태라 탈퇴가 끝난 것과 같이 첫 화면으로 보낸다
+      if (isApiError(error) && error.status === 401) await logOut();
+      else showApiError(error);
+    } finally {
+      setIsWithdrawing(false);
+    }
   };
 
   return (
@@ -64,7 +91,7 @@ export function SettingsScreen() {
       </View>
 
       <View style={styles.accountActions}>
-        <Pressable hitSlop={8}>
+        <Pressable hitSlop={8} onPress={() => setIsConfirmingWithdraw(true)}>
           <AppText variant="body02" color="textTertiary">
             회원 탈퇴
           </AppText>
@@ -75,6 +102,16 @@ export function SettingsScreen() {
           </AppText>
         </Pressable>
       </View>
+
+      {/* Figma에 탈퇴 확인 창이 없어서 기록 삭제 확인 창과 같은 모양을 쓴다. 문구는 백엔드와 정한 것 */}
+      <ConfirmDialog
+        visible={isConfirmingWithdraw}
+        title="정말 탈퇴할까요?"
+        description="남긴 기록이 모두 사라져요"
+        confirmLabel="탈퇴"
+        onCancel={() => setIsConfirmingWithdraw(false)}
+        onConfirm={withdraw}
+      />
     </ScreenContainer>
   );
 }

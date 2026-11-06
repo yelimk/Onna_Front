@@ -5,6 +5,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { deletePost } from '@/api/posts';
 import { AppText } from '@/components/app-text';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import { Icon } from '@/components/icon';
 import { PressHighlight } from '@/components/press-highlight';
 import { ScreenContainer } from '@/components/screen-container';
@@ -13,7 +14,6 @@ import { showToast } from '@/components/toast';
 import { colors } from '@/constants/colors';
 import { radius, spacing } from '@/constants/layout';
 import { duration } from '@/constants/motion';
-import { DeleteConfirmDialog } from '@/features/record/components/delete-confirm-dialog';
 import { useMyPosts } from '@/hooks/use-my-posts';
 import { mockNotificationPosts } from '@/mock/notifications';
 import { formatDate } from '@/utils/format-date';
@@ -102,10 +102,13 @@ export function RecordDetailScreen() {
         </View>
       </View>
 
-      <DeleteConfirmDialog
+      <ConfirmDialog
         visible={isConfirmingDelete}
+        title="삭제하시겠습니까?"
+        description="삭제한 기록은 다시 복구할 수 없어요"
+        confirmLabel="삭제"
         onCancel={() => setIsConfirmingDelete(false)}
-        onDelete={removePost}
+        onConfirm={removePost}
       />
     </ScreenContainer>
   );
