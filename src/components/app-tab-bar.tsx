@@ -65,7 +65,7 @@ export function AppTabBar({ state, descriptors, emitter, navigateToTab, insets }
             accessibilityLabel={label}
             onPress={press}
             style={styles.tab}>
-            <View style={[styles.indicator, isFocused && styles.indicatorOn]} />
+            <View style={[styles.indicator, !isFocused && styles.indicatorOff]} />
             <Icon name={tabIcons[route.name] ?? 'location'} color={color} />
             <AppText variant="caption03" color={color}>
               {label}
@@ -99,8 +99,11 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xxs,
     // 네 모서리를 모두 둥글게 한다 (Figma 선택 탭 주황 line, 모서리 4)
     borderRadius: radius.xs,
-  },
-  indicatorOn: {
     backgroundColor: colors.primary,
+  },
+  // 고르지 않은 탭은 색을 빼지 않고 투명하게만 한다.
+  // 배경색을 넣었다 뺐다 하면 안드로이드가 이 칸을 지웠다 다시 만들면서 모서리 둥글기를 놓쳐 각지게 보인다
+  indicatorOff: {
+    opacity: 0,
   },
 });
