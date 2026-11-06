@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
@@ -8,6 +9,8 @@ import { Icon } from '@/components/icon';
 import { ScreenContainer } from '@/components/screen-container';
 import { colors } from '@/constants/colors';
 import { radius, spacing } from '@/constants/layout';
+import { PlacePreviewMap } from '@/features/map/components/place-preview-map';
+import { fromServerCoordinate } from '@/features/map/utils/to-coordinate';
 import { DraftPhoto } from '@/features/upload/components/draft-photo';
 import { UploadChecklist } from '@/features/upload/components/upload-checklist';
 import { UploadStepHeader } from '@/features/upload/components/upload-step-header';
@@ -16,16 +19,19 @@ import { useUploadDraft } from '@/features/upload/upload-draft';
 import { formatHashtag } from '@/utils/format-hashtag';
 
 const locationPin = require('@/assets/icons/location-pick.svg');
+// location_pick 그림(53 높이)에서 뾰족한 끝 아래로 남은 그림자 높이. 끝이 내 자리를 가리키도록 지도를 맞출 때 쓴다.
+const pinShadowBelowTip = 8;
 
 /**
  * ② 기록 탭: 남기기 3/3 위치 확인.
  * 집 위치 같은 개인정보가 드러나지 않게 정확한 좌표 대신 장소 이름(반경)으로 저장한다.
- * 회색 칸은 나중에 작은 지도로 바꾼다. 새로고침 버튼은 서버가 위치가 부정확하다고 할 때 위치를 다시 잡는다.
+ * 작은 지도는 셔터를 누른 자리를 핀으로 보여준다. 새로고침 버튼은 서버가 위치가 부정확하다고 할 때 위치를 다시 잡는다.
  * '기록 완료'에서 draft를 서버로 보낸다. 제목은 서버에 아직 칸이 없어서 보내지 않는다.
  */
 export function ConfirmScreen() {
   const { draft } = useUploadDraft();
   const { canSubmit, isLocating, isSubmitting, relocate, submit } = useSubmitPost();
+  const coordinate = useMemo(() => (draft.location ? fromServerCoordinate(draft.location) : null), [draft.location]);
 
   return (
     <ScreenContainer
@@ -45,6 +51,16 @@ export function ConfirmScreen() {
       </AppText>
 
       <View style={styles.mapBox}>
+        <PlacePreviewMap
+          coordinate={coordinate}
+          pinTipInset={pinShadowBelowTip}
+          pin={
+            <View style={styles.pin}>
+              <Badge label={draft.placeLabel} tone="dark" />
+              <Image source={locationPin} style={styles.pinImage} contentFit="contain" />
+            </View>
+          }
+        />
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="위치 다시 찾기"
@@ -53,10 +69,6 @@ export function ConfirmScreen() {
           style={styles.reload}>
           <Icon name="reload" />
         </Pressable>
-        <View style={styles.pin}>
-          <Badge label={draft.placeLabel} tone="dark" />
-          <Image source={locationPin} style={styles.pinImage} contentFit="contain" />
-        </View>
       </View>
 
       <View style={styles.preview}>
@@ -88,8 +100,8 @@ const styles = StyleSheet.create({
     height: 145,
     borderRadius: radius.lg,
     backgroundColor: colors.uploadMapBackground,
-    alignItems: 'center',
-    justifyContent: 'center',
+    // 지도(WebView)가 둥근 모서리 밖으로 삐져나오지 않게 자른다
+    overflow: 'hidden',
   },
   // 지도 위 떠 있는 버튼(IconButton)과 달리 그림자 없이 옅은 회색 동그라미 (Figma reload_circle)
   reload: {

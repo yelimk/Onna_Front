@@ -28,10 +28,8 @@ export default function RootLayout() {
   return (
     <Fragment>
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background01 } }}>
-        {/* 남기기와 열림 순간은 탭 바 없이 전체 화면, 신고는 아래에서 올라오는 모달 */}
+        {/* 남기기는 탭 바 없이 전체 화면 */}
         <Stack.Screen name="upload" options={{ presentation: 'fullScreenModal' }} />
-        <Stack.Screen name="opening/[id]" options={{ presentation: 'fullScreenModal', animation: 'fade' }} />
-        <Stack.Screen name="report/[id]" options={{ presentation: 'modal' }} />
         {/* 사진 카드는 지도 위를 어둡게 덮고 탭 바까지 가리는 투명 모달 */}
         <Stack.Screen
           name="photo/[id]"

@@ -1,5 +1,4 @@
-import { router } from 'expo-router';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
@@ -53,10 +52,11 @@ type NextStopCardProps = {
   onStop: () => void;
 };
 
-/** 걷는 중 화면 아래쪽: 다음 자리 미리보기와 그만 걷기 */
+/**
+ * 걷는 중 화면 아래쪽: 다음 자리 미리보기와 그만 걷기.
+ * '자세히'·'(시연) 도착 근처'는 지운 와이어프레임 자리 상세(/map/spot)로 가던 버튼이라 뺐다.
+ */
 export function NextStopCard({ stop, blurLevel, onStop }: NextStopCardProps) {
-  const goToSpot = () => router.push(`/map/spot/${stop.spotId}`);
-
   return (
     <View style={styles.nextCard}>
       <View style={styles.nextRow}>
@@ -67,15 +67,8 @@ export function NextStopCard({ stop, blurLevel, onStop }: NextStopCardProps) {
           </AppText>
           <AppText variant="subtitle04">{stop.hashtags.join(' ')}</AppText>
         </View>
-        <Pressable style={styles.detailButton} onPress={goToSpot}>
-          <AppText variant="button05">자세히</AppText>
-        </Pressable>
       </View>
-      <View style={styles.buttons}>
-        <Button label="그만 걷기" variant="outline" style={styles.button} onPress={onStop} />
-        {/* 시연에서 실제로 걷지 않고 도착 직전 상태를 보여주기 위한 버튼 */}
-        <Button label="(시연) 도착 근처" variant="primary" style={styles.button} onPress={goToSpot} />
-      </View>
+      <Button label="그만 걷기" variant="outline" onPress={onStop} />
     </View>
   );
 }
@@ -126,18 +119,5 @@ const styles = StyleSheet.create({
   nextTexts: {
     flex: 1,
     gap: spacing.xxs,
-  },
-  detailButton: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: radius.sm,
-    backgroundColor: colors.background02,
-  },
-  buttons: {
-    flexDirection: 'row',
-    gap: spacing.xs,
-  },
-  button: {
-    flex: 1,
   },
 });

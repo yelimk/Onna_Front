@@ -144,7 +144,7 @@ src/
   app/            화면 주소와 화면 이동 구조 (Expo Router)
   features/       기능별 코드 (각 폴더의 screens/에 실제 화면)
     auth/           소개, 로그인, 회원가입, 권한, 취향 설문
-    map/            지도, 검색, 검색결과·경로 추천, 묶음 목록, 자리 상세, 열린 자리, 산책 경로, 신고
+    map/            지도, 검색, 검색결과·경로 추천, 묶음 목록, 길안내, 사진 카드(신고 창), 산책 경로
     record/         내 기록 목록, 기록 상세
     upload/         남기기 (촬영, 한 줄, 위치 확인)
     my/             마이, 좋아요 내역, 연 자리 기록, 두 목록의 상세, 기호 설정, 설정, 약관
@@ -158,7 +158,7 @@ src/
   types/          데이터 타입
 assets/
   fonts/          Pretendard 글꼴 파일
-  icons/          Figma 아이콘 SVG (검정·회색·흰색 파일이 따로 있으면 그 파일을 씀)
+  icons/          Figma 아이콘 SVG (검정·회색·흰색 파일이 따로 있으면 그 파일을 씀). 반짝이(sparkle-orange)만 PNG
   images/         앱 아이콘, 온보딩 일러스트 (onboarding/), 목록 예시 사진 (sample/)
 ```
 
@@ -175,7 +175,7 @@ GUI 디자인을 입힌 화면: 시작 화면(스플래시, 주황 배경), 소�
 
 가짜 데이터는 `src/mock/`와 각 기능의 `constants/preview-*.ts`에 있어요. 백엔드 API가 나오면 이 값을 서버 데이터로 바꿔요.
 
-지도 API는 **카카오맵**이에요. Expo Go에서도 열리도록 네이티브 SDK 대신 WebView 안에 카카오맵 JavaScript SDK를 띄워요. 지금은 지도 홈(`/map`), 검색결과(`/map/results`), 묶음 목록(`/map/cluster/[id]`)이 카카오맵이고, 나머지 지도 화면과 내 기록 지도, 남기기 위치 확인은 아직 회색 지도(`components/map-placeholder.tsx`)예요.
+지도 API는 **카카오맵**이에요. Expo Go에서도 열리도록 네이티브 SDK 대신 WebView 안에 카카오맵 JavaScript SDK를 띄워요. 지금은 지도 홈(`/map`), 검색결과(`/map/results`), 묶음 목록(`/map/cluster/[id]`), 길안내(`/map/navigation`), 남기기 위치 확인(`/upload/confirm`의 작은 지도, `features/map/components/place-preview-map.tsx`)이 카카오맵이고, 나머지 지도 화면(산책 경로 `/map/walk`)과 내 기록 지도는 아직 회색 지도(`components/map-placeholder.tsx`)예요.
 
 지도 홈은 Figma GUI 디자인(비탐색 모드, 탐색 모드)으로 바뀌었어요. 카카오맵 코드는 `features/map/kakao-map/`에 모여 있어요.
 
@@ -192,7 +192,7 @@ GUI 디자인을 입힌 화면: 시작 화면(스플래시, 주황 배경), 소�
 - **해시태그**: `#`으로 시작하면 해시태그 검색이에요. 서버(`GET /search/hashtags`)가 해시태그마다 가장 가까운 기록 자리·거리·기록 수·기록 핀을 줘요. 정확도순은 검색어와 똑같은 것 → 검색어로 시작하는 것 → 들어간 것 순으로 앱이 다시 놓아요 (`features/map/hooks/use-hashtag-search.ts`, `features/map/utils/search-hashtags.ts`). 검색결과 탭에서는 `#` 없이 쳐도 해시태그 탭에 결과가 나와요. 동네 이름은 카카오 좌표→주소 API로 붙여요 (`features/map/api/get-region-name.ts`).
 - **최근 검색기록**은 폰에 저장돼서 앱을 꺼도 남아요. 검색 화면과 검색결과 화면이 같은 기록을 써요.
 - 결과 하나를 누르면(목록이든 지도 표시든) 목록 대신 **경로 추천 카드**가 떠요. 지도에는 그곳만 핀으로 보이고, 카드에는 내 위치에서의 거리, 이 근처(300m) 남겨진 기록 수, 그 기록들의 해시태그가 나와요. 해시태그를 골라 '경로 추천'을 누르면 같은 화면에서 **AI 추천 경로**가 그려져요.
-  - 들를 자리: 서버 AI 추천(`GET /recommendations/route`, 목적지까지 걷는 대략의 시간을 `minutes`로 보냄)이 준 자리 중 내 위치→목적지 직선에서 250m 안쪽인 것을 최대 3곳, 걸어가며 만나는 순서로 골라요. 서버가 목적지를 받지 않아 가는 길에서 벗어난 자리는 빼요. 추천을 받지 못하면 지도 기록 중 고른 해시태그가 붙은 자리로 대신 골라요 (`features/map/hooks/use-walk-route.ts`, `features/map/utils/pick-route-stops.ts`).
+  - 들를 자리: 서버 AI 추천(`GET /recommendations/route`)에 목적지(`destLat`·`destLng`), 고른 해시태그(태그 사전 id, `tagIds`), 목적지까지 걷는 대략의 시간(`minutes`, 10~60분)을 보내고, 받은 자리를 받은 순서(걸어가며 만나는 순서)대로 최대 3곳 써요. 자리마다 제목·해시태그·장소 이름이 와요. 추천을 받지 못하면 지도 기록 중 고른 해시태그가 붙은, 내 위치→목적지 직선에서 250m 안쪽 자리로 대신 골라요 (`features/map/hooks/use-walk-route.ts`, `features/map/utils/pick-route-stops.ts`).
   - 경로 선: TMAP 보행자 경로 API로 실제 걷는 길을 받아요. 키가 없거나 실패하면 직선으로 이어요 (`features/map/api/get-walk-route.ts`).
   - 카드는 손잡이로 접고 펼쳐요. '이 길로 걷기'를 누르면 **길안내 화면**(`/map/navigation`)으로 목적지와 들를 자리를 넘겨요.
 - **길안내**(`/map/navigation`)는 걸으면서 내 위치를 경로 위에 놓아 걸어온 길(회색)과 남은 길(주황)을 나눠 그리고, 위쪽 띠에 '다음 자리까지 N분'(다 들렀으면 목적지까지)을 보여줘요. 아래 '범위 내 기록들'은 내 열림 반경 안의 기록이에요 (`features/map/hooks/use-walk-navigation.ts`). '길안내 종료'를 누르면 지도 홈으로 돌아가요. 목적지(25m 안)에 닿으면 아래 패널이 아래로 미끄러져 내려가고 (Figma '지도 경로 탐색 애니메이션'), 목적지 50m 안에 남겨진 기록이 있으면 서버에 열어 달라고 하고, 서버가 열어 주면 **'열렸어요'(사진 해금)** 화면을 띄워요. 어두운 판이 깔린 뒤 사진이 커지며 나타나고, 이어서 글과 버튼이 떠올라요 (Figma '지도 최종 목적지 도착 애니메이션'). '사진과 한 줄 보기'를 누르면 그 기록의 사진 카드가 떠요.
@@ -203,25 +203,27 @@ GUI 디자인을 입힌 화면: 시작 화면(스플래시, 주황 배경), 소�
 지도 홈 마커는 서버의 **지도 구역**(`GET /map/zones`)으로 그려요 (`features/map/hooks/use-map-zones.ts`, `features/map/utils/zones-to-markers.ts`).
 - 사진이 한 장인 구역은 사진 마커, 여러 장이면 묶음 마커('#첫태그 · 둘째태그 +N개 더')예요. 사진이 없는 구역은 Figma 지도 홈에 없어서 그리지 않아요.
 - 사진이 열렸는지와 얼마나 흐린지는 서버가 내 위치로 정한 흐림 단계(`S0`→`OPEN`)를 따르고, 사진도 서버가 흐리게 만든 것을 그대로 보여줘요.
-- 구역은 앱 전체가 한 번 받아 같이 써요. 30m 걸으면 다시 받고(흐림 단계가 바뀌므로), 가만히 있어도 사진 주소가 5분 뒤 만료되기 전에 4분마다 다시 받아요 (`map-config.ts`).
-- 위치 권한 없이 둘러보면 캠퍼스 가운데 기준으로 받고, 맛보기 사진(`isTeaser`)만 보여주고 나머지는 잠가요.
+- 구역은 앱 전체가 한 번 받아 같이 써요. 30m 걸으면 다시 받고(흐림 단계가 바뀌므로), 가만히 있어도 사진 주소가 30분 뒤 만료되기 전에 25분마다 다시 받아요 (`map-config.ts`).
+- 사진 마커는 사진마다 오는 좌표(일부러 흐린 좌표)에 놓고, 묶음 마커는 구역 자리에 놓아요.
+- 지도 구역은 남의 사진만 주고(남의 지도에는 올린 지 24시간 뒤부터), 내 사진은 빼고 줘요. 그래서 내가 남긴 기록은 `GET /users/me/posts`로 따로 받아 열린 사진 마커로 바로 올려요. 지도 홈에 들어올 때마다 다시 받아서 방금 남긴 기록도 보여요 (`features/map/hooks/use-my-map-posts.ts`).
+- 위치 권한 없이 둘러보면 위치(`lat`·`lng`·`accuracy`)를 빼고 캠퍼스 가운데를 지도 중심(`centerLat`·`centerLng`)으로 보내요. 서버가 맛보기·내가 연 사진만 열어 줘요.
 - 로그인하지 않았거나 인터넷이 끊기면 지도 위에 안내 한 줄이 떠요.
 
-지도 기능의 데이터는 모두 서버 API에 연결했어요. 사진에는 좌표가 없어서 지도 구역 자리에 놓는 등, 서버에 더 필요한 것은 따로 정리해 백엔드에 요청해요.
+지도 기능의 데이터는 모두 서버 API(2차 명세)에 연결했어요.
 
 ```
 앱 시작 → 소개 → 로그인 → (회원가입) → 권한 요청 → 취향 설문 → 지도
                                                   └─ 건너뛰기 → 지도
 
 아래 탭
-├─ 지도  /map            → 검색 → 검색결과 → 경로 추천 카드 → 산책 경로
-│                         → 묶음 목록, 자리 상세 → 열린 자리 → 신고(모달)
-│                         → 산책 경로 (추천 → 걷는 중)
+├─ 지도  /map            → 검색(검색창, 경로 버튼) → 검색결과 → 경로 추천 카드 → 산책 경로
+│                         → 묶음 목록 → 사진 카드 /photo/[id] (좋아요, 신고 창)
+│                         (옛 산책 경로 /map/walk는 코드만 남아 있고, 홈에서 들어가는 버튼은 없어요)
 ├─ 기록  /record         → 기록 상세 /record/[id]
 └─ 마이  /my             → 알림(오른쪽 위 종) → 기록 상세(/my/record/[id]), 좋아요 내역·연 자리 기록 → 상세(/my/spot/[id]), 사용자 기호 설정, 설정 → 약관
 
 남기기 (탭 바 없는 전체 화면)  /upload/camera → write → confirm → 내 기록
-  지도의 카메라 버튼, 자리 상세, 열린 자리에서 들어와요.
+  지도의 카메라 버튼, 사진 카드의 '나도 이 자리에 남기기'에서 들어와요.
 ```
 
 | 주소 | 화면 파일 | 와이어프레임 |
@@ -229,7 +231,7 @@ GUI 디자인을 입힌 화면: 시작 화면(스플래시, 주황 배경), 소�
 | `/intro`, `/login`, `/signup`, `/permission`, `/survey` | `features/auth/screens/` | ⓪ 시작 |
 | `/map`, `/map/search`, `/map/results`, `/map/navigation`, `/map/walk` | `features/map/screens/` | ① 지도 |
 | `/map/cluster/[id]` | `features/map/screens/` | ①-A |
-| `/map/spot/[id]`, `/opening/[id]`, `/map/opened/[id]`, `/report/[id]` | `features/map/screens/` | ①-A, ①-B |
+| `/photo/[id]` (사진 카드, 신고 창) | `features/map/screens/photo-detail-screen.tsx` | ①-A, ①-B |
 | `/record`, `/record/[id]` | `features/record/screens/` | ② 기록 |
 | `/upload/camera`, `/upload/write`, `/upload/confirm` | `features/upload/screens/` | ② 기록 |
 | `/my`, `/my/likes`, `/my/opened-history`, `/my/preferences`, `/my/settings` | `features/my/screens/` | ③ 마이 |
@@ -238,12 +240,11 @@ GUI 디자인을 입힌 화면: 시작 화면(스플래시, 주황 배경), 소�
 
 와이어프레임 여러 장이 한 화면의 여러 상태인 경우가 많아요. 예를 들어 위치 권한 안내와 탐색 모드는 `/map` 한 화면이고, AI 추천 산책길과 걷는 중은 `/map/walk` 한 화면이에요. 위치 권한 안내는 실제 권한을 따라요. 다시 보려면 폰 설정에서 Expo Go의 위치 권한을 끄면 돼요.
 
-- 지도 홈은 손가락으로 끌고 확대·축소해요. 사진 묶음을 누르면 묶음 목록, 사진을 누르면 자리 상세로 가요.
-- **묶음 목록**(`/map/cluster/[id]`)은 위쪽 카카오 지도에 고른 묶음을 주황 원으로 표시하고, 아래 패널에 묶음 안의 기록을 AI 추천순(서버가 준 순서)으로 보여줘요. 기록은 서버의 `GET /zones/{id}/posts`로 받고(묶음 id = 구역 id), 지도 구역과 같은 기준(30m 걷기, 4분)으로 다시 받아요 (`features/map/hooks/use-zone-posts.ts`). 기록을 누르면 사진 카드가 떠요.
+- 지도 홈은 손가락으로 끌고 확대·축소해요. 사진 묶음을 누르면 묶음 목록, 사진을 누르면 그 기록의 사진 카드(`/photo/[id]`)가 떠요.
+- **묶음 목록**(`/map/cluster/[id]`)은 위쪽 카카오 지도에 고른 묶음을 주황 원으로 표시하고, 아래 패널에 묶음 안의 기록을 AI 추천순(서버가 준 순서)으로 보여줘요. 기록은 서버의 `GET /zones/{id}/posts`로 받고(묶음 id = 구역 id), 지도 구역과 같은 기준(30m 걷기, 25분)으로 다시 받아요 (`features/map/hooks/use-zone-posts.ts`). 기록을 누르면 사진 카드가 떠요.
 - 검색결과와 묶음 목록의 아래 패널은 같은 부품(`features/map/components/map-bottom-sheet.tsx`)이에요. 손잡이를 누르거나 밀어서 접고 펼쳐요.
 - 오른쪽 위 **탐색 모드** 스위치를 켜면 내 위치 둘레에 열림 반경 원(25m, 서버가 사진을 열어 주는 거리)이 그려지고, 아래 패널에 **가장 가까운 기록**이 떠요. 패널은 손잡이를 누르거나 위아래로 밀어서 접고 펼쳐요. 펼친 동안에는 카메라 버튼이 숨어요.
-- 자리 상세(`/map/spot/[id]`)는 자리 종류에 따라 모양이 달라요. 맛보기 사진을 누르면 **맛보기**, 점선 `+`를 누르면 **빈 자리**, 나머지 흐린 사진을 누르면 **거리별 열림 단계**가 열려요.
-- 거리별 열림 단계는 **480m 멀리 → 120m 다가가는 중 → 25m 거의 열림 → 열렸어요(`/opening/[id]`) → 열린 자리(`/map/opened/[id]`)** 순서예요. 진짜 위치를 붙이기 전까지는 화면의 `(시연)` 버튼으로 다음 단계로 넘겨요. 단계와 거리 값은 `features/map/constants/approach-stages.ts`에 있어요.
+- 와이어프레임의 자리 상세(맛보기·빈 자리·거리별 열림 단계), 열렸어요, 열린 자리, 신고 화면은 Figma GUI(지도 홈탭 UI·지도 애니메이션)에 없어서 지웠어요. 그 역할은 사진 카드(`/photo/[id]`, 열기·좋아요·신고 창)와 길안내 도착 때의 '열렸어요'(사진 해금)가 맡아요.
 
 ## 남은 일
 
@@ -253,17 +254,18 @@ GUI 디자인을 입힌 화면: 시작 화면(스플래시, 주황 배경), 소�
 
 - [x] **지도 API 정하기** → 카카오맵 (WebView + JavaScript SDK, Expo Go에서 동작)
 - [x] 지도 홈을 카카오맵으로 바꾸기 → `features/map/kakao-map/`
-- [ ] 나머지 지도 화면의 회색 지도를 카카오맵으로 바꾸기 → `components/map-placeholder.tsx`를 쓰는 화면들
+- [ ] 나머지 지도 화면의 회색 지도를 카카오맵으로 바꾸기 → 남은 곳: 산책 경로(`walk-screen.tsx`)
 - [ ] 마커·경로를 화면 좌표에서 위도·경도로 바꾸기 → `features/map/constants/preview-*.ts`는 서버 데이터가 오면 지우기
 - [x] 위치 권한 확인·요청, 내 위치 가져오기 (앱 전체가 GPS 하나를 같이 씀) → `features/map/hooks/use-my-location.ts`
 - [ ] 남기기 화면에서도 내 위치가 필요하면 `use-my-location.ts`를 `src/hooks/`로 옮기기
 - [x] 지도 홈 탐색 모드 (열림 반경, 가장 가까운 기록 패널) → `features/map/components/explore-sheet.tsx`
 - [x] 열림 반경을 서버 사진 열기 기준(25m)과 맞추기 → `features/map/constants/map-config.ts`
 - [x] 탐색 모드 스위치에 눈 아이콘 넣기 → `features/map/components/explore-mode-toggle.tsx`
-- [ ] 거리 계산 함수 → `src/utils/`
-- [ ] 거리에 따라 열림 단계가 자동으로 바뀌게 하기. 캠퍼스에서 걸어보고 거리 값 정하기 → `features/map/constants/approach-stages.ts`
-- [ ] 걸어서 길 안내, AI 산책 경로 받아와서 그리기 (TMAP 보행자 경로 등)
-- [ ] 바텀시트를 손으로 끌어 올리고 내리기 (필요하면) → `features/map/components/bottom-panel.tsx`
+- [x] 거리 계산 함수 → `features/map/utils/get-distance-meters.ts` (지금은 지도만 써요. 다른 기능도 쓰게 되면 `src/utils/`로 옮기기)
+- [x] 거리에 따라 흐림 단계가 바뀌게 하기 → 서버가 내 위치로 정한 `stage`(S0→OPEN)를 따르고, 30m 걸으면 다시 받아요 (`features/map/hooks/use-map-zones.ts`). 사진은 서버 기준 25m 안에서 열려요
+- [x] 걸어서 길 안내, AI 경로 받아와서 그리기 → 검색결과 경로 카드 → 길안내(`/map/navigation`), 서버 경로 추천 + TMAP 보행자 경로
+- [ ] 산책 경로 화면(`/map/walk`, 지금은 들어가는 버튼 없음)도 서버 경로 추천·카카오맵으로 바꾸기 → 지금은 `preview-walk-route.ts` 가짜 데이터
+- [x] 바텀시트를 손으로 끌어 올리고 내리기 → `features/map/components/map-bottom-sheet.tsx`(검색결과·묶음 목록), `explore-sheet.tsx`(탐색 모드), `records-in-range-sheet.tsx`(길안내). 옛 와이어프레임 화면의 `bottom-panel.tsx`는 아직 고정
 
 ### 화면 담당
 
@@ -299,19 +301,19 @@ GUI 디자인을 입힌 화면: 시작 화면(스플래시, 주황 배경), 소�
 - [x] 묶음 목록(`getZonePosts`) → `features/map/hooks/use-zone-posts.ts`
 - [x] 사진 카드 열기·좋아요(`openPost`, `likePost`, `unlikePost`) → `features/map/hooks/use-opened-posts.ts`, `use-record-detail.ts`
 - [x] 해시태그 검색(`searchHashtags`) → `features/map/hooks/use-hashtag-search.ts`
-- [x] 산책 경로 추천(`getRouteRecommendation`) → `features/map/hooks/use-walk-route.ts` (서버가 목적지를 받지 않아 가는 길의 자리만 앱이 남김)
+- [x] 산책 경로 추천(`getRouteRecommendation`) → `features/map/hooks/use-walk-route.ts` (목적지·고른 해시태그를 같이 보냄)
 - 지도 위치는 서버 모양(`lat`, `lng`, `accuracy`)으로 바꿔 보내요 (`features/map/utils/to-coordinate.ts`, 오차는 `use-my-location.ts`의 `useLocationAccuracy`). 기록 id는 지도 안에서 문자열, 서버에 보낼 때 숫자로 바꿔요.
-- 흐림 단계·사진은 서버 `stage`·`imageUrl`을 그대로 써요. 사진 주소가 5분 뒤 만료돼서, 지도 구역·묶음·연 사진은 받은 지 4분이 지나면(앱이 다시 앞으로 올 때도) 다시 받아요.
+- 흐림 단계·사진은 서버 `stage`·`imageUrl`을 그대로 써요. 사진 주소가 30분 뒤 만료돼서, 지도 구역·묶음·연 사진은 받은 지 25분이 지나면(앱이 다시 앞으로 올 때도) 다시 받아요. 위치를 모르면 위치 셋을 빼고 보내요 (`toMyLocation`).
 - [x] 알림 목록('5분 전', '3시간 전', '작년'처럼 지금과의 차이로 묶음, `utils/format-relative-time.ts`), 새 알림 빨간 점(알림 화면과 마이 탭 종), 누르면 기록 상세 → `features/notification/hooks/use-notifications.ts`, `use-has-new-notifications.ts` (빨간 점은 서버가 주지 않아서 알림 화면을 마지막으로 나간 시각을 폰에 적어 두고 비교: `utils/notification-seen-at.ts`)
 - [ ] 아직 가짜 데이터: 좋아요 내역·연 자리 기록의 '지도' 보기 (칭호는 서버 없이 `features/my/constants/profile-badges.ts`에 고정)
 - [x] 장소 검색 → 카카오 로컬 API (`features/map/api/search-places.ts`)
 - [x] 해시태그 검색 → 서버 `GET /search/hashtags` (`features/map/hooks/use-hashtag-search.ts`)
-- [ ] 신고 보내기 (명세에 아직 없음) → `report-screen.tsx`
+- [ ] 신고 보내기 (명세에 아직 없음, 백엔드에 요청함) → `features/map/components/report-sheet.tsx` (사진 카드의 신고 창. 지금은 접수 안내만 보여줘요)
 
 ### GUI 디자인이 나오면
 
 - [ ] 회색 사진 자리를 실제 흐린 사진으로 (`expo-image`의 `blurRadius`) → `components/photo-placeholder.tsx`
-- [ ] 흐림이 걷히는 애니메이션 → `features/map/screens/opening-screen.tsx`
+- [x] 사진이 열리는 애니메이션 → `features/map/components/photo-unlock-overlay.tsx` (Figma '지도 최종 목적지 도착 애니메이션')
 - [x] 아래 탭 바 Figma 디자인 (아이콘, 고른 탭 위 주황 막대) → `components/app-tab-bar.tsx`
 - [ ] 와이어프레임 때문에 임시로 추가한 색 4개 맞추기 → `src/constants/colors.ts` 아래쪽
 - [x] 소개 화면 일러스트, 시작 화면(스플래시) 색 → `assets/images/onboarding/`, `app.json`

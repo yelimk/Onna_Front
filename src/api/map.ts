@@ -15,21 +15,27 @@ import type {
  */
 
 type ZonesOptions = {
-  /** 지도 중심. 없으면 내 위치 기준 */
+  /** 지도 중심. 없으면 내 위치 기준. 내 위치를 모르면(null) 꼭 보내야 한다. */
   center?: Coordinate;
   /** 반경(m), 기본 500 */
   radius?: number;
 };
 
-/** 지도 홈: 구역별 묶음과 대표 흐린 사진. 사진 0개 구역도 온다. */
-export function getMapZones(myLocation: MyLocation, { center, radius }: ZonesOptions = {}) {
+/**
+ * 지도 홈: 구역별 묶음과 대표 흐린 사진. 사진 0개 구역도 온다.
+ * 위치 권한이 없으면 myLocation을 null로 (lat·lng·accuracy를 셋 다 뺀다). 이때는 맛보기·내가 연 사진만 OPEN이다.
+ */
+export function getMapZones(myLocation: MyLocation | null, { center, radius }: ZonesOptions = {}) {
   return apiRequest<Zone[]>('/map/zones', {
     query: { ...myLocation, centerLat: center?.lat, centerLng: center?.lng, radius },
   });
 }
 
-/** 묶음 안 사진 목록. sort 기본값은 서버의 'recommend'(추천순) */
-export function getZonePosts(zoneId: number, myLocation: MyLocation, sort?: string) {
+/** 묶음 안 사진 정렬: 추천순(기본), 좋아요 많은 순, 가까운 순(위치 없으면 추천순) */
+export type ZonePostsSort = 'recommend' | 'likes' | 'distance';
+
+/** 묶음 안 사진 목록. 위치 권한이 없으면 myLocation을 null로 (셋 다 뺀다). */
+export function getZonePosts(zoneId: number, myLocation: MyLocation | null, sort?: ZonePostsSort) {
   return apiRequest<PostPreview[]>(`/zones/${zoneId}/posts`, { query: { ...myLocation, sort } });
 }
 
@@ -52,7 +58,18 @@ export function searchHashtags(keyword: string, from: Coordinate) {
   return apiRequest<HashtagSearchResult[]>('/search/hashtags', { query: { keyword, ...from } });
 }
 
-/** 산책 경로 추천. minutes 기본 20분 */
-export function getRouteRecommendation(from: Coordinate, minutes?: number) {
-  return apiRequest<RouteRecommendation>('/recommendations/route', { query: { ...from, minutes } });
+type RouteOptions = {
+  /** 걷는 시간(분). 5~60, 기본 20 */
+  minutes?: number;
+  /** 목적지. 주면 가는 길에 들를 자리를 고른다. */
+  destination?: Coordinate;
+  /** 고른 해시태그(태그 사전 id) */
+  tagIds?: number[];
+};
+
+/** 산책 경로 추천. 들를 곳이 없으면 title은 null, stops는 빈 배열이다. 목적지를 한쪽만 주거나 minutes가 범위 밖이면 INVALID_INPUT */
+export function getRouteRecommendation(from: Coordinate, { minutes, destination, tagIds }: RouteOptions = {}) {
+  return apiRequest<RouteRecommendation>('/recommendations/route', {
+    query: { ...from, minutes, destLat: destination?.lat, destLng: destination?.lng, tagIds },
+  });
 }

@@ -18,6 +18,7 @@ import { mapChromeFadeMs } from '@/features/map/constants/map-motion';
 import { useHomeMapMarkers } from '@/features/map/hooks/use-home-map-markers';
 import { useHomePlace } from '@/features/map/hooks/use-home-place';
 import { useMyLocation } from '@/features/map/hooks/use-my-location';
+import { useMyMapPosts } from '@/features/map/hooks/use-my-map-posts';
 import { usePlaceRoute } from '@/features/map/hooks/use-place-route';
 import { useResultsMap, type ResultsMapView } from '@/features/map/hooks/use-results-map';
 import { KakaoMapView } from '@/features/map/kakao-map/kakao-map-view';
@@ -38,6 +39,7 @@ function openMarker(marker: MapMarker) {
  * Figma '지도 홈 화면 UI'. 카카오맵 위에 사진 마커, 검색창, 탐색 모드 스위치, 남기기 버튼을 올린다.
  * 탐색 모드를 켜면 내 위치 둘레에 열림 반경을 그리고, 아래 패널에서 가장 가까운 기록을 보여준다.
  * 해시태그 검색에서 장소를 넘겨받으면 그 장소 카드를 띄우고, 경로 추천을 받을 수 있다 (Figma '지도 해시태그 검색 시 경로 추천 UI').
+ * 내가 남긴 기록은 지도 구역에 들어 있지 않아서(남의 사진만 옴) 따로 받아 함께 올린다.
  * 위치 권한이 없으면 지도 위에 권한 안내를 덮는다.
  * 검색창을 누르면 Figma '지도 홈 화면 애니메이션'처럼 검색창·탐색 모드만 남기고 나머지를 흐리게 지운 뒤 검색 창을 띄운다.
  */
@@ -46,6 +48,7 @@ export function MapScreen() {
   const { isChecking, isGranted, location, request } = useMyLocation();
   const { markers, nearestPhoto, errorCode } = useHomeMapMarkers(location);
   const zonesNotice = getZonesNotice(errorCode);
+  const myPostMarkers = useMyMapPosts();
   const [isExploring, setIsExploring] = useState(false);
   // 탐색 모드를 켜면 바로 가장 가까운 기록이 보이도록 펼친 상태로 시작한다.
   const [isSheetExpanded, setIsSheetExpanded] = useState(true);
@@ -65,10 +68,10 @@ export function MapScreen() {
   const placeRoute = usePlaceRoute(place, location);
   const [cardHeight, setCardHeight] = useState(0);
   const placeMap = useResultsMap(placeRoute.mapView ?? noPlaceView, cardHeight);
-  // 홈 마커는 그대로 두고, 고른 장소의 핀을 위에 더한다.
+  // 남의 기록(구역)에 내 기록을 더하고, 고른 장소가 있으면 그 핀을 위에 더한다.
   const mapMarkers = useMemo<MapMarker[]>(
-    () => (place ? [...markers, ...placeMap.markers] : markers),
-    [place, markers, placeMap.markers],
+    () => [...markers, ...myPostMarkers, ...(place ? placeMap.markers : [])],
+    [markers, myPostMarkers, place, placeMap.markers],
   );
 
   const showPermissionCard = !isChecking && !isGranted && !isBrowsing;
@@ -131,7 +134,7 @@ export function MapScreen() {
         ) : (
           <View style={[styles.bottom, isExploring && styles.bottomWithSheet]}>
             <View style={styles.actions}>
-              <MapActionButtons showCamera={!isRecordVisible} />
+              <MapActionButtons onRoutePress={openSearch} showCamera={!isRecordVisible} />
             </View>
             {isExploring && (
               <ExploreSheet

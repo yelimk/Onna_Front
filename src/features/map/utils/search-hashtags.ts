@@ -37,7 +37,11 @@ export function toHashtagResults(results: HashtagSearchResult[], keyword: string
         coordinate: fromServerCoordinate(result),
         distanceMeters: result.distanceM,
         recordCount: result.postCount,
-        postPins: result.posts.map((post) => ({ postId: String(post.postId), coordinate: fromServerCoordinate(post) })),
+        postPins: result.posts.map((post) => ({
+          postId: String(post.postId),
+          coordinate: fromServerCoordinate(post),
+          placeName: post.zoneName,
+        })),
       };
     })
     .sort((a, b) => matchRank(a.name) - matchRank(b.name));

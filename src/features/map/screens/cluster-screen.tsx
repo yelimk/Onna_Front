@@ -33,11 +33,11 @@ export function ClusterScreen() {
   const { height: windowHeight } = useWindowDimensions();
   const { location } = useMyLocation();
   // 지도 홈과 같은 마커에서 묶음을 찾아야 홈에서 누른 자리와 같은 곳이 보인다.
-  const { markers, zones, isNearMe } = useHomeMapMarkers(location);
+  const { markers, zones } = useHomeMapMarkers(location);
   const [isSheetExpanded, setIsSheetExpanded] = useState(true);
 
   const zone = zones.find(({ zoneId }) => String(zoneId) === id);
-  const { posts, errorCode } = useZonePosts(zone, location, isNearMe);
+  const { posts, errorCode } = useZonePosts(zone, location);
   const cluster = markers.find((marker) => marker.kind === 'cluster' && marker.id === id);
   const sheetHeight = Math.round(windowHeight * expandedSheetRatio);
 

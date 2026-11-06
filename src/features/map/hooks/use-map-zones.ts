@@ -3,21 +3,14 @@ import { AppState } from 'react-native';
 
 import { isApiError } from '@/api/api-error';
 import { getMapZones } from '@/api/map';
-import {
-  browsingAccuracyMeters,
-  defaultMapCenter,
-  zonesRefetchMeters,
-  zonesRefreshMs,
-} from '@/features/map/constants/map-config';
+import { defaultMapCenter, zonesRefetchMeters, zonesRefreshMs } from '@/features/map/constants/map-config';
 import type { Coordinate } from '@/features/map/types/home-map-marker';
 import { getDistanceMeters } from '@/features/map/utils/get-distance-meters';
-import { toServerCoordinate } from '@/features/map/utils/to-coordinate';
+import { toMyLocation, toServerCoordinate } from '@/features/map/utils/to-coordinate';
 import type { Zone } from '@/types/api';
 
 export type ZonesState = {
   zones: Zone[];
-  /** 내 위치로 받은 구역인지. false면 위치 없이 캠퍼스 가운데로 받은 것이다. */
-  isNearMe: boolean;
   /** 받지 못했을 때 그 이유. 로그인 안 함(UNAUTHORIZED 등), 인터넷 끊김(NETWORK_ERROR) */
   errorCode: string | null;
 };
@@ -26,7 +19,7 @@ export type ZonesState = {
  * 지도 구역은 앱 전체가 하나를 같이 쓴다. 지도 홈, 묶음, 검색, 길안내가 같은 기록을 봐야
  * 한 화면에서 연 사진이 다른 화면에서 잠겨 보이는 일이 없고, 화면마다 서버에 따로 묻지 않는다.
  */
-let state: ZonesState = { zones: [], isNearMe: false, errorCode: null };
+let state: ZonesState = { zones: [], errorCode: null };
 let lastRequest: { at: number; origin: Coordinate | null } | null = null;
 let isFetching = false;
 /** 가장 최근에 화면이 알려 준 위치. 받는 중에 위치가 바뀌면, 끝난 뒤 이 위치로 다시 볼 수 있게 남겨 둔다. */
@@ -48,18 +41,19 @@ function shouldRefetch(origin: Coordinate | null) {
   return origin !== null && lastRequest.origin !== null && getDistanceMeters(origin, lastRequest.origin) >= zonesRefetchMeters;
 }
 
-async function requestZones(origin: Coordinate | null, accuracy: number | null) {
-  latest = { origin, accuracy };
+async function requestZones(location: Coordinate | null, accuracy: number | null) {
+  latest = { origin: location, accuracy };
+  const myLocation = toMyLocation(location, accuracy);
+  // 오차를 아직 모르면 위치 없이 받은 것으로 친다. 오차가 잡히면 '위치가 생김'으로 보고 다시 받는다.
+  const origin = myLocation ? location : null;
   if (isFetching || !shouldRefetch(origin)) return;
   isFetching = true;
   lastRequest = { at: Date.now(), origin };
   try {
-    const myLocation = {
-      ...toServerCoordinate(origin ?? defaultMapCenter),
-      accuracy: origin ? (accuracy ?? browsingAccuracyMeters) : browsingAccuracyMeters,
-    };
-    const zones = await getMapZones(myLocation);
-    setState({ zones, isNearMe: origin !== null, errorCode: null });
+    // 위치를 모르면 위치 셋(lat·lng·accuracy)을 다 빼고 지도 가운데(캠퍼스)를 중심으로 보낸다.
+    // 서버는 이때 맛보기·내가 연 사진만 열어 주므로 앱이 따로 잠글 필요가 없다.
+    const zones = await getMapZones(myLocation, myLocation ? {} : { center: toServerCoordinate(defaultMapCenter) });
+    setState({ zones, errorCode: null });
   } catch (error) {
     // 받은 구역은 그대로 두고 이유만 알린다. 잠깐 끊겨도 지도가 텅 비지 않게 한다.
     setState({ ...state, errorCode: isApiError(error) ? error.code : 'UNKNOWN' });
@@ -80,7 +74,7 @@ const subscribe = (listener: () => void) => {
 const getSnapshot = () => state;
 
 /**
- * 내 위치 둘레의 지도 구역(GET /map/zones). 위치를 모르면 캠퍼스 가운데 둘레를 받는다.
+ * 내 위치 둘레의 지도 구역(GET /map/zones). 위치를 모르면 위치 없이 캠퍼스 가운데 둘레를 받는다.
  * 걸으면 흐림 단계가 바뀌므로 위치가 바뀔 때마다 다시 받을지 보고, 가만히 있어도 사진 주소가 만료되기 전에 다시 받는다.
  */
 export function useMapZones(myLocation: Coordinate | null, accuracy: number | null) {

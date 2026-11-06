@@ -40,7 +40,7 @@ export function PhotoDetailCard({ record, photoHeight, onClose, onReport, onLeav
     <View style={styles.card}>
       <View style={styles.header}>
         <AppText variant="heading03" numberOfLines={1} style={styles.title}>
-          {record.placeName}
+          {record.title}
         </AppText>
         {record.isUnlocked && (
           <Pressable accessibilityRole="button" accessibilityLabel="신고" onPress={onReport} style={styles.headerButton}>

@@ -3,7 +3,8 @@ import { apiBaseUrl } from '@/api/config';
 import { notifySessionExpired } from '@/api/session-events';
 import { clearTokens, getTokens, saveTokens, type Tokens } from '@/api/token-storage';
 
-type QueryValue = string | number | boolean | undefined;
+/** 배열은 같은 이름으로 여러 번 붙인다 (tagIds=1&tagIds=2). 서버(Spring)가 그렇게 받는다. */
+type QueryValue = string | number | boolean | undefined | (string | number)[];
 
 type RequestOptions = {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
@@ -17,9 +18,11 @@ type RequestOptions = {
 };
 
 function buildUrl(path: string, query?: Record<string, QueryValue>) {
-  const params = Object.entries(query ?? {})
-    .filter(([, value]) => value !== undefined)
-    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`);
+  const params = Object.entries(query ?? {}).flatMap(([key, value]) =>
+    (value === undefined ? [] : Array.isArray(value) ? value : [value]).map(
+      (item) => `${encodeURIComponent(key)}=${encodeURIComponent(String(item))}`,
+    ),
+  );
   return `${apiBaseUrl}${path}${params.length > 0 ? `?${params.join('&')}` : ''}`;
 }
 
