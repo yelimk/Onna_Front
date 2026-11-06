@@ -134,7 +134,7 @@ export function MapScreen() {
         ) : (
           <View style={[styles.bottom, isExploring && styles.bottomWithSheet]}>
             <View style={styles.actions}>
-              <MapActionButtons showCamera={!isRecordVisible} />
+              <MapActionButtons onRoutePress={openSearch} showCamera={!isRecordVisible} />
             </View>
             {isExploring && (
               <ExploreSheet

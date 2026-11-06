@@ -216,9 +216,9 @@ GUI 디자인을 입힌 화면: 시작 화면(스플래시, 주황 배경), 소�
                                                   └─ 건너뛰기 → 지도
 
 아래 탭
-├─ 지도  /map            → 검색 → 검색결과 → 경로 추천 카드 → 산책 경로
+├─ 지도  /map            → 검색(검색창, 경로 버튼) → 검색결과 → 경로 추천 카드 → 산책 경로
 │                         → 묶음 목록 → 사진 카드 /photo/[id] (좋아요, 신고 창)
-│                         → 산책 경로 (추천 → 걷는 중)
+│                         (옛 산책 경로 /map/walk는 코드만 남아 있고, 홈에서 들어가는 버튼은 없어요)
 ├─ 기록  /record         → 기록 상세 /record/[id]
 └─ 마이  /my             → 알림(오른쪽 위 종), 좋아요 내역·연 자리 기록 → 상세(/my/spot/[id]), 사용자 기호 설정, 설정 → 약관
 
@@ -264,7 +264,7 @@ GUI 디자인을 입힌 화면: 시작 화면(스플래시, 주황 배경), 소�
 - [x] 거리 계산 함수 → `features/map/utils/get-distance-meters.ts` (지금은 지도만 써요. 다른 기능도 쓰게 되면 `src/utils/`로 옮기기)
 - [x] 거리에 따라 흐림 단계가 바뀌게 하기 → 서버가 내 위치로 정한 `stage`(S0→OPEN)를 따르고, 30m 걸으면 다시 받아요 (`features/map/hooks/use-map-zones.ts`). 사진은 서버 기준 25m 안에서 열려요
 - [x] 걸어서 길 안내, AI 경로 받아와서 그리기 → 검색결과 경로 카드 → 길안내(`/map/navigation`), 서버 경로 추천 + TMAP 보행자 경로
-- [ ] 산책 경로 화면(`/map/walk`, 지도 홈 '산책 경로 추천' 버튼)도 서버 경로 추천·카카오맵으로 바꾸기 → 지금은 `preview-walk-route.ts` 가짜 데이터
+- [ ] 산책 경로 화면(`/map/walk`, 지금은 들어가는 버튼 없음)도 서버 경로 추천·카카오맵으로 바꾸기 → 지금은 `preview-walk-route.ts` 가짜 데이터
 - [x] 바텀시트를 손으로 끌어 올리고 내리기 → `features/map/components/map-bottom-sheet.tsx`(검색결과·묶음 목록), `explore-sheet.tsx`(탐색 모드), `records-in-range-sheet.tsx`(길안내). 옛 와이어프레임 화면의 `bottom-panel.tsx`는 아직 고정
 
 ### 화면 담당
