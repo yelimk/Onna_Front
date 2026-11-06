@@ -17,12 +17,13 @@ type SurveyDoneProps = {
 /** 설문 완료: 고른 취향을 요약하고 지도로 보낸다 */
 export function SurveyDone({ answers, placeNames, nickname, nearbySpotCount }: SurveyDoneProps) {
   const relationTitle = relationOptions.find((option) => option.id === answers.relation)?.title ?? '-';
-  const walkSummary = [...answers.walkTimes, answers.walkDuration].filter(Boolean).join(' · ') || '-';
+  const walkItems: string[] = [...answers.walkTimes, ...(answers.walkDuration ? [answers.walkDuration] : [])];
 
+  // 값은 조각(해시태그 하나, 걷는 때 하나)으로 나눠 둔다. 길면 조각 사이에서 줄이 바뀐다
   const rows = [
-    { label: '나와 대구·경북', value: relationTitle },
-    { label: '끌리는 자리', value: placeNames.join(' ') || '-' },
-    { label: '걷는 때', value: walkSummary },
+    { label: '나와 대구·경북', pieces: [relationTitle] },
+    { label: '끌리는 자리', pieces: placeNames.length > 0 ? placeNames : ['-'] },
+    { label: '걷는 때', pieces: walkItems.length > 0 ? withDots(walkItems) : ['-'] },
   ];
 
   return (
@@ -50,10 +51,14 @@ export function SurveyDone({ answers, placeNames, nickname, nearbySpotCount }: S
               <AppText variant="caption02" color="textTertiary">
                 {row.label}
               </AppText>
-              {/* Figma는 한 줄로만 보여준다. 해시태그를 많이 고르면 끝을 말줄임으로 자른다. */}
-              <AppText variant="subtitle04" numberOfLines={1} style={styles.value}>
-                {row.value}
-              </AppText>
+              {/* Figma 디자인 수정: 값이 길면 자르지 않고 오른쪽에 맞춘 채 다음 줄로 넘긴다 */}
+              <View style={styles.value}>
+                {row.pieces.map((piece, index) => (
+                  <AppText key={`${piece}-${index}`} variant="subtitle04">
+                    {piece}
+                  </AppText>
+                ))}
+              </View>
             </View>
           ))}
         </View>
@@ -107,13 +112,24 @@ const styles = StyleSheet.create({
   rows: {
     gap: spacing.xs,
   },
+  // 값이 여러 줄이 되어도 이름은 첫 줄 높이에 둔다 (Figma)
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
     gap: spacing.md,
   },
+  // Figma: 조각 사이 4, 줄 사이 4, 오른쪽 맞춤
   value: {
     flexShrink: 1,
-    textAlign: 'right',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-end',
+    gap: spacing.xxs,
   },
 });
+
+/** 걷는 때 조각 사이에 '·'를 따로 끼운다. 줄이 바뀌어도 점이 앞 조각에 붙어 있게 (Figma: 조각과 점이 따로 있음) */
+function withDots(items: string[]) {
+  return items.flatMap((item, index) => (index === 0 ? [item] : ['·', item]));
+}
