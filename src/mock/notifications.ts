@@ -14,9 +14,8 @@ import { getStartOfToday, getStartOfWeek } from '@/utils/week-range';
 const toUri = (photo: number) => Image.resolveAssetSource?.(photo)?.uri ?? '';
 
 /*
- * '오늘'·'이번주' 묶음이 늘 보이게 오늘 0시와 이번 주 월요일 0시를 기준으로 시각을 정한다.
+ * 예시가 '몇 시간 전', '며칠 전'처럼 여러 묶음으로 보이게 오늘 0시와 이번 주 월요일 0시를 기준으로 시각을 정한다.
  * 지금 시각 기준으로 정하면 앱을 켤 때마다 알림이 새로 온 것처럼 빨간 점이 다시 붙는다.
- * 오늘이 월요일이면 '이번주' 예시도 오늘 묶음에 들어간다.
  */
 const minutesAfterToday = (minutes: number) => new Date(getStartOfToday() + minutes * 60_000).toISOString();
 const minutesAfterMonday = (minutes: number) => new Date(getStartOfWeek() + minutes * 60_000).toISOString();
