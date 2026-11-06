@@ -12,6 +12,7 @@ import { ScreenContainer } from '@/components/screen-container';
 import { ScreenHeader } from '@/components/screen-header';
 import { spacing } from '@/constants/layout';
 import { MenuGroup, MenuRow } from '@/features/my/components/menu-group';
+import { useMyEmail } from '@/features/my/hooks/use-my-email';
 import { usePermissionLabels } from '@/features/my/hooks/use-permission-labels';
 import { showApiError } from '@/utils/show-api-error';
 
@@ -24,6 +25,7 @@ import { showApiError } from '@/utils/show-api-error';
  */
 export function SettingsScreen() {
   const permissionLabels = usePermissionLabels();
+  const email = useMyEmail();
   const openPhoneSettings = () => Linking.openSettings();
 
   const [isConfirmingWithdraw, setIsConfirmingWithdraw] = useState(false);
@@ -83,8 +85,8 @@ export function SettingsScreen() {
         </MenuGroup>
 
         <MenuGroup title="계정 · 안전">
-          {/* Figma 오른쪽 값은 '카카오'지만 앱은 이메일로만 로그인한다. 주소를 보여주면 긴 주소가 줄을 밀어내서 제목만 둔다 (팀 결정) */}
-          <MenuRow label="로그인 계정" />
+          {/* Figma 오른쪽 값은 '카카오'지만 앱은 이메일로만 로그인해서 이메일 주소를 보여준다. 길면 뒤를 '…'로 줄인다 (디자이너 요청) */}
+          <MenuRow label="로그인 계정" trailing={email} truncateTrailing />
           <MenuRow label="이용약관 · 개인정보 처리방침" onPress={() => router.push('/terms')} />
           <MenuRow label="버전" trailing={Constants.expoConfig?.version ?? '-'} />
         </MenuGroup>
