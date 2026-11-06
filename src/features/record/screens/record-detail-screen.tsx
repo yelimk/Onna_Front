@@ -12,6 +12,7 @@ import { colors } from '@/constants/colors';
 import { radius, spacing } from '@/constants/layout';
 import { DeleteConfirmDialog } from '@/features/record/components/delete-confirm-dialog';
 import { useMyPosts } from '@/hooks/use-my-posts';
+import { mockNotificationPosts } from '@/mock/notifications';
 import { formatDate } from '@/utils/format-date';
 import { formatHashtag } from '@/utils/format-hashtag';
 import { showApiError } from '@/utils/show-api-error';
@@ -22,13 +23,15 @@ const deleteButtonSize = 36;
 /**
  * ② 기록 탭: 내 기록 상세. 사진은 앱 카메라 비율(세로 3:4) 그대로 크게 보여준다.
  * 기록 하나만 받는 API가 없어서 내 기록 목록을 다시 받아 id로 찾는다 (사진 주소도 새로 받게 된다).
- * 머리글 가운데는 기록 제목이다. 서버에 아직 제목이 없어서 제목이 없는 기록은 비워 둔다.
+ * 머리글 가운데는 기록 제목이다. 제목이 필수가 되기 전에 올린 기록은 제목이 없어서 비워 둔다.
+ * 마이 탭 알림에서도 이 화면을 연다(/my/record/[id]). 그래야 뒤로 가면 알림 화면으로 돌아온다.
  * 오른쪽 위 휴지통으로 한 번 더 물은 뒤 지운다.
  */
 export function RecordDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { posts } = useMyPosts();
-  const post = posts?.find((item) => String(item.postId) === id);
+  // 예시 알림을 누르고 들어오면 예시 기록에서 찾는다 (시연 전에 지운다, mock/notifications.ts)
+  const post = [...(posts ?? []), ...mockNotificationPosts].find((item) => String(item.postId) === id);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
   // 목록을 받기 전에는 머리글만 보여준다

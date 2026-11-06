@@ -34,15 +34,17 @@ export function PhotoListRow({ item, onPress, right }: PhotoListRowProps) {
               style={[styles.photo, { width: size.photo, height: size.photo }]}
               contentFit="cover"
             />
-            <View style={styles.texts}>
-              <AppText variant={size.title} numberOfLines={1}>
-                {item.title}
-              </AppText>
-              <AppText variant={size.caption} color="textTertiary" numberOfLines={1}>
-                {item.hashtags.join(' ')}
-              </AppText>
+            <View style={styles.textsAndRight}>
+              <View style={styles.texts}>
+                <AppText variant={size.title} numberOfLines={1}>
+                  {item.title}
+                </AppText>
+                <AppText variant={size.caption} color="textTertiary" numberOfLines={1}>
+                  {item.hashtags.join(' ')}
+                </AppText>
+              </View>
+              {right}
             </View>
-            {right}
           </View>
         );
       }}
@@ -75,6 +77,13 @@ const styles = StyleSheet.create({
   },
   photo: {
     borderRadius: radius.sm,
+  },
+  // Figma list_m: 사진과 글 사이는 16이지만, 글과 오른쪽 하트 사이는 4라서 둘을 한 묶음으로 둔다
+  textsAndRight: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xxs,
   },
   // Figma list_l·list_m: 글 묶음 위아래 4
   texts: {

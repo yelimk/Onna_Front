@@ -31,7 +31,7 @@ export function SurveyScreen() {
   const [answers, setAnswers] = useState<SurveyAnswers>({ placeTagIds: [], walkTimes: [] });
   const [nickname, setNickname] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-  const { tags } = useTags();
+  const { tags, hasFailed, reload } = useTags();
 
   useEffect(() => {
     getMe()
@@ -104,6 +104,8 @@ export function SurveyScreen() {
       {step === 2 && (
         <PlaceStep
           tags={tags}
+          hasFailed={hasFailed}
+          onRetry={reload}
           value={answers.placeTagIds}
           onChange={(placeTagIds) => update({ placeTagIds })}
         />

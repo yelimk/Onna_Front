@@ -1,5 +1,5 @@
 import { apiRequest } from '@/api/client';
-import type { Achievements, LikedSpot, Me, MyPost, OpenedSpot, Tag } from '@/types/api';
+import type { Achievements, AppNotification, LikedSpot, Me, MyPost, OpenedSpot, Tag } from '@/types/api';
 
 /** 내 정보. onboarded가 false면 취향 설문으로 보낸다. */
 export function getMe() {
@@ -29,6 +29,11 @@ export function getMyAchievements() {
 /** 연 자리 기록 (최근에 연 순서) */
 export function getMyOpens() {
   return apiRequest<OpenedSpot[]>('/users/me/opens');
+}
+
+/** 알림 목록 (최근 순, 최대 50개). 푸시 없이 이 목록으로만 본다 */
+export function getMyNotifications() {
+  return apiRequest<AppNotification[]>('/users/me/notifications');
 }
 
 /** 좋아요 내역 (최근에 누른 순서). 나만 볼 수 있다 */

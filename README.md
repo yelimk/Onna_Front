@@ -218,7 +218,7 @@ GUI 디자인을 입힌 화면: 시작 화면(스플래시, 주황 배경), 소�
 │                         → 묶음 목록, 자리 상세 → 열린 자리 → 신고(모달)
 │                         → 산책 경로 (추천 → 걷는 중)
 ├─ 기록  /record         → 기록 상세 /record/[id]
-└─ 마이  /my             → 알림(오른쪽 위 종), 좋아요 내역·연 자리 기록 → 상세(/my/spot/[id]), 사용자 기호 설정, 설정 → 약관
+└─ 마이  /my             → 알림(오른쪽 위 종) → 기록 상세(/my/record/[id]), 좋아요 내역·연 자리 기록 → 상세(/my/spot/[id]), 사용자 기호 설정, 설정 → 약관
 
 남기기 (탭 바 없는 전체 화면)  /upload/camera → write → confirm → 내 기록
   지도의 카메라 버튼, 자리 상세, 열린 자리에서 들어와요.
@@ -271,7 +271,7 @@ GUI 디자인을 입힌 화면: 시작 화면(스플래시, 주황 배경), 소�
 - [x] 카메라 화면 GUI, 찍은 사진을 가운데 3:4로 자르고 1080×1440으로 줄이기 → `features/upload/utils/normalize-photo.ts`
 - [x] 권한 안내 화면에서 실제 위치·카메라·알림 권한 요청 → `features/auth/utils/request-app-permissions.ts`
 - [ ] 로그인 여부에 따라 첫 화면 정하기 (지금은 항상 소개 화면) → `src/app/index.tsx`
-- [x] 설정의 권한 상태를 실제 값으로 → `features/my/hooks/use-permission-labels.ts`
+- [x] 설정의 위치·카메라·알림 권한 상태를 실제 값으로 (누르면 폰 설정, 앱으로 돌아오면 다시 확인) → `features/my/hooks/use-permission-labels.ts`
 - [ ] 약관 실제 문장 확정 (Figma도 아직 제목만 있음) → `features/my/screens/terms-screen.tsx`
 - [ ] 회원 탈퇴 (계정 API가 나오면). 비밀번호 찾기는 Figma 보류
 
@@ -294,6 +294,7 @@ GUI 디자인을 입힌 화면: 시작 화면(스플래시, 주황 배경), 소�
 - [x] 남기기: 셔터 순간 위치, 서버 질문, 제목(10자), AI 해시태그 추천(번호 없이 이름으로 주고받음), 업로드(얼굴·위치 거절 안내) → `features/upload/`
 - [x] 내 기록 목록·상세, 마이 탭 닉네임·남긴 자리·연 자리·좋아한 자리 수 → `hooks/use-my-posts.ts`, `features/my/hooks/use-my-summary.ts`
 - [x] 좋아요 내역·연 자리 기록 목록과 상세, 좋아요 누르기·취소 → `features/my/hooks/use-my-spots.ts`, `use-liked-spots.ts` (상세의 한 줄 코멘트는 목록 API에 없어서 비어 있음)
+- [ ] 시연 전에 지울 예시 데이터: 서버 목록이 비었을 때 대신 보여주는 내 기록(`mock/my-posts.ts`), 좋아요 내역·연 자리 기록(`mock/my-spots.ts`), 알림(`mock/notifications.ts`)
 - [x] 지도 홈 마커(`getMapZones`) → `features/map/hooks/use-map-zones.ts`, `utils/zones-to-markers.ts`
 - [x] 묶음 목록(`getZonePosts`) → `features/map/hooks/use-zone-posts.ts`
 - [x] 사진 카드 열기·좋아요(`openPost`, `likePost`, `unlikePost`) → `features/map/hooks/use-opened-posts.ts`, `use-record-detail.ts`
@@ -301,7 +302,8 @@ GUI 디자인을 입힌 화면: 시작 화면(스플래시, 주황 배경), 소�
 - [x] 산책 경로 추천(`getRouteRecommendation`) → `features/map/hooks/use-walk-route.ts` (서버가 목적지를 받지 않아 가는 길의 자리만 앱이 남김)
 - 지도 위치는 서버 모양(`lat`, `lng`, `accuracy`)으로 바꿔 보내요 (`features/map/utils/to-coordinate.ts`, 오차는 `use-my-location.ts`의 `useLocationAccuracy`). 기록 id는 지도 안에서 문자열, 서버에 보낼 때 숫자로 바꿔요.
 - 흐림 단계·사진은 서버 `stage`·`imageUrl`을 그대로 써요. 사진 주소가 5분 뒤 만료돼서, 지도 구역·묶음·연 사진은 받은 지 4분이 지나면(앱이 다시 앞으로 올 때도) 다시 받아요.
-- [ ] 아직 가짜 데이터: 알림(서버 API는 있음, 아직 안 붙임), 좋아요 내역·연 자리 기록의 '지도' 보기, 회원 탈퇴 (칭호는 서버 없이 `features/my/constants/profile-badges.ts`에 고정)
+- [x] 알림 목록, 오늘·이번주 묶음, 새 알림 빨간 점, 누르면 기록 상세 → `features/notification/hooks/use-notifications.ts` (빨간 점은 서버가 주지 않아서 알림 화면을 마지막으로 나간 시각을 폰에 적어 두고 비교: `utils/notification-seen-at.ts`)
+- [ ] 아직 가짜 데이터: 좋아요 내역·연 자리 기록의 '지도' 보기, 회원 탈퇴 (칭호는 서버 없이 `features/my/constants/profile-badges.ts`에 고정)
 - [x] 장소 검색 → 카카오 로컬 API (`features/map/api/search-places.ts`)
 - [x] 해시태그 검색 → 서버 `GET /search/hashtags` (`features/map/hooks/use-hashtag-search.ts`)
 - [ ] 신고 보내기 (명세에 아직 없음) → `report-screen.tsx`

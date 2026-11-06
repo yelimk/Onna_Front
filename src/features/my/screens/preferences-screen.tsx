@@ -1,8 +1,9 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { getMyTags, saveMyTags } from '@/api/users';
+import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
 import { ScreenContainer } from '@/components/screen-container';
 import { ScreenHeader } from '@/components/screen-header';
@@ -22,7 +23,7 @@ import { showApiError } from '@/utils/show-api-error';
  * 걷는 방식·시간은 서버에 저장할 곳이 아직 없어서 화면 안에서만 고른다 (백엔드에 요청해 둠).
  */
 export function PreferencesScreen() {
-  const { tags } = useTags();
+  const { tags, hasFailed, reload } = useTags();
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
 
   useEffect(() => {
@@ -66,6 +67,13 @@ export function PreferencesScreen() {
       footer={<Button label="저장하기" variant="primary" onPress={save} />}>
       <View style={styles.cards}>
         <PreferenceCard title="해시태그 유형" description="마음이 가는 해시태그를 모두 선택해 주세요">
+          {hasFailed && (
+            <Pressable onPress={reload} hitSlop={8}>
+              <AppText variant="caption02" color="textTertiary">
+                해시태그를 불러오지 못했어요. 눌러서 다시 불러오기
+              </AppText>
+            </Pressable>
+          )}
           <ChipGroup
             options={(tags ?? []).map((tag) => ({ key: tag.id, label: formatHashtag(tag.name) }))}
             isSelected={(tagId) => selectedTagIds.includes(tagId)}

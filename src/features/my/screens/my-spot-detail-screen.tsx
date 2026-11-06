@@ -21,7 +21,7 @@ const reportButtonSize = 36;
 /**
  * ③ 마이 탭: 좋아요 내역·연 자리 기록에서 사진을 누르면 보이는 상세 (Figma 좋아요 내역 상세).
  * 두 목록이 같은 상세 화면을 쓰고, 목록에서 받은 값을 그대로 보여준다.
- * 목록 API에 한 줄 코멘트가 없어서 코멘트 줄은 비워 둔다 (백엔드에 요청할 것).
+ * 목록 API에 한 줄 코멘트가 아직 없어서(백엔드에 요청함), 서버가 줄 때만 코멘트 줄을 보여준다.
  * 신고는 서버 없이 화면만 두기로 해서(팀 결정) 빨간 사이렌을 누르면 접수 토스트만 띄운다. 한 번 신고하면 다시 띄우지 않는다.
  */
 export function MySpotDetailScreen() {
@@ -68,6 +68,7 @@ export function MySpotDetailScreen() {
           </View>
 
           <View style={styles.texts}>
+            {spot.oneLine && <AppText variant="body01">{spot.oneLine}</AppText>}
             <AppText variant="caption02" color="textDeactivated">
               {formatDate(spot.date)}
             </AppText>

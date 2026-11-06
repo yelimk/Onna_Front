@@ -5,6 +5,9 @@ import { AppText } from '@/components/app-text';
 import { colors } from '@/constants/colors';
 import { radius, spacing } from '@/constants/layout';
 
+// 57 - 20 - 닉네임 줄 높이(22 × 1.2). 디자인 시스템 간격 8·12 사이 값이라 이 카드에만 쓴다
+const nicknameToBadgesGap = 10.6;
+
 type ProfileCardProps = {
   nickname: string;
   badges: string[];
@@ -61,11 +64,11 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     backgroundColor: colors.background01,
   },
-  // Figma 프로필 카드: 옆 16, 위아래 20
+  // Figma 프로필 카드: 옆 16, 위아래 20. 닉네임과 칭호 사이는 Figma 위치(닉네임 위 20, 칭호 위 57)로 계산한 값이다
   profile: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.lg,
-    gap: spacing.sm,
+    gap: nicknameToBadgesGap,
   },
   nameRow: {
     flexDirection: 'row',
