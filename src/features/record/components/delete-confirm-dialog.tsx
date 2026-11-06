@@ -17,6 +17,10 @@ type DeleteConfirmDialogProps = {
 
 // Figma 삭제 확인 창의 '취소 | 삭제' 버튼 줄 높이 (사이 세로선도 이 높이)
 const actionHeight = 40;
+// Figma 삭제 확인 창 너비. 글 길이에 따라 창 크기가 바뀌지 않게 고정한다
+const dialogWidth = 240;
+// Figma 창 안 선 두께 (기록 목록 선과 같은 0.5)
+const lineWidth = 0.5;
 
 /**
  * 내 기록 삭제 전에 한 번 묻는 창 (Figma 기록 상세 > 삭제). 지운 기록은 되돌릴 수 없어서 꼭 묻는다.
@@ -77,6 +81,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.dialogDim,
   },
   dialog: {
+    width: dialogWidth,
     borderRadius: radius.lg,
     backgroundColor: colors.background01,
     overflow: 'hidden',
@@ -92,7 +97,7 @@ const styles = StyleSheet.create({
   actions: {
     height: actionHeight,
     flexDirection: 'row',
-    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopWidth: lineWidth,
     borderTopColor: colors.borderDeactivated,
   },
   action: {
@@ -101,7 +106,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   actionDivider: {
-    width: StyleSheet.hairlineWidth,
+    width: lineWidth,
     backgroundColor: colors.borderDeactivated,
   },
 });
