@@ -37,7 +37,8 @@ export function MySpotDetailScreen() {
   const report = () => {
     if (isReported) return;
     setIsReported(true);
-    showToast('신고가 접수되었습니다');
+    // Figma에는 신고 토스트 움직임이 없어서, 같은 '한 번 누르고 결과만 알려주는' 기록 삭제 토스트와 같이 움직인다
+    showToast('신고가 접수되었습니다', 'plain', 'brief');
   };
 
   return (
