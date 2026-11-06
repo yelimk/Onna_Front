@@ -29,6 +29,8 @@ const sizes = {
 /**
  * 내 기록 한 줄 (Figma list): 사진, 굵은 제목(한 줄), 한 줄 코멘트(두 줄까지, 넘치면 '…'), 해시태그, 날짜, 받은 좋아요 수.
  * 서버에 아직 제목이 없어서 제목이 없는 기록은 제목 줄 없이 코멘트부터 보여준다.
+ * 줄 높이는 사진(120)에 맞춘 144가 기본이다. 코멘트가 두 줄이라 글이 사진보다 길어지면 Figma처럼 그 줄만 길어져서,
+ * 해시태그와 좋아요 수가 겹치지 않는다.
  * 누르고 있으면 회색 칸 안으로 줄어든다. 줄 높이는 그대로라 아래 목록이 흔들리지 않는다.
  * 줄어드는 움직임은 100ms 동안 이어진다 (Figma 프로토타입 list pressed: 스마트 애니메이트 100ms, Ease out).
  * 글자 크기는 앱에서 부드럽게 바꿀 수 없어서 누르는 순간 바뀐다.
@@ -46,9 +48,9 @@ export function RecordListItem({ post, onPress, showMeta = true }: RecordListIte
     const photoSize = interpolate(progress.get(), [0, 1], [sizes.default.photo, sizes.pressed.photo]);
     return { width: photoSize, height: photoSize };
   });
-  // 글 칸도 사진과 같은 높이로 같이 줄인다
+  // 글 칸은 적어도 사진 높이만큼 두고 사진과 같이 줄인다. 글이 더 길면 그만큼 늘어난다
   const bodyStyle = useAnimatedStyle(() => ({
-    height: interpolate(progress.get(), [0, 1], [sizes.default.photo, sizes.pressed.photo]),
+    minHeight: interpolate(progress.get(), [0, 1], [sizes.default.photo, sizes.pressed.photo]),
   }));
 
   return (
@@ -58,27 +60,29 @@ export function RecordListItem({ post, onPress, showMeta = true }: RecordListIte
           <Image source={{ uri: post.imageUrl }} style={styles.photoImage} contentFit="cover" />
         </Animated.View>
         <Animated.View style={[styles.body, bodyStyle]}>
-          {/* 날짜는 제목 줄 옆에만 둔다. 글 전체 옆에 두면 날짜(2026.08.28) 너비만큼 코멘트 칸이 좁아져 줄이 일찍 꺾인다 */}
-          <View style={styles.titleRow}>
-            <View style={styles.title}>
-              {post.title && (
-                <AppText variant={size.title} numberOfLines={1}>
-                  {post.title}
+          <View>
+            {/* 날짜는 제목 줄 옆에만 둔다. 글 전체 옆에 두면 날짜(2026.08.28) 너비만큼 코멘트 칸이 좁아져 줄이 일찍 꺾인다 */}
+            <View style={styles.titleRow}>
+              <View style={styles.title}>
+                {post.title && (
+                  <AppText variant={size.title} numberOfLines={1}>
+                    {post.title}
+                  </AppText>
+                )}
+              </View>
+              {showMeta && (
+                <AppText variant={size.meta} color="textDeactivated" style={styles.date}>
+                  {formatDate(post.createdAt)}
                 </AppText>
               )}
             </View>
-            {showMeta && (
-              <AppText variant={size.meta} color="textDeactivated" style={styles.date}>
-                {formatDate(post.createdAt)}
-              </AppText>
-            )}
+            <AppText variant={size.comment} numberOfLines={2}>
+              {post.oneLine}
+            </AppText>
+            <AppText variant={size.meta} color="textTertiary" style={styles.hashtags}>
+              {post.tags.map(formatHashtag).join(' ')}
+            </AppText>
           </View>
-          <AppText variant={size.comment} numberOfLines={2}>
-            {post.oneLine}
-          </AppText>
-          <AppText variant={size.meta} color="textTertiary" style={styles.hashtags}>
-            {post.tags.map(formatHashtag).join(' ')}
-          </AppText>
           {showMeta && (
             <View style={styles.likes}>
               <Icon name="heartSmall" size={16} color="textDeactivated" />
@@ -94,14 +98,17 @@ export function RecordListItem({ post, onPress, showMeta = true }: RecordListIte
 }
 
 const styles = StyleSheet.create({
-  // 기본 사진(120)과 위아래 여백(12)으로 정해지는 줄 높이. 눌러서 사진이 작아져도 이 높이를 지킨다.
+  // 기본 사진(120)과 위아래 여백(12)으로 정해지는 줄 높이. 눌러서 사진이 작아져도 이 높이보다 작아지지 않는다.
   row: {
-    height: 120 + spacing.sm * 2,
+    minHeight: 120 + spacing.sm * 2,
+    paddingVertical: spacing.sm,
     justifyContent: 'center',
   },
   // Figma pressed: 줄 양옆을 8씩 줄인 회색 칸, 안쪽 여백 8 (contentStyle이 0에서 이 값까지 움직인다)
+  // 글이 사진보다 길어지면 사진은 Figma처럼 줄 가운데에 둔다
   content: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: spacing.md,
     borderRadius: radius.md,
   },
@@ -112,10 +119,11 @@ const styles = StyleSheet.create({
   photoImage: {
     flex: 1,
   },
-  // 글 칸 높이를 사진과 똑같이 고정해서, 글이 길든 짧든 줄마다 높이와 좋아요 위치가 같게 한다
+  // 위는 제목·코멘트·해시태그, 아래 끝은 좋아요 수. 글이 짧아도 좋아요 수는 사진 아래 끝에 맞춘다
   body: {
     flex: 1,
     paddingTop: spacing.xxs,
+    justifyContent: 'space-between',
   },
   titleRow: {
     flexDirection: 'row',
@@ -130,11 +138,9 @@ const styles = StyleSheet.create({
   date: {
     paddingLeft: spacing.xs,
   },
-  // 좋아요 수는 글 길이와 상관없이 늘 사진 아래쪽 끝, 오른쪽에 붙인다 (Figma list)
+  // 좋아요 수는 오른쪽 아래 끝에 붙인다. 글 아래에 따로 자리를 차지해서 해시태그와 겹치지 않는다 (Figma list)
   likes: {
-    position: 'absolute',
-    right: 0,
-    bottom: 0,
+    alignSelf: 'flex-end',
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xxs,
