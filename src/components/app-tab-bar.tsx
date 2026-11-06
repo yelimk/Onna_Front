@@ -92,10 +92,11 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xs,
   },
   // 고르지 않은 탭도 같은 자리를 비워 둬서, 탭을 바꿔도 아이콘 높이가 흔들리지 않게 한다.
+  // Figma 탭 바: 주황 막대와 아이콘 사이 8. 탭 안 간격(4)에 4를 더해서 맞춘다
   indicator: {
     width: indicatorWidth,
     height: indicatorHeight,
-    marginBottom: spacing.xs,
+    marginBottom: spacing.xxs,
     // 네 모서리를 모두 둥글게 한다 (Figma 선택 탭 주황 line, 모서리 4)
     borderRadius: radius.xs,
   },

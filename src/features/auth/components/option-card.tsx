@@ -1,9 +1,12 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View, type ViewStyle } from 'react-native';
+import Animated, { interpolateColor, useAnimatedStyle } from 'react-native-reanimated';
 
 import { AppText } from '@/components/app-text';
 import { colors } from '@/constants/colors';
 import { radius, spacing } from '@/constants/layout';
+import { duration } from '@/constants/motion';
+import { useTransitionProgress } from '@/hooks/use-transition-progress';
 
 type OptionCardProps = {
   title: string;
@@ -20,34 +23,39 @@ type OptionCardProps = {
 /**
  * 설문 선택지 카드. 고르면 연한 주황 배경에 검정 테두리.
  * 설명이 있으면 Figma selectbox_text(두꺼운 테두리, 큰 모서리), 없으면 selectbox_check 모양이다.
+ * 고를 때 색이 100ms 동안 서서히 바뀐다 (Figma 프로토타입 selectbox: 디졸브 100ms, Ease out).
  */
 export function OptionCard({ title, description, selected, onPress, right, compact = false, style }: OptionCardProps) {
+  const progress = useTransitionProgress(selected, duration.press);
+  const selectStyle = useAnimatedStyle(() => ({
+    borderColor: interpolateColor(progress.get(), [0, 1], [colors.borderDeactivated, colors.textPrimary]),
+    backgroundColor: interpolateColor(progress.get(), [0, 1], [colors.background01, colors.selectedBackground]),
+  }));
+
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ selected }}
-      onPress={onPress}
-      style={[styles.card, description ? styles.textCard : styles.checkCard, selected && styles.selected, style]}>
-      <View style={styles.texts}>
-        <AppText variant={compact ? 'subtitle04' : 'subtitle03'}>{title}</AppText>
-        {description && (
-          <AppText variant={compact ? 'caption04' : 'caption02'} color="textSecondary">
-            {description}
-          </AppText>
-        )}
-      </View>
-      {right}
+    <Pressable accessibilityRole="button" accessibilityState={{ selected }} onPress={onPress} style={style}>
+      <Animated.View style={[styles.card, description ? styles.textCard : styles.checkCard, selectStyle]}>
+        <View style={styles.texts}>
+          <AppText variant={compact ? 'subtitle04' : 'subtitle03'}>{title}</AppText>
+          {description && (
+            <AppText variant={compact ? 'caption04' : 'caption02'} color="textSecondary">
+              {description}
+            </AppText>
+          )}
+        </View>
+        {right}
+      </Animated.View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
+  // 두 칸 격자에서 옆 카드와 높이를 맞추려고 감싸는 칸을 꽉 채운다
   card: {
+    flexGrow: 1,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: spacing.md,
-    borderColor: colors.borderDeactivated,
-    backgroundColor: colors.background01,
   },
   textCard: {
     paddingVertical: spacing.md,
@@ -58,10 +66,6 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     borderRadius: radius.md,
     borderWidth: 1.5,
-  },
-  selected: {
-    borderColor: colors.textPrimary,
-    backgroundColor: colors.selectedBackground,
   },
   texts: {
     flex: 1,

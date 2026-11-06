@@ -5,13 +5,19 @@ import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
 import { ScreenContainer } from '@/components/screen-container';
-import { colors } from '@/constants/colors';
-import { radius, sectionGap, spacing } from '@/constants/layout';
+import { sectionGap, spacing } from '@/constants/layout';
+import { easeInOut } from '@/constants/motion';
+import { IntroDots } from '@/features/auth/components/intro-dots';
 import { IntroIllustration } from '@/features/auth/components/intro-illustration';
+import { StepTransition } from '@/features/auth/components/step-transition';
 import { introSlides } from '@/features/auth/constants/intro-slides';
 import { markIntroSeen } from '@/features/auth/utils/intro-seen';
 
-/** 시작: 서비스 소개 3장. 처음 설치했을 때만 나오고, 마지막 장에서 '다음'을 누르면 로그인으로 간다. */
+/**
+ * 시작: 서비스 소개 3장. 처음 설치했을 때만 나오고, 마지막 장에서 '다음'을 누르면 로그인으로 간다.
+ * '다음'을 누르면 그림과 글이 300ms 동안 다음 장으로 서서히 바뀐다 (Figma 프로토타입: 스마트 애니메이트 300ms, Ease in and out).
+ * 마지막 장에서 로그인으로 가는 움직임(Figma 슬라이드 인 300ms)은 휴대폰 기본 화면 넘김이라 Figma 값으로 바꿀 수 없다.
+ */
 export function IntroScreen() {
   const [slideIndex, setSlideIndex] = useState(0);
   const slide = introSlides[slideIndex];
@@ -30,16 +36,13 @@ export function IntroScreen() {
   return (
     <ScreenContainer
       footer={
-        <>
-          <View style={styles.dots}>
-            {introSlides.map((item, index) => (
-              <View key={item.title} style={[styles.dot, index === slideIndex && styles.activeDot]} />
-            ))}
-          </View>
+        <View style={styles.footer}>
+          <IntroDots count={introSlides.length} activeIndex={slideIndex} />
           <Button label="다음" variant="primary" onPress={handleNext} />
-        </>
+        </View>
       }>
-      <View style={styles.content}>
+      {/* 첫 장은 앱을 켤 때 바로 보이게 움직이지 않는다 */}
+      <StepTransition stepKey={slideIndex} animate={slideIndex > 0} easing={easeInOut} style={styles.content}>
         <View style={styles.illustration}>
           <IntroIllustration name={slide.illustration} />
         </View>
@@ -51,7 +54,7 @@ export function IntroScreen() {
             {slide.description}
           </AppText>
         </View>
-      </View>
+      </StepTransition>
     </ScreenContainer>
   );
 }
@@ -62,11 +65,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.xxxl,
   },
-  // 장마다 그림 크기가 달라도 글자 위치가 흔들리지 않게 그림 칸 높이를 고정한다
+  // 장마다 그림 크기가 달라도 글자 위치가 흔들리지 않게 그림 칸 높이를 고정한다.
+  // Figma 세 장 모두 그림 위쪽 끝이 제목보다 약 298 위에 있어서, 위쪽에 맞춰 놓는다 (250 + 아래 간격 48).
+  // 돋보기·책의 그림자는 이 칸 아래로 조금 넘친다.
   illustration: {
-    height: 260,
+    height: 250,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
   },
   texts: {
     gap: spacing.md,
@@ -74,21 +79,8 @@ const styles = StyleSheet.create({
   center: {
     textAlign: 'center',
   },
-  // Figma 온보딩: 점과 '다음' 버튼 사이 40
-  dots: {
-    marginBottom: sectionGap,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: spacing.xs,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: radius.full,
-    backgroundColor: colors.placeholderBox,
-  },
-  activeDot: {
-    width: 24,
-    backgroundColor: colors.primary,
+  // Figma 온보딩: 점과 '다음' 버튼 사이 40. 아래 고정 영역의 기본 간격(12) 대신 이 값을 쓰려고 한 묶음으로 둔다
+  footer: {
+    gap: sectionGap,
   },
 });

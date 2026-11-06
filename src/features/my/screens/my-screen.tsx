@@ -10,6 +10,9 @@ import { ProfileCard, StatsCard } from '@/features/my/components/profile-summary
 import { profileBadges } from '@/features/my/constants/profile-badges';
 import { useMySummary } from '@/features/my/hooks/use-my-summary';
 
+// Figma 마이 알림 종(bell_circle): 48 동그라미 안 아이콘 26
+const bellIconSize = 26;
+
 /**
  * ③ 마이 탭: 프로필, 내 숫자, 메뉴. 알림은 오른쪽 위 종 버튼으로 들어간다.
  * 칭호는 앱에 고정해 둔 값이다(constants/profile-badges.ts). 숫자는 서버 업적 API에서 받는다.
@@ -23,7 +26,15 @@ export function MyScreen() {
         <AppText variant="heading02" style={styles.title}>
           마이
         </AppText>
-        <IconButton icon="bell" size={48} showPressed accessibilityLabel="알림" onPress={() => router.push('/my/notifications')} />
+        <IconButton
+          icon="bell"
+          size={48}
+          iconSize={bellIconSize}
+          flat
+          showPressed
+          accessibilityLabel="알림"
+          onPress={() => router.push('/my/notifications')}
+        />
       </View>
 
       <View style={styles.sections}>

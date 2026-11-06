@@ -1,15 +1,18 @@
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { deletePost } from '@/api/posts';
 import { AppText } from '@/components/app-text';
 import { Icon } from '@/components/icon';
+import { PressHighlight } from '@/components/press-highlight';
 import { ScreenContainer } from '@/components/screen-container';
 import { ScreenHeader } from '@/components/screen-header';
+import { showToast } from '@/components/toast';
 import { colors } from '@/constants/colors';
 import { radius, spacing } from '@/constants/layout';
+import { duration } from '@/constants/motion';
 import { DeleteConfirmDialog } from '@/features/record/components/delete-confirm-dialog';
 import { useMyPosts } from '@/hooks/use-my-posts';
 import { mockNotificationPosts } from '@/mock/notifications';
@@ -19,6 +22,8 @@ import { showApiError } from '@/utils/show-api-error';
 
 // Figma 기록 상세 오른쪽 위 삭제 버튼(동그라미) 크기
 const deleteButtonSize = 36;
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * ② 기록 탭: 내 기록 상세. 사진은 앱 카메라 비율(세로 3:4) 그대로 크게 보여준다.
@@ -42,8 +47,12 @@ export function RecordDetailScreen() {
   const removePost = async () => {
     setIsConfirmingDelete(false);
     try {
-      await deletePost(post.postId);
+      // Figma 기록탭 프로토타입: 확인 창이 180ms 동안 사라진 뒤 목록으로 돌아가고, 목록 위로 '삭제되었습니다'가 내려온다.
+      // 지우는 요청이 창이 사라지기 전에 끝나도 창이 다 사라질 때까지 기다린다
+      await Promise.all([deletePost(post.postId), wait(duration.change)]);
       router.back();
+      // 목록은 화면에 돌아오면 다시 받아서, 지운 기록은 빠져 있다 (use-my-posts.ts)
+      showToast('삭제되었습니다', 'success', 'brief');
     } catch (error) {
       showApiError(error);
     }
@@ -62,13 +71,14 @@ export function RecordDetailScreen() {
             ) : undefined
           }
           right={
-            <Pressable
+            // 누르고 있으면 옅은 회색 동그라미가 100ms 동안 서서히 깔린다 (Figma 삭제 버튼 pressed: 디졸브 100ms)
+            <PressHighlight
               accessibilityRole="button"
               accessibilityLabel="기록 삭제"
               onPress={() => setIsConfirmingDelete(true)}
-              style={({ pressed }) => [styles.deleteButton, pressed && styles.deleteButtonPressed]}>
+              style={styles.deleteButton}>
               <Icon name="trash" />
-            </Pressable>
+            </PressHighlight>
           }
         />
       }>
@@ -116,10 +126,6 @@ const styles = StyleSheet.create({
     borderRadius: radius.full,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  // 누르고 있으면 옅은 회색 동그라미 (Figma 삭제 버튼 pressed)
-  deleteButtonPressed: {
-    backgroundColor: colors.background02,
   },
   texts: {
     marginTop: spacing.md,

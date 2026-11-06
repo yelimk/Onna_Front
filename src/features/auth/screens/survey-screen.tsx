@@ -8,6 +8,7 @@ import { showToast } from '@/components/toast';
 import { spacing } from '@/constants/layout';
 import { PlaceStep } from '@/features/auth/components/place-step';
 import { RelationStep } from '@/features/auth/components/relation-step';
+import { StepTransition } from '@/features/auth/components/step-transition';
 import { SurveyDone } from '@/features/auth/components/survey-done';
 import { SurveyHeader } from '@/features/auth/components/survey-header';
 import { WalkStep } from '@/features/auth/components/walk-step';
@@ -25,12 +26,17 @@ const previewNearbySpotCount = 12;
  * 시작: 온보딩 설문.
  * 1/3~3/3과 완료 화면을 한 화면에서 단계(step)만 바꿔 보여준다. step이 totalSteps보다 크면 완료 화면.
  * '완료'를 누르면 고른 자리 해시태그를 서버에 저장한다. 저장하면 다음 로그인부터 설문을 건너뛴다.
+ * 단계가 바뀌면 300ms 동안 다음 단계로 서서히 바뀐다 (Figma 프로토타입: 스마트 애니메이트 300ms, Ease out).
+ * 완료 화면도 같은 방식으로 서서히 나타난다. Figma는 슬라이드 인이지만, 다른 화면으로 넘어가는 슬라이드는
+ * 휴대폰 기본 넘김이라 Figma대로 못 해서, 여기만 밀려 들어오면 어색해 빼기로 했다 (팀 결정).
  */
 export function SurveyScreen() {
   const [step, setStep] = useState(1);
   const [answers, setAnswers] = useState<SurveyAnswers>({ placeTagIds: [], walkTimes: [] });
   const [nickname, setNickname] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  // 화면에 처음 들어왔을 때는 첫 단계가 바로 보이게, 단계를 한 번이라도 옮긴 뒤부터 움직인다
+  const [hasMoved, setHasMoved] = useState(false);
   const { tags, hasFailed, reload } = useTags();
 
   useEffect(() => {
@@ -48,7 +54,14 @@ export function SurveyScreen() {
     (step === 3 && answers.walkTimes.length > 0 && answers.walkDuration !== undefined);
 
   const goToMap = () => router.replace('/map');
-  const goBack = () => (step === 1 ? router.back() : setStep(step - 1));
+  const goBack = () => {
+    if (step === 1) {
+      router.back();
+      return;
+    }
+    setHasMoved(true);
+    setStep(step - 1);
+  };
   const update = (patch: Partial<SurveyAnswers>) => setAnswers({ ...answers, ...patch });
 
   const goNext = async () => {
@@ -57,6 +70,7 @@ export function SurveyScreen() {
       return;
     }
     if (step < totalSteps) {
+      setHasMoved(true);
       setStep(step + 1);
       return;
     }
@@ -79,12 +93,14 @@ export function SurveyScreen() {
       .map((tag) => formatHashtag(tag.name));
     return (
       <ScreenContainer footer={<Button label="지도 열기" variant="primary" onPress={goToMap} />}>
-        <SurveyDone
-          answers={answers}
-          placeNames={placeNames}
-          nickname={nickname}
-          nearbySpotCount={previewNearbySpotCount}
-        />
+        <StepTransition stepKey={step} animate>
+          <SurveyDone
+            answers={answers}
+            placeNames={placeNames}
+            nickname={nickname}
+            nearbySpotCount={previewNearbySpotCount}
+          />
+        </StepTransition>
       </ScreenContainer>
     );
   }
@@ -100,24 +116,26 @@ export function SurveyScreen() {
           onPress={goNext}
         />
       }>
-      {step === 1 && <RelationStep value={answers.relation} onChange={(relation) => update({ relation })} />}
-      {step === 2 && (
-        <PlaceStep
-          tags={tags}
-          hasFailed={hasFailed}
-          onRetry={reload}
-          value={answers.placeTagIds}
-          onChange={(placeTagIds) => update({ placeTagIds })}
-        />
-      )}
-      {step === 3 && (
-        <WalkStep
-          walkTimes={answers.walkTimes}
-          walkDuration={answers.walkDuration}
-          onChangeWalkTimes={(walkTimes) => update({ walkTimes })}
-          onChangeWalkDuration={(walkDuration) => update({ walkDuration })}
-        />
-      )}
+      <StepTransition stepKey={step} animate={hasMoved}>
+        {step === 1 && <RelationStep value={answers.relation} onChange={(relation) => update({ relation })} />}
+        {step === 2 && (
+          <PlaceStep
+            tags={tags}
+            hasFailed={hasFailed}
+            onRetry={reload}
+            value={answers.placeTagIds}
+            onChange={(placeTagIds) => update({ placeTagIds })}
+          />
+        )}
+        {step === 3 && (
+          <WalkStep
+            walkTimes={answers.walkTimes}
+            walkDuration={answers.walkDuration}
+            onChangeWalkTimes={(walkTimes) => update({ walkTimes })}
+            onChangeWalkDuration={(walkDuration) => update({ walkDuration })}
+          />
+        )}
+      </StepTransition>
     </ScreenContainer>
   );
 }

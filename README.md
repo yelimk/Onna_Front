@@ -332,6 +332,7 @@ Figma `디자인 시스템` 페이지의 값을 코드로 옮겨 두었어요.
 | `src/constants/typography.ts` | 글씨 스타일 (Heading, Subtitle, Body, Caption, Button) |
 | `src/components/app-text.tsx` | 글씨 부품 `AppText` |
 | `src/constants/layout.ts` | 간격(`spacing`), 모서리(`radius`), 화면 좌우 여백 |
+| `src/constants/motion.ts` | 애니메이션 시간(`duration`)과 곡선(`easeOut`, `easeIn`, `easeInOut`). Figma 프로토타입 설정 값을 옮겼어요 |
 
 ### 공통 부품
 
@@ -356,6 +357,9 @@ Figma `디자인 시스템` 페이지의 값을 코드로 옮겨 두었어요.
 | `AppTabBar` | 아래 탭 바 (지도·기록·마이, 고른 탭 위 주황 막대). 마이 탭 안쪽 화면에서는 숨김, 지도 검색 화면에서는 흐리게 사라짐 |
 | `Toast` | 화면 위에 잠깐 뜨는 알림. `showToast('신고가 접수되었습니다', 'success')`로 부른다 (`error` / `success` / `plain`). 루트 레이아웃에 `ToastHost`가 있음 |
 | `LikeButton` | 사진 상세 아래 '좋아요' 버튼 (누르면 빨간 하트·테두리) |
+| `PressHighlight` | 누르고 있으면 뒤에 옅은 회색이 서서히 깔리는 누름 영역 (휴지통, 확인 창 버튼 등) |
+
+누름·고름 모양은 Figma 프로토타입처럼 서서히 바뀌어요. 새 부품에서 같은 움직임이 필요하면 `hooks/use-press-progress.ts`(누르고 있는 동안), `hooks/use-transition-progress.ts`(켜짐·고름이 바뀔 때)를 써요. 글자색을 서서히 바꿀 때는 `AnimatedAppText`를 써요.
 
 ### 사용법
 
