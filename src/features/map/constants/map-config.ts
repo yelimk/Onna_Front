@@ -34,6 +34,12 @@ export const defaultMapLevel = 3;
  */
 export const openRadiusMeters = 25;
 
+/**
+ * 사진 카드가 서버에 '열어 달라'고 물어볼 거리. 열지는 서버가 실제 좌표로 25m를 보고 정한다.
+ * 앱이 가진 사진 좌표는 일부러 흐린 좌표라서 25m로 거르면 실제로 가까운데도 묻지 않는 일이 생겨, 넉넉히 잡고 서버에 맡긴다.
+ */
+export const openTryMeters = 100;
+
 /** 고른 장소에서 이 거리 안의 기록을 '이 근처 남겨진 기록'으로 센다. 걸어서 5분 안쪽이다. */
 export const nearbyRecordRadiusMeters = 300;
 

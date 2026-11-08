@@ -14,6 +14,7 @@ export function toPhotoMarker(zone: Zone, preview: PostPreview): PhotoMarker {
     coordinate: fromServerCoordinate(preview),
     hashtags: preview.tags.map(formatHashtag),
     isOpen: preview.stage === 'OPEN',
+    serverDistanceMeters: preview.distanceM,
     imageUrl: preview.imageUrl,
     title: preview.title,
     placeName: zone.name,

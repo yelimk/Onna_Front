@@ -45,8 +45,8 @@ export function useHomeMapMarkers(myLocation: Coordinate | null) {
   const markers = useMemo(() => toHomeMarkers(shownZones), [shownZones]);
   const records = useMemo(() => toPreviewRecords(shownZones), [shownZones]);
   const nearestPhoto = useMemo(
-    () => findNearestPhoto(markers, myLocation ?? defaultMapCenter),
-    [markers, myLocation],
+    () => findNearestPhoto(records, myLocation ?? defaultMapCenter),
+    [records, myLocation],
   );
 
   return { markers, records, nearestPhoto, zones, errorCode };

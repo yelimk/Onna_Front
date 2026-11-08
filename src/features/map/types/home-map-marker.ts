@@ -25,6 +25,11 @@ export type PhotoMarker = {
   hashtags: string[];
   /** 열림 반경 안에 들어와서 흐리지 않게 보이는 사진 */
   isOpen: boolean;
+  /**
+   * 서버가 잰 내 위치~사진 거리(m, 10m 단위). 사진을 받은 그 순간 위치 기준이고, 위치 없이 받았으면 null.
+   * coordinate는 일부러 흐린 좌표라 앱이 재면 실제보다 멀거나 가깝게 나온다. 열릴지(25m)는 이 값이 더 정확하다.
+   */
+  serverDistanceMeters?: number | null;
   /** 사진 주소. 서버가 흐림 단계에 맞춰 흐리게 만들어 주고, 30분 뒤 만료된다. 없으면 회색으로 가린다. */
   imageUrl?: string;
   /** 기록 제목 (남긴 사람이 쓴 10자) */

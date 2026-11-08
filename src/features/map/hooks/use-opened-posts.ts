@@ -25,6 +25,9 @@ const emptyState: PostState = { post: null, openedAt: 0, errorCode: null };
 const postStates = new Map<string, PostState>();
 /** 지금 서버에 열어 달라고 묻는 중인 기록. 같은 기록을 동시에 두 번 묻지 않는다. */
 const opening = new Set<string>();
+/** 기록마다 마지막으로 물은 시각. 멀어서(TOO_FAR) 실패해도 위치가 5m마다 바뀌므로, 너무 자주 묻지 않게 간격을 둔다. */
+const lastTriedAt = new Map<string, number>();
+const retryIntervalMs = 5 * 1000;
 const listeners = new Set<() => void>();
 /** 지금까지 연 기록 전부 (기록 id → 연 기록). 바뀔 때마다 새 Map이라 지도가 바뀐 것을 알아챈다. */
 let openedPosts: ReadonlyMap<string, OpenedPost> = new Map();
@@ -49,6 +52,8 @@ export async function openNearbyPost(postId: string, location: Coordinate, accur
   const myLocation = toMyLocation(location, accuracy);
   // 오차를 모르면 서버가 판단할 수 없어서 묻지 않는다. 오차가 잡히면(다음 위치) 그때 연다.
   if (!myLocation || opening.has(postId) || isFresh(getState(postId))) return;
+  if (Date.now() - (lastTriedAt.get(postId) ?? 0) < retryIntervalMs) return;
+  lastTriedAt.set(postId, Date.now());
   opening.add(postId);
   try {
     const post = await openPost(Number(postId), myLocation);
