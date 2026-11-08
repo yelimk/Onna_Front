@@ -49,13 +49,18 @@ const loadTagDictionary = () => {
 };
 
 /**
- * 고른 해시태그('#덤') → 서버 태그 id. 경로 추천은 태그를 id로 받는다.
- * AI가 만든 해시태그는 태그 사전에 없어서 id가 없으므로 뺀다.
+ * 고른 해시태그('#덤') → 서버로 보낼 태그 id와 이름. 서버는 둘 중 하나라도 맞으면 그 해시태그로 본다.
+ * - 이름: AI가 만든 해시태그는 태그 사전에 없어 id를 모르므로 이름으로 보낸다.
+ * - id: 화면 해시태그는 띄어쓰기를 지운 모양('#말없이챙겨준사람')이라 이름이 서버 태그와 다를 수 있어서,
+ *   태그 사전에 있는 것은 id로도 같이 보낸다.
  */
-async function toTagIds(hashtags: string[]) {
-  if (hashtags.length === 0) return [];
-  const tags = await loadTagDictionary();
-  return tags.filter((tag) => hashtags.includes(formatHashtag(tag.name))).map(({ id }) => id);
+async function toRouteTags(hashtags: string[]) {
+  if (hashtags.length === 0) return { tagIds: [], tags: [] };
+  const dictionary = await loadTagDictionary();
+  return {
+    tagIds: dictionary.filter((tag) => hashtags.includes(formatHashtag(tag.name))).map(({ id }) => id),
+    tags: hashtags.map((hashtag) => hashtag.replace(/^#+/, '')),
+  };
 }
 
 /** 서버가 고른 자리 → 지도 기록. 사진은 지도·묶음에서 이미 받은 기록이면 덧붙인다. */
@@ -94,12 +99,13 @@ export function useWalkRoute(plan: WalkRoutePlan | null, myLocation: Coordinate 
   useEffect(() => {
     if (!plan) return;
     let isStale = false;
-    toTagIds(plan.hashtags)
-      .then((tagIds) =>
+    toRouteTags(plan.hashtags)
+      .then(({ tagIds, tags }) =>
         getRouteRecommendation(toServerCoordinate(plan.start), {
           minutes: estimateWalkMinutes(plan),
           destination: toServerCoordinate(plan.destination),
           tagIds,
+          tags,
         }),
       )
       .then((response) => {
