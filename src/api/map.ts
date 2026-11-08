@@ -65,11 +65,13 @@ type RouteOptions = {
   destination?: Coordinate;
   /** 고른 해시태그(태그 사전 id) */
   tagIds?: number[];
+  /** 고른 해시태그 이름('#' 없이). AI 해시태그처럼 id를 모를 때 쓴다. tagIds와 같이 보내면 어느 쪽이든 맞으면 고른다. */
+  tags?: string[];
 };
 
 /** 산책 경로 추천. 들를 곳이 없으면 title은 null, stops는 빈 배열이다. 목적지를 한쪽만 주거나 minutes가 범위 밖이면 INVALID_INPUT */
-export function getRouteRecommendation(from: Coordinate, { minutes, destination, tagIds }: RouteOptions = {}) {
+export function getRouteRecommendation(from: Coordinate, { minutes, destination, tagIds, tags }: RouteOptions = {}) {
   return apiRequest<RouteRecommendation>('/recommendations/route', {
-    query: { ...from, minutes, destLat: destination?.lat, destLng: destination?.lng, tagIds },
+    query: { ...from, minutes, destLat: destination?.lat, destLng: destination?.lng, tagIds, tags },
   });
 }
