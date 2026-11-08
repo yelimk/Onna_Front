@@ -112,21 +112,38 @@
 
 ## 5. 아키텍처
 
-```
-src/app/                  라우트. 파일마다 한 줄로 기능 폴더의 화면을 꺼냄
-  ↓
-src/features/<기능>/      화면(screens)과 그 기능만 쓰는 부품·훅·함수
-  ↓
-src/components, hooks, utils, constants   두 기능 이상이 같이 쓰는 것 (디자인 시스템 포함)
-  ↓
-src/api/                  서버 요청. 모든 요청은 client.ts를 거침
+### 5.1 시스템 구성
+
+```mermaid
+flowchart LR
+    subgraph Phone["폰 (iOS · Android)"]
+        App["온나 앱<br/>Expo · React Native"]
+        Map["카카오맵 JS SDK<br/>(WebView)"]
+    end
+    App <--> Map
+    App <-->|"REST API · 로그인 토큰"| Server["온나 서버"]
+    Server --> AI["AI 서버<br/>해시태그 추천 · 경로 · 얼굴 확인"]
+    App -->|"장소 검색"| Kakao["카카오 로컬 API"]
+    App -->|"걷는 길"| Tmap["TMAP 보행자 경로 API"]
+    EAS["EAS Update"] -.->|"새 버전 배포"| App
 ```
 
-- **라우트와 화면 분리**: `src/app/`의 파일은 `export { MapScreen as default } from '@/features/map/screens/map-screen';` 한 줄입니다. 주소와 화면을 따로 바꿀 수 있습니다.
+### 5.2 앱 내부 구조
+
+```mermaid
+flowchart TB
+    Route["src/app<br/>라우트 (한 줄씩)"] --> Screen["features/기능/screens<br/>화면"]
+    Screen --> Feature["features/기능/hooks · components · utils<br/>그 기능만 쓰는 것"]
+    Screen --> Shared["components · hooks · utils · constants<br/>공통 · 디자인 시스템"]
+    Feature --> Shared
+    Feature --> Api["src/api<br/>서버 요청"]
+    Api --> Client["client.ts<br/>토큰 · 재발급 · 오류 처리"]
+```
+
+- **라우트와 화면 분리**: `src/app/`의 파일은 `export { MapScreen as default } from '@/features/map/screens/map-screen';` 한 줄이라, 주소와 화면을 따로 바꿀 수 있습니다.
 - **기능별 폴더**: 한 기능만 쓰는 코드는 그 기능 폴더에, 두 기능 이상이 쓰면 공통 폴더에 둡니다. 공통 폴더는 기능 폴더를 가져다 쓰지 않습니다.
-- **화면은 그리기, 훅은 데이터**: 서버에서 받고, 다시 받고, 실패를 처리하는 일은 `use-*.ts` 훅이 맡고 화면은 결과만 그립니다.
-- **서버 요청 한 곳**: `api/client.ts`가 토큰을 붙이고, 만료되면 한 번 새로 받아 다시 보내고, 오류를 `ApiError`로 바꿉니다. 다시 받기도 실패하면 어느 화면에서든 로그인 화면으로 보냅니다 (`hooks/use-session-expired-redirect.ts`).
-- **디자인 값은 이름으로**: 색·글씨·간격·애니메이션 시간을 `src/constants/`에 두고 화면에서는 이름만 씁니다.
+- **화면은 그리기, 훅은 데이터**: 서버에서 받고 다시 받고 실패를 처리하는 일은 `use-*.ts` 훅이 맡고, 화면은 결과만 그립니다.
+- **서버 요청 한 곳**: 모든 요청이 `api/client.ts`를 거쳐 토큰 붙이기, 만료 시 재발급, 오류 변환을 한 번에 처리합니다.
 
 <details>
 <summary><b>폴더 구조</b></summary>
@@ -155,21 +172,29 @@ assets/           글꼴, Figma 아이콘(SVG), 이미지
 
 </details>
 
-### 5.1 화면 이동
+### 5.3 사용자 흐름
 
+```mermaid
+flowchart TB
+    Start(["앱 시작"]) --> Logged{"로그인 상태?"}
+    Logged -- 예 --> MapHome
+    Logged -- 아니요 --> Intro["소개 (처음 한 번)"] --> Login["로그인 · 회원가입"] --> Perm["권한 안내"] --> Survey["취향 설문"] --> MapHome
+
+    subgraph Tabs["아래 탭"]
+        MapHome["지도"]
+        Record["기록"]
+        My["마이"]
+    end
+
+    MapHome --> Search["검색 → 검색결과"] --> Route["경로 추천"] --> Nav["길안내"] --> Open["열렸어요"]
+    MapHome --> Photo["사진 카드<br/>열기 · 좋아요 · 신고"]
+    Photo --> Upload
+    MapHome --> Upload["남기기<br/>촬영 → 한 줄 → 위치 확인"] --> Record
+    Record --> RecordDetail["기록 상세 · 삭제"]
+    My --> MyMenu["알림 · 좋아요 내역 · 연 자리 기록<br/>사용자 기호 설정 · 설정"]
 ```
-앱 시작 → (로그인 상태면 바로 지도) 소개 → 로그인 → 회원가입 → 권한 → 취향 설문 → 지도
 
-아래 탭
-├─ 지도  /map     검색 → 검색결과 → 경로 추천 → 길안내 → '열렸어요'
-│                 묶음 목록, 사진 카드 /photo/[id]
-├─ 기록  /record  기록 상세
-└─ 마이  /my      알림, 좋아요 내역·연 자리 기록 → 상세, 사용자 기호 설정, 설정 → 약관
-
-남기기  /upload/camera → write → confirm
-```
-
-### 5.2 구현 상세
+### 5.4 구현 상세
 
 **공통**
 - **로그인 풀림**: 토큰을 다시 받지 못하면 `api/session-events.ts`로 알리고, 어느 화면에서든 로그인 화면으로 보냅니다 (`hooks/use-session-expired-redirect.ts`).
