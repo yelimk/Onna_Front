@@ -2,8 +2,9 @@ import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 
 import { getWalkRoute, toWalkRoute } from '@/features/map/api/get-walk-route';
-import { defaultMapCenter, openRadiusMeters, walkingSpeedMetersPerSecond } from '@/features/map/constants/map-config';
+import { defaultMapCenter, walkingSpeedMetersPerSecond } from '@/features/map/constants/map-config';
 import { useHomeMapMarkers } from '@/features/map/hooks/use-home-map-markers';
+import { useRecordsInRange } from '@/features/map/hooks/use-records-in-range';
 import type { Coordinate } from '@/features/map/types/home-map-marker';
 import type { WalkRoute } from '@/features/map/types/walk-route';
 import { getDistanceMeters } from '@/features/map/utils/get-distance-meters';
@@ -92,16 +93,8 @@ export function useWalkNavigation(myLocation: Coordinate | null) {
     };
   }, [route, destination, stops, current]);
 
-  // '범위 내 기록들': 내 위치 열림 반경 안의 기록. AI 추천순은 팀원 AI가 붙기 전까지 가까운 순으로 대신한다.
-  const recordsInRange = useMemo(
-    () =>
-      records
-        .map((record) => ({ record, distance: getDistanceMeters(current, record.coordinate) }))
-        .filter(({ distance }) => distance <= openRadiusMeters)
-        .sort((a, b) => a.distance - b.distance)
-        .map(({ record }) => record),
-    [records, current],
-  );
+  // '범위 내 기록들': 내 위치 열림 반경 안의 기록을 서버 추천순으로
+  const recordsInRange = useRecordsInRange(current, myLocation);
 
   // 도착하면 목적지에 가장 가까이 남겨진 기록 하나가 열린다 (Figma '사진 해금 UI'). 없으면 열 기록이 없다.
   const unlockedRecord = useMemo(() => {
