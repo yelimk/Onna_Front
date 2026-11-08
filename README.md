@@ -1,4 +1,18 @@
+<div align="center">
+
 # 온나 (Onna) 프론트엔드
+
+**무뚝뚝한 겉 안의 따뜻한 정, 속정을 사진과 한 줄로 남기고 걸어가서 열어 보는 앱**
+
+![React Native](https://img.shields.io/badge/React_Native-0.88-61DAFB?logo=react&logoColor=white)
+![Expo](https://img.shields.io/badge/Expo-SDK_58-000020?logo=expo&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Expo Router](https://img.shields.io/badge/Expo_Router-000020?logo=expo&logoColor=white)
+![Kakao Map](https://img.shields.io/badge/Kakao_Map-FFCD00?logo=kakao&logoColor=black)
+
+[프로젝트 설명](#프로젝트-설명) · [앱 실행하기](#앱-실행하기) · [기능](#기능-사용-흐름-순서) · [기술 스택](#기술-스택) · [아키텍처](#아키텍처) · [프론트엔드 협업 방법](#프론트엔드-협업-방법)
+
+</div>
 
 <!-- 팀원, 역할은 팀에서 함께 작성 예정 -->
 
@@ -114,7 +128,8 @@ src/api/                  서버 요청. 모든 요청은 client.ts를 거침
 - **서버 요청 한 곳**: `api/client.ts`가 토큰을 붙이고, 만료되면 한 번 새로 받아 다시 보내고, 오류를 `ApiError`로 바꿉니다. 다시 받기도 실패하면 어느 화면에서든 로그인 화면으로 보냅니다 (`hooks/use-session-expired-redirect.ts`).
 - **디자인 값은 이름으로**: 색·글씨·간격·애니메이션 시간을 `src/constants/`에 두고 화면에서는 이름만 씁니다.
 
-### 폴더 구조
+<details>
+<summary><b>폴더 구조</b> (펼쳐 보기)</summary>
 
 ```
 src/
@@ -138,6 +153,8 @@ assets/           글꼴, Figma 아이콘(SVG), 이미지
 
 기능 폴더 안은 `screens/`, `components/`, `hooks/`, `utils/`, `constants/`로 같은 모양입니다.
 
+</details>
+
 ### 화면 이동
 
 ```
@@ -152,7 +169,7 @@ assets/           글꼴, Figma 아이콘(SVG), 이미지
 남기기  /upload/camera → write → confirm
 ```
 
-### 구현 메모
+### 구현 상세
 
 - **흐림과 열기**: 서버가 내 위치로 정한 흐림 단계(`S0`→`OPEN`)대로 사진을 보여 주고, 30m 걸을 때마다 다시 받습니다. 사진 주소가 30분 뒤 만료되므로 25분마다 다시 받습니다.
 - **카카오맵**: 코드는 `features/map/kakao-map/`에 모았습니다. 마커는 HTML이라 디자인 시스템 값을 CSS로 바꿔 넣습니다.
@@ -165,7 +182,10 @@ assets/           글꼴, Figma 아이콘(SVG), 이미지
 
 ## 디자인 시스템
 
-Figma 디자인 시스템의 값을 코드로 옮겼습니다.
+Figma 디자인 시스템의 값을 코드로 옮겨, 화면에서는 이름으로만 씁니다.
+
+<details>
+<summary><b>파일과 규칙</b> (펼쳐 보기)</summary>
 
 | 파일 | 내용 |
 |---|---|
@@ -178,7 +198,12 @@ Figma 디자인 시스템의 값을 코드로 옮겼습니다.
 - Figma 값 중 글씨·여백·모서리·색은 그대로, 화면 너비(390)와 고정 위치는 폰 크기에 맞게 바꿔 옮깁니다 (`AGENTS.md` "Figma 수치 옮기기").
 - 화면은 공통 부품으로 먼저 조립합니다: `ScreenContainer`, `ScreenHeader`, `Button`, `TextField`, `Checkbox`, `Radio`, `Toggle`, `Chip`, `Badge`, `Icon`, `IconButton`, `SegmentedToggle`, `LikeButton`, `Toast`, `ConfirmDialog`, `LoadingSpinner`, `PressHighlight`, `PhotoPlaceholder`, `MapPlaceholder`, `AppTabBar`.
 
+</details>
+
 ## 개발 환경에서 실행하기
+
+<details>
+<summary><b>설치, 환경 변수, 배포</b> (펼쳐 보기)</summary>
 
 **준비물**: Node.js 22.13 이상, 폰에 Expo Go 앱
 
@@ -208,7 +233,9 @@ EXPO_PUBLIC_API_URL=            # (선택) 서버 주소. 비우면 src/api/conf
 npx eas-cli@latest update --branch develop --environment development --message "바뀐 내용"
 ```
 
-## FE 협업 방법
+</details>
+
+## 프론트엔드 협업 방법
 
 **브랜치**
 
