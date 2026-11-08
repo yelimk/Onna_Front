@@ -34,6 +34,7 @@ type PhotoDetailCardProps = {
  * Figma '지도 사진 남기기 UI'의 흰 사진 카드. 다른 사람이 이 자리에 남긴 사진 한 장을 크게 보여준다.
  * - 열린 기록: 한 줄, 해시태그, '나도 이 자리에 남기기', '좋아요' (Figma '장소 사진 촬영 후 화면', '코멘트 작성' 화면)
  * - 아직 안 열린 기록: 한 줄 대신 '가까이 가면 열려요' 안내만, 버튼 없음 (Figma '사진 신고' 화면)
+ * - 내 기록: 신고·좋아요 없이 '나도 이 자리에 남기기'만
  */
 export function PhotoDetailCard({ record, photoHeight, onClose, onReport, onLeaveMine, onToggleLike }: PhotoDetailCardProps) {
   // Figma '기록 남기기 상세 애니메이션': 좋아요를 누르면 하트가 빨갛게 바뀌며 톡 튄다.
@@ -45,7 +46,7 @@ export function PhotoDetailCard({ record, photoHeight, onClose, onReport, onLeav
         <AppText variant="heading03" numberOfLines={1} style={styles.title}>
           {record.title}
         </AppText>
-        {record.isUnlocked && (
+        {record.isUnlocked && !record.isMine && (
           <Pressable accessibilityRole="button" accessibilityLabel="신고" onPress={onReport} style={styles.headerButton}>
             <Icon name="report" size={20} color="error" />
           </Pressable>
@@ -78,18 +79,20 @@ export function PhotoDetailCard({ record, photoHeight, onClose, onReport, onLeav
               나도 이 자리에 남기기
             </AppText>
           </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityState={{ selected: record.isLiked }}
-            onPress={onToggleLike}
-            style={[styles.action, styles.like, record.isLiked && styles.liked]}>
-            <Animated.View style={heartStyle}>
-              <Icon name={record.isLiked ? 'heartFilled' : 'heart'} size={20} color={record.isLiked ? 'error' : 'textDeactivated'} />
-            </Animated.View>
-            <AppText variant="button03" color={record.isLiked ? 'error' : 'textDeactivated'}>
-              좋아요
-            </AppText>
-          </Pressable>
+          {!record.isMine && (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityState={{ selected: record.isLiked }}
+              onPress={onToggleLike}
+              style={[styles.action, styles.like, record.isLiked && styles.liked]}>
+              <Animated.View style={heartStyle}>
+                <Icon name={record.isLiked ? 'heartFilled' : 'heart'} size={20} color={record.isLiked ? 'error' : 'textDeactivated'} />
+              </Animated.View>
+              <AppText variant="button03" color={record.isLiked ? 'error' : 'textDeactivated'}>
+                좋아요
+              </AppText>
+            </Pressable>
+          )}
         </View>
       )}
     </View>

@@ -99,12 +99,14 @@ export function useWalkNavigation(myLocation: Coordinate | null) {
   // 도착하면 목적지에 가장 가까이 남겨진 기록 하나가 열린다 (Figma '사진 해금 UI'). 없으면 열 기록이 없다.
   const unlockedRecord = useMemo(() => {
     if (!progress?.hasArrived || !destination) return null;
-    const nearest = records
+    // 지도 홈 기록은 구역 대표 사진뿐이라, 범위 내 기록(구역 사진 전체)도 같이 본다.
+    // AI 추천 경로는 마지막 자리(대표 사진이 아닐 수 있음)가 목적지라서 이게 없으면 도착해도 열리지 않을 수 있다.
+    const nearest = [...recordsInRange, ...records]
       .map((record) => ({ record, distance: getDistanceMeters(destination, record.coordinate) }))
       .filter(({ distance }) => distance <= unlockMatchMeters)
       .sort((a, b) => a.distance - b.distance)[0];
     return nearest?.record ?? null;
-  }, [progress?.hasArrived, destination, records]);
+  }, [progress?.hasArrived, destination, records, recordsInRange]);
 
   return {
     destinationName: params.destinationName ?? '',
