@@ -106,8 +106,8 @@
 | 배포 | EAS Update |
 | 코드 검사 | ESLint, TypeScript |
 
-- **Expo Go에 들어 있는 모듈만 썼습니다.** 앱을 새로 빌드하지 않아도 팀 모두가 QR 하나로 바로 테스트할 수 있습니다.
-- **지도는 카카오맵 JavaScript SDK를 WebView로 띄웠습니다.** iOS·Android가 같은 지도 코드를 쓰고, 앱을 따로 설치하지 않아도 Expo Go로 두 OS 모두 바로 열 수 있어 더 많은 사용자가 먼저 써 볼 수 있습니다.
+- **Expo Go에 들어 있는 모듈만 썼습니다.** 앱을 새로 빌드하지 않아도 팀원과 기획·디자인 담당까지 iOS·Android 폰에서 QR 하나로 바로 확인할 수 있어, 짧은 해커톤 기간에 피드백을 빠르게 주고받았습니다.
+- **지도는 카카오맵 JavaScript SDK를 WebView로 띄웠습니다.** 앱용 카카오맵 SDK는 Expo Go에 없어서 별도 빌드가 필요합니다. WebView 방식은 iOS·Android가 같은 지도 코드를 쓰고 Expo Go에서 바로 열립니다.
 - 라이브러리는 모두 MIT 라이선스입니다.
 
 ## 5. 아키텍처
@@ -168,8 +168,6 @@ assets/           글꼴, Figma 아이콘(SVG), 이미지
 
 남기기  /upload/camera → write → confirm
 ```
-
-`/map/walk`(옛 산책 경로 화면)는 코드만 남아 있고, 앱에서 들어가는 버튼은 없습니다.
 
 ### 5.2 구현 상세
 
