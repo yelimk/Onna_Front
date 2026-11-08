@@ -7,6 +7,7 @@ import type { ResultsMapView } from '@/features/map/hooks/use-results-map';
 import { useWalkRoute, type WalkRoutePlan } from '@/features/map/hooks/use-walk-route';
 import type { Coordinate } from '@/features/map/types/home-map-marker';
 import type { SearchResultItem } from '@/features/map/types/search-result-item';
+import { formatItemDetails } from '@/features/map/utils/to-search-result-items';
 
 /**
  * 장소 하나를 골랐을 때의 '장소 카드 → 경로 추천' 흐름. 검색결과 화면과 지도 홈이 같이 쓴다.
@@ -24,7 +25,18 @@ export function usePlaceRoute(place: SearchResultItem | null, myLocation: Coordi
   const card = useMemo<SelectedResultState | null>(() => {
     if (!place) return null;
     if (activePlan) {
-      return { mode: 'route', item: place, stops: walk.stops, isLoading: walk.isLoading, isExpanded: isRouteExpanded };
+      return {
+        mode: 'route',
+        key: place.key,
+        title: place.title,
+        details: formatItemDetails(place),
+        stops: walk.stops,
+        message: walk.stops.length > 0 ? '가는 길에 취향에 맞는 자리를 찾았어요' : '가는 길에 들를 만한 자리를 찾지 못했어요',
+        // 들를 자리가 없어도 목적지까지는 걸어갈 수 있다.
+        canWalk: true,
+        isLoading: walk.isLoading,
+        isExpanded: isRouteExpanded,
+      };
     }
     return { mode: 'place', item: place, nearby };
   }, [place, activePlan, walk.stops, walk.isLoading, isRouteExpanded, nearby]);

@@ -49,7 +49,9 @@ function getSheetMessage(tab: SearchTab, items: SearchResultItem[], options: {
  */
 function getPanelKey(tab: SearchTab, card: SelectedResultState | null) {
   if (!card) return `list-${tab}`;
-  return card.mode === 'record' ? `record-${card.record.id}` : `${card.mode}-${card.item.key}`;
+  if (card.mode === 'record') return `record-${card.record.id}`;
+  // 경로 카드의 key는 고른 장소의 key와 같다.
+  return `${card.mode}-${card.mode === 'route' ? card.key : card.item.key}`;
 }
 
 /**

@@ -15,10 +15,11 @@ import { useHomeMapMarkers } from '@/features/map/hooks/use-home-map-markers';
 import type { Coordinate, PhotoMarker } from '@/features/map/types/home-map-marker';
 import type { WalkRoute } from '@/features/map/types/walk-route';
 import { getDistanceMeters } from '@/features/map/utils/get-distance-meters';
-import { findKnownRecord, rememberRecords } from '@/features/map/utils/known-records';
+import { rememberRecords } from '@/features/map/utils/known-records';
 import { pickRouteStops } from '@/features/map/utils/pick-route-stops';
-import { fromServerCoordinate, toServerCoordinate } from '@/features/map/utils/to-coordinate';
-import type { RouteRecommendation, Tag } from '@/types/api';
+import { toServerCoordinate } from '@/features/map/utils/to-coordinate';
+import { toStopRecords } from '@/features/map/utils/to-stop-records';
+import type { Tag } from '@/types/api';
 import { formatHashtag } from '@/utils/format-hashtag';
 
 /**
@@ -61,24 +62,6 @@ async function toRouteTags(hashtags: string[]) {
     tagIds: dictionary.filter((tag) => hashtags.includes(formatHashtag(tag.name))).map(({ id }) => id),
     tags: hashtags.map((hashtag) => hashtag.replace(/^#+/, '')),
   };
-}
-
-/** 서버가 고른 자리 → 지도 기록. 사진은 지도·묶음에서 이미 받은 기록이면 덧붙인다. */
-function toStopRecords({ stops }: RouteRecommendation): PhotoMarker[] {
-  return stops.map((stop) => {
-    const id = String(stop.postId);
-    const known = findKnownRecord(id);
-    return {
-      kind: 'photo',
-      id,
-      coordinate: fromServerCoordinate(stop),
-      hashtags: stop.tags.map(formatHashtag),
-      isOpen: known?.isOpen ?? false,
-      imageUrl: known?.imageUrl,
-      title: stop.title,
-      placeName: stop.zoneName ?? known?.placeName,
-    };
-  });
 }
 
 /** null: 서버 추천을 받지 못함(앱 규칙으로 대신 고른다). undefined: 아직 받는 중 */
