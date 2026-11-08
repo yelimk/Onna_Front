@@ -1,6 +1,5 @@
-import { router, useFocusEffect, useNavigation } from 'expo-router';
-import type { BottomTabNavigationProp } from 'expo-router/tabs';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -63,16 +62,9 @@ export function MapScreen() {
 
   const routes = useHomeRoutes(location);
 
-  // 지도 탭에 있는데 아래 지도 탭을 다시 누르면 지도를 내 위치로 옮긴다 (다른 곳을 둘러보다가 돌아올 때).
-  // 검색 창이 떠 있을 때(지도 홈이 가려짐)는 옮기지 않는다.
-  const navigation = useNavigation();
+  // 오른쪽 '내 위치' 버튼을 누를 때마다 번호를 올려, 지도가 내 위치로 돌아오게 한다 (다른 곳을 둘러보다가 돌아올 때).
   const [recenterRequest, setRecenterRequest] = useState(0);
-  useEffect(() => {
-    const tabs = navigation.getParent<BottomTabNavigationProp<Record<string, object | undefined>>>();
-    return tabs?.addListener('tabPress', () => {
-      if (navigation.isFocused()) setRecenterRequest((count) => count + 1);
-    });
-  }, [navigation]);
+  const moveToMyLocation = () => setRecenterRequest((count) => count + 1);
 
   const openSearch = () => {
     // 검색에서 장소를 골라 돌아오면 그 장소 경로를 보므로, 보고 있던 AI 추천 경로는 닫는다.
@@ -135,7 +127,11 @@ export function MapScreen() {
         ) : (
           <View style={[styles.bottom, isExploring && styles.bottomWithSheet]}>
             <View style={styles.actions}>
-              <MapActionButtons onRoutePress={routes.openAiRoute} showCamera={!isRecordVisible} />
+              <MapActionButtons
+                onMyLocationPress={moveToMyLocation}
+                onRoutePress={routes.openAiRoute}
+                showCamera={!isRecordVisible}
+              />
             </View>
             {isExploring && (
               <ExploreSheet

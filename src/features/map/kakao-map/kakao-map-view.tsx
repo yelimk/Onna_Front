@@ -37,7 +37,7 @@ type KakaoMapViewProps<Marker extends MapMarker> = {
   /** true면 마커 이름표와 내 위치를 흐리게 지운다 (검색을 여는 동안). */
   isQuiet?: boolean;
   onMarkerPress: (marker: Marker) => void;
-  /** 바뀔 때마다(늘어나는 번호) 지도를 내 위치로 옮긴다. 지도 홈에서 지도 탭을 다시 누를 때 쓴다. */
+  /** 바뀔 때마다(늘어나는 번호) 지도를 내 위치로 옮긴다. 지도 홈의 '내 위치' 버튼이 쓴다. */
   recenterRequest?: number;
   /** 지도 움직임이 멈췄을 때 지도 가운데. 지도 홈이 이 둘레의 기록을 받는다. */
   onCenterChange?: (center: Coordinate) => void;
