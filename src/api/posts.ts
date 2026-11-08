@@ -1,7 +1,7 @@
 import { File } from 'expo-file-system';
 
 import { apiRequest } from '@/api/client';
-import type { CreatedPost, MyLocation } from '@/types/api';
+import type { CreatedPost, MyLocation, ReportReason } from '@/types/api';
 
 /**
  * 한 줄을 보내고 AI가 새로 만든 해시태그 이름 3~5개(# 없음)를 받는다.
@@ -48,6 +48,15 @@ export function createPost({ photoUri, location, questionId, title, oneLine, tag
   tags.forEach((tag) => formData.append('tags', tag));
 
   return apiRequest<CreatedPost>('/posts', { method: 'POST', formData });
+}
+
+/**
+ * 사진 신고. 지도 사진 카드와 마이 탭 상세가 같은 신고 창에서 부른다.
+ * 같은 사진을 다시 신고해도 성공(처음 이유가 남는다)이라, 앱이 이미 신고했는지 따로 기억하지 않아도 된다.
+ * 내 사진이면 INVALID_INPUT(400), 없거나 지웠거나 숨겨진 사진이면 POST_NOT_FOUND(404).
+ */
+export function reportPost(postId: number, reason: ReportReason) {
+  return apiRequest<void>(`/posts/${postId}/reports`, { method: 'POST', body: { reason } });
 }
 
 /** 내 기록 삭제. 남의 기록이면 NOT_OWNER, 없으면 POST_NOT_FOUND */

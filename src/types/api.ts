@@ -13,6 +13,9 @@ export type MyLocation = Coordinate & {
   accuracy: number;
 };
 
+/** 신고 이유. 서버(POST /posts/{postId}/reports)가 받는 값 그대로다. 화면 문구는 features/map/constants/report-reasons.ts */
+export type ReportReason = 'privacy' | 'private-space' | 'inappropriate' | 'advertising' | 'other';
+
 /** S0(멀리) → S1 → S2 → OPEN(열림). 단계가 오를수록 더 선명한 사진이 온다. */
 export type PostStage = 'S0' | 'S1' | 'S2' | 'OPEN';
 

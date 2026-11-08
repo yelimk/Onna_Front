@@ -6,12 +6,14 @@ import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
 import { Icon } from '@/components/icon';
 import { Radio } from '@/components/radio';
+import { showToast } from '@/components/toast';
 import { colors } from '@/constants/colors';
 import { screenPaddingX, spacing } from '@/constants/layout';
 import { duration } from '@/constants/motion';
 import { SheetHandle } from '@/features/map/components/sheet-handle';
 import { sheetCornerRadius } from '@/features/map/constants/map-layout';
 import { reportReasons, type ReportReasonId } from '@/features/map/constants/report-reasons';
+import { getReportErrorMessage } from '@/features/map/utils/get-report-error-message';
 
 // Figma '기록 남기기 상세 애니메이션': 신고 창은 사진 카드 위로 아래에서 올라오고, 닫으면 내려간다.
 const sheetEntering = SlideInDown.duration(duration.normal);
@@ -19,21 +21,30 @@ const sheetExiting = SlideOutDown.duration(duration.fast);
 
 type ReportSheetProps = {
   onClose: () => void;
-  onSubmit: (reason: ReportReasonId) => void;
+  /** 서버로 보내는 동안 기다리게 Promise를 돌려준다. 실패하면 창을 그대로 두고 이유를 토스트로 알린다. */
+  onSubmit: (reason: ReportReasonId) => void | Promise<void>;
 };
 
 /**
  * Figma '지도 사진 남기기 UI'의 신고 창. 사진 카드 위로 아래에서 올라온다.
- * 이유를 하나 골라야 '신고하기'를 누를 수 있다. 신고 API가 나오면 onSubmit에서 서버로 보낸다.
+ * 이유를 하나 골라야 '신고하기'를 누를 수 있다. 서버가 받은 뒤에만 '신고가 접수됐어요'를 보여준다.
  */
 export function ReportSheet({ onClose, onSubmit }: ReportSheetProps) {
   const [reason, setReason] = useState<ReportReasonId | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSending, setIsSending] = useState(false);
 
-  const submit = () => {
-    if (!reason) return;
-    onSubmit(reason);
-    setIsSubmitted(true);
+  const submit = async () => {
+    if (!reason || isSending) return;
+    setIsSending(true);
+    try {
+      await onSubmit(reason);
+      setIsSubmitted(true);
+    } catch (error) {
+      showToast(getReportErrorMessage(error), 'error');
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (
@@ -71,7 +82,7 @@ export function ReportSheet({ onClose, onSubmit }: ReportSheetProps) {
               </Pressable>
             ))}
           </View>
-          <Button label="신고하기" variant="dark" disabled={!reason} onPress={submit} />
+          <Button label="신고하기" variant="dark" disabled={!reason || isSending} onPress={submit} />
         </>
       )}
     </Animated.View>
