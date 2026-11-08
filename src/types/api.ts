@@ -94,6 +94,9 @@ export type MyPost = Coordinate & {
   createdAt: string;
 };
 
+/** 온보딩 1단계 '대구·경북과의 사이'. NATIVE(토박이에요), MOVED_IN(대구·경북으로 왔어요), VISITING(잠깐 머무는 중이에요) */
+export type RegionRelation = 'NATIVE' | 'MOVED_IN' | 'VISITING';
+
 export type Badge = {
   /** FIRST_DISCOVERER(최초 발견자), WALKER(걸음왕) */
   code: string;

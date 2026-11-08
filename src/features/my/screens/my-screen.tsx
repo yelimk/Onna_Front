@@ -7,7 +7,6 @@ import { ScreenContainer } from '@/components/screen-container';
 import { spacing } from '@/constants/layout';
 import { ActivityMenu } from '@/features/my/components/activity-menu';
 import { ProfileCard, StatsCard } from '@/features/my/components/profile-summary';
-import { profileBadges } from '@/features/my/constants/profile-badges';
 import { useMySummary } from '@/features/my/hooks/use-my-summary';
 import { useHasNewNotifications } from '@/features/notification/hooks/use-has-new-notifications';
 
@@ -16,10 +15,10 @@ const bellIconSize = 26;
 
 /**
  * ③ 마이 탭: 프로필, 내 숫자, 메뉴. 알림은 오른쪽 위 종 버튼으로 들어간다.
- * 칭호는 앱에 고정해 둔 값이다(constants/profile-badges.ts). 숫자는 서버 업적 API에서 받는다.
+ * 칭호와 숫자는 서버 업적 API에서 받는다. 칭호 맨 앞의 '초보 탐험가'만 앱이 붙인다(utils/get-profile-badges.ts).
  */
 export function MyScreen() {
-  const { nickname, leftCount, openedCount, likedCount } = useMySummary();
+  const { nickname, badges, leftCount, openedCount, likedCount } = useMySummary();
   const hasNewNotifications = useHasNewNotifications();
 
   return (
@@ -43,7 +42,7 @@ export function MyScreen() {
       </View>
 
       <View style={styles.sections}>
-        <ProfileCard nickname={nickname} badges={profileBadges} />
+        <ProfileCard nickname={nickname} badges={badges} />
         <StatsCard
           stats={[
             { label: '남긴 자리', value: leftCount },

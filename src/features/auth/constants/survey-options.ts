@@ -1,17 +1,19 @@
 import type { WalkDuration, WalkTime } from '@/constants/walk-options';
+import type { RegionRelation } from '@/types/api';
 
 /** 온보딩 설문 선택지. GUI 설문 1/3~3/3 문구 그대로. 첫 추천의 근거가 된다. */
 
 export type RelationOption = {
-  id: 'local' | 'moved' | 'visiting';
+  /** 서버에 그대로 보내는 값이라 서버 이름(NATIVE 등)을 id로 쓴다 */
+  id: RegionRelation;
   title: string;
   description: string;
 };
 
 export const relationOptions: RelationOption[] = [
-  { id: 'local', title: '토박이에요', description: '대구·경북 토박이에요. 익숙한 곳을 새로 보고 싶어요' },
-  { id: 'moved', title: '대구·경북으로 왔어요', description: '학교나 일 때문에 와서 지내고 있어요' },
-  { id: 'visiting', title: '잠깐 머무는 중이에요', description: '여행이나 짧은 일정으로 왔어요' },
+  { id: 'NATIVE', title: '토박이에요', description: '대구·경북 토박이에요. 익숙한 곳을 새로 보고 싶어요' },
+  { id: 'MOVED_IN', title: '대구·경북으로 왔어요', description: '학교나 일 때문에 와서 지내고 있어요' },
+  { id: 'VISITING', title: '잠깐 머무는 중이에요', description: '여행이나 짧은 일정으로 왔어요' },
 ];
 
 /**
@@ -39,7 +41,7 @@ export { walkDurationOptions, walkTimeOptions, type WalkDuration, type WalkTime 
 
 export type SurveyAnswers = {
   relation?: RelationOption['id'];
-  /** 서버 태그 id. 서버에는 이것만 저장한다 (관계·걷는 때는 아직 저장할 API가 없다). */
+  /** 서버 태그 id. 관계와 함께 서버에 저장한다 (걷는 때는 서버 보기가 정해지면 연결한다). */
   placeTagIds: number[];
   walkTimes: WalkTime[];
   walkDuration?: WalkDuration;
