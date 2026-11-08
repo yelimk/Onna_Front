@@ -26,11 +26,15 @@ const postStates = new Map<string, PostState>();
 /** 지금 서버에 열어 달라고 묻는 중인 기록. 같은 기록을 동시에 두 번 묻지 않는다. */
 const opening = new Set<string>();
 const listeners = new Set<() => void>();
+/** 지금까지 연 기록 전부 (기록 id → 연 기록). 바뀔 때마다 새 Map이라 지도가 바뀐 것을 알아챈다. */
+let openedPosts: ReadonlyMap<string, OpenedPost> = new Map();
 
 const getState = (postId: string) => postStates.get(postId) ?? emptyState;
 
 function updateState(postId: string, change: Partial<PostState>) {
-  postStates.set(postId, { ...getState(postId), ...change });
+  const next = { ...getState(postId), ...change };
+  postStates.set(postId, next);
+  if (next.post && openedPosts.get(postId) !== next.post) openedPosts = new Map(openedPosts).set(postId, next.post);
   listeners.forEach((listener) => listener());
 }
 
@@ -83,6 +87,16 @@ const subscribe = (listener: () => void) => {
   listeners.add(listener);
   return () => listeners.delete(listener);
 };
+
+const getOpenedPosts = () => openedPosts;
+
+/**
+ * 지금까지 연 기록 전부. 사진 카드·길안내에서 연 사진을 지도 마커도 바로 열린 모습으로 바꾸는 데 쓴다.
+ * 지도 구역은 30m 걷거나 25분이 지나야 다시 받아서, 이게 없으면 연 사진이 지도에선 한동안 흐리게 남는다.
+ */
+export function useOpenedPosts() {
+  return useSyncExternalStore(subscribe, getOpenedPosts, getOpenedPosts);
+}
 
 /** 연 기록 한 건과, 열지 못했다면 그 이유. 열거나 좋아요가 바뀔 때마다 다시 그린다. */
 export function useOpenedPost(postId: string) {

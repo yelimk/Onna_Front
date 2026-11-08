@@ -1,24 +1,20 @@
-import { kakaoRestApiKey } from '@/features/map/constants/map-config';
-import type { Coordinate } from '@/features/map/types/home-map-marker';
+import { defaultMapCenter, kakaoRestApiKey, placeSearchRadiusMeters } from '@/features/map/constants/map-config';
 import type { Place } from '@/features/map/types/place';
 
 const keywordSearchUrl = 'https://dapi.kakao.com/v2/local/search/keyword.json';
 const resultLimit = 15;
 
-/** 카카오 로컬 API 응답 중 쓰는 값만. 좌표와 거리는 문자열로 온다. */
+/** 카카오 로컬 API 응답 중 쓰는 값만. 좌표는 문자열로 온다. */
 type KakaoPlaceDocument = {
   id: string;
   place_name: string;
   address_name: string;
-  distance: string;
   x: string;
   y: string;
 };
 
 type SearchPlacesOptions = {
   query: string;
-  /** 있으면 이 근처 결과를 앞에 두고 거리도 받아 온다. */
-  near: Coordinate | null;
   signal?: AbortSignal;
 };
 
@@ -40,15 +36,21 @@ function toShortAddress(addressName: string) {
     .join(' ');
 }
 
-/** 카카오 로컬 키워드 검색. https://developers.kakao.com/docs/latest/ko/local/dev-guide#search-by-keyword */
-export async function searchPlaces({ query, near, signal }: SearchPlacesOptions): Promise<Place[]> {
+/**
+ * 카카오 로컬 키워드 검색. https://developers.kakao.com/docs/latest/ko/local/dev-guide#search-by-keyword
+ * 서비스 지역(캠퍼스 가운데에서 placeSearchRadiusMeters 안)만 찾는다.
+ * 카카오가 주는 거리는 캠퍼스 가운데 기준이라 쓰지 않고, 내 위치에서의 거리는 부르는 쪽이 잰다.
+ */
+export async function searchPlaces({ query, signal }: SearchPlacesOptions): Promise<Omit<Place, 'distanceMeters'>[]> {
   if (!kakaoRestApiKey) throw new MissingKakaoRestKeyError();
 
-  const params = new URLSearchParams({ query, size: String(resultLimit) });
-  if (near) {
-    params.set('x', String(near.longitude));
-    params.set('y', String(near.latitude));
-  }
+  const params = new URLSearchParams({
+    query,
+    size: String(resultLimit),
+    x: String(defaultMapCenter.longitude),
+    y: String(defaultMapCenter.latitude),
+    radius: String(placeSearchRadiusMeters),
+  });
 
   const response = await fetch(`${keywordSearchUrl}?${params}`, {
     headers: { Authorization: `KakaoAK ${kakaoRestApiKey}` },
@@ -61,7 +63,6 @@ export async function searchPlaces({ query, near, signal }: SearchPlacesOptions)
     id: document.id,
     name: document.place_name,
     shortAddress: toShortAddress(document.address_name),
-    distanceMeters: document.distance ? Number(document.distance) : null,
     coordinate: { latitude: Number(document.y), longitude: Number(document.x) },
   }));
 }

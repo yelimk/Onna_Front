@@ -3,11 +3,11 @@ import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
-import { PhotoPlaceholder } from '@/components/photo-placeholder';
 import { colors } from '@/constants/colors';
 import { radius, spacing } from '@/constants/layout';
 import { HashtagChoiceChips } from '@/features/map/components/hashtag-choice-chips';
 import { CardCloseButton, MapBottomCard } from '@/features/map/components/map-bottom-card';
+import { RecordPhoto } from '@/features/map/components/record-photo';
 import type { SearchResultItem } from '@/features/map/types/search-result-item';
 import type { NearbyRecordSummary } from '@/features/map/utils/summarize-nearby-records';
 import { formatItemDetails } from '@/features/map/utils/to-search-result-items';
@@ -38,7 +38,8 @@ export function RouteStartCard({ item, nearby, onClose, onRecommend, onLayout }:
   return (
     <MapBottomCard onLayout={onLayout}>
       <View style={styles.summary}>
-        <PhotoPlaceholder width={photoSize} height={photoSize} style={styles.photo} />
+        {/* 근처에서 가장 가까운 기록 사진. 내 위치에서 먼 사진은 서버가 흐리게 준다. 기록이 없으면 회색 칸 */}
+        <RecordPhoto imageUrl={nearby.representative?.imageUrl} width={photoSize} height={photoSize} style={styles.photo} />
         <View style={styles.texts}>
           <AppText variant="heading03" numberOfLines={1}>
             {item.title}

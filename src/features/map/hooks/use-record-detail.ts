@@ -23,6 +23,8 @@ export type RecordDetail = {
   /** 서버가 열어 준 기록이면 한 줄과 좋아요·남기기 버튼을 보여준다 */
   isUnlocked: boolean;
   isLiked: boolean;
+  /** 내가 남긴 기록. 내 사진은 신고할 수 없고(서버 400), 좋아요는 남의 사진에 건네는 것이라 두 버튼을 숨긴다. */
+  isMine: boolean;
   /** 지금 열림 반경 안이면 true */
   isNearby: boolean;
   /** 열지 못한 이유 (TOO_FAR 멀리 있음, RETRY_LOCATION 위치 부정확 등). 열렸거나 아직 안 물어봤으면 null */
@@ -61,6 +63,7 @@ export function useRecordDetail(recordId: string, myLocation: Coordinate | null)
     imageUrl: opened?.imageUrl ?? found?.imageUrl,
     isUnlocked: opened !== null || isMine,
     isLiked: opened?.liked ?? false,
+    isMine,
     isNearby,
     openErrorCode,
   };

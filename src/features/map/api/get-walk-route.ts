@@ -48,16 +48,15 @@ async function getTmapRoute({ start, destination, destinationName, stops }: Walk
   };
 }
 
+/** 이미 있는 길 좌표를 경로로 바꾼다. 거리는 좌표 사이를 더하고, 시간은 거리로 어림한다. */
+export function toWalkRoute(path: Coordinate[], isEstimated: boolean): WalkRoute {
+  const distanceMeters = path.slice(1).reduce((sum, point, index) => sum + getDistanceMeters(path[index], point), 0);
+  return { path, distanceMeters, durationSeconds: distanceMeters / walkingSpeedMetersPerSecond, isEstimated };
+}
+
 /** 걷는 길 API를 못 쓸 때: 내 위치 → 들르는 자리 → 목적지를 직선으로 잇고, 거리로 시간을 어림한다. */
 export function getStraightRoute({ start, destination, stops }: WalkRouteRequest): WalkRoute {
-  const path = [start, ...stops.map(({ coordinate }) => coordinate), destination];
-  const distanceMeters = path.slice(1).reduce((sum, point, index) => sum + getDistanceMeters(path[index], point), 0);
-  return {
-    path,
-    distanceMeters,
-    durationSeconds: distanceMeters / walkingSpeedMetersPerSecond,
-    isEstimated: true,
-  };
+  return toWalkRoute([start, ...stops.map(({ coordinate }) => coordinate), destination], true);
 }
 
 /** TMAP 키가 있으면 실제 걷는 길, 없거나 실패하면 직선 경로를 돌려준다. 경로 추천이 멈추지 않게 하려는 것이다. */

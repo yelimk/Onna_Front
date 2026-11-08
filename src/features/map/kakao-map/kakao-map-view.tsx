@@ -37,6 +37,8 @@ type KakaoMapViewProps<Marker extends MapMarker> = {
   /** true면 마커 이름표와 내 위치를 흐리게 지운다 (검색을 여는 동안). */
   isQuiet?: boolean;
   onMarkerPress: (marker: Marker) => void;
+  /** 지도 움직임이 멈췄을 때 지도 가운데. 지도 홈이 이 둘레의 기록을 받는다. */
+  onCenterChange?: (center: Coordinate) => void;
 };
 
 type MapStatus = { state: 'loading' | 'ready' } | { state: 'error'; message: string };
@@ -80,6 +82,7 @@ export function KakaoMapView<Marker extends MapMarker>({
   walkedPath = null,
   isQuiet = false,
   onMarkerPress,
+  onCenterChange,
 }: KakaoMapViewProps<Marker>) {
   const webViewRef = useRef<MapWebView>(null);
   const hasCenteredRef = useRef(false);
@@ -131,6 +134,7 @@ export function KakaoMapView<Marker extends MapMarker>({
       const marker = markers.find(({ kind, id }) => kind === event.kind && id === event.markerId);
       if (marker) onMarkerPress(marker);
     }
+    if (event?.type === 'centerChange') onCenterChange?.(event.center);
   };
 
   if (status.state === 'error') {

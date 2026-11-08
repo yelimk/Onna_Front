@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 
 import { MissingKakaoRestKeyError, searchPlaces } from '@/features/map/api/search-places';
-import { defaultMapCenter } from '@/features/map/constants/map-config';
 import type { Coordinate } from '@/features/map/types/home-map-marker';
 import type { Place } from '@/features/map/types/place';
+import { getDistanceMeters } from '@/features/map/utils/get-distance-meters';
 
 /** 글자를 칠 때마다 요청하면 카카오 호출 한도를 금방 쓰므로, 손을 멈춘 뒤에 검색한다. */
 const debounceMs = 300;
@@ -22,7 +22,7 @@ function isPlaceQuery(query: string) {
 }
 
 /**
- * 검색어로 장소를 찾는다. 내 위치를 모르면 기본 위치(캠퍼스) 근처를 먼저 찾되, 거리는 내 위치가 아니라서 보여주지 않는다.
+ * 검색어로 장소를 찾는다. 찾는 곳은 서비스 지역(캠퍼스와 학교 앞)뿐이고, 거리는 내 위치에서 잰다. 내 위치를 모르면 거리를 보여주지 않는다.
  * 앞 요청이 늦게 도착해 새 결과를 덮지 않도록, 검색어가 바뀌면 앞 요청을 취소한다.
  * 새 결과가 오기 전까지는 앞 결과를 그대로 보여줘서 목록이 깜빡이지 않게 한다.
  */
@@ -38,10 +38,13 @@ export function usePlaceSearch(query: string, myLocation: Coordinate | null) {
 
     const controller = new AbortController();
     const timer = setTimeout(() => {
-      searchPlaces({ query: keyword, near: searchCenter ?? defaultMapCenter, signal: controller.signal })
+      searchPlaces({ query: keyword, signal: controller.signal })
         .then((places) => {
-          const visiblePlaces = searchCenter ? places : places.map((place) => ({ ...place, distanceMeters: null }));
-          setResult({ query: keyword, places: visiblePlaces, errorMessage: null });
+          const placesWithDistance = places.map((place) => ({
+            ...place,
+            distanceMeters: searchCenter ? Math.round(getDistanceMeters(searchCenter, place.coordinate)) : null,
+          }));
+          setResult({ query: keyword, places: placesWithDistance, errorMessage: null });
         })
         .catch((error: unknown) => {
           if (controller.signal.aborted) return;

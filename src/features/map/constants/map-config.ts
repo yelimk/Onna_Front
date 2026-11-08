@@ -18,6 +18,13 @@ export const kakaoMapBaseUrl = 'http://localhost';
 /** 내 위치를 아직 모를 때 보여주는 곳 (영남대학교) */
 export const defaultMapCenter: Coordinate = { latitude: 35.8306, longitude: 128.7544 };
 
+/**
+ * 장소 검색은 캠퍼스 가운데(defaultMapCenter)에서 이 거리 안만 찾는다.
+ * 기획서 MVP 범위가 '영남대 캠퍼스와 학교 앞'이라, 같은 이름의 먼 곳(칠곡·진량의 '정문' 등)은 결과와 지도에서 뺀다.
+ * 캠퍼스 끝(정문·후문)과 학교 앞 동네까지 들어오는 거리다.
+ */
+export const placeSearchRadiusMeters = 1500;
+
 /** 카카오맵 확대 단계. 작을수록 자세히 보이고, 3은 골목과 건물이 보이는 정도다. */
 export const defaultMapLevel = 3;
 
@@ -49,6 +56,12 @@ export const zonesRefreshMs = 25 * 60 * 1000;
  * 다시 받아야 가까워진 사진이 열린다. 위치를 5m마다 받으므로 매번 묻지 않도록 간격을 둔다.
  */
 export const zonesRefetchMeters = 30;
+
+/**
+ * 지도 가운데가 이만큼 옮겨지면 구역을 다시 받는다. 구역은 지도 가운데에서 500m(서버 기본) 안을 받으므로,
+ * 조금 끌 때마다 묻지 않고 보이는 곳이 꽤 바뀌었을 때만 묻는다.
+ */
+export const zonesCenterRefetchMeters = 200;
 
 /**
  * 경로 추천(GET /recommendations/route)에 보낼 산책 시간을 셀 때, 직선 거리에 곱하는 값.
