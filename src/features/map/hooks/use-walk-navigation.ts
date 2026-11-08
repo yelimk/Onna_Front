@@ -1,13 +1,14 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 
-import { getWalkRoute } from '@/features/map/api/get-walk-route';
+import { getWalkRoute, toWalkRoute } from '@/features/map/api/get-walk-route';
 import { defaultMapCenter, openRadiusMeters, walkingSpeedMetersPerSecond } from '@/features/map/constants/map-config';
 import { useHomeMapMarkers } from '@/features/map/hooks/use-home-map-markers';
 import type { Coordinate } from '@/features/map/types/home-map-marker';
 import type { WalkRoute } from '@/features/map/types/walk-route';
 import { getDistanceMeters } from '@/features/map/utils/get-distance-meters';
 import { findKnownRecord } from '@/features/map/utils/known-records';
+import { findPassedPath } from '@/features/map/utils/open-search-result';
 import { locateOnRoute, splitRoute } from '@/features/map/utils/route-progress';
 
 type NavigationParams = {
@@ -15,6 +16,8 @@ type NavigationParams = {
   latitude?: string;
   longitude?: string;
   stopIds?: string;
+  /** 지도 홈 AI 추천 경로에서 받은 길의 번호 (openNavigation) */
+  pathId?: string;
 };
 
 /** 들를 자리·목적지에 이만큼(m) 다가오면 도착한 것으로 본다. GPS 오차를 생각한 값이다. */
@@ -49,9 +52,16 @@ export function useWalkNavigation(myLocation: Coordinate | null) {
   if (!start && myLocation) setStart(myLocation);
   const routeStart = start ?? defaultMapCenter;
 
-  const [route, setRoute] = useState<WalkRoute | null>(null);
+  // 지도 홈 AI 추천 경로가 넘긴 길이 있으면 그 길을 그대로 쓴다. 지도 홈에서 본 선과 길안내 선이 같아야 헷갈리지 않는다.
+  const passedRoute = useMemo(() => {
+    const path = findPassedPath(params.pathId);
+    return path ? toWalkRoute(path, false) : null;
+  }, [params.pathId]);
+
+  const [fetchedRoute, setRoute] = useState<WalkRoute | null>(null);
+  const route = passedRoute ?? fetchedRoute;
   useEffect(() => {
-    if (!destination) return;
+    if (!destination || passedRoute) return;
     const controller = new AbortController();
     getWalkRoute(
       { start: routeStart, destination, destinationName: params.destinationName ?? '', stops },
@@ -60,7 +70,7 @@ export function useWalkNavigation(myLocation: Coordinate | null) {
       .then(setRoute)
       .catch(() => {});
     return () => controller.abort();
-  }, [routeStart, destination, params.destinationName, stops]);
+  }, [routeStart, destination, params.destinationName, stops, passedRoute]);
 
   const current = myLocation ?? routeStart;
 
