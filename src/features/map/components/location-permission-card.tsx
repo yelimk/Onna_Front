@@ -6,6 +6,9 @@ import { Icon } from '@/components/icon';
 import { colors } from '@/constants/colors';
 import { floatingShadow, radius, spacing } from '@/constants/layout';
 
+/** Figma 위치 아이콘 원 크기 */
+const iconCircleSize = 60;
+
 type LocationPermissionCardProps = {
   onRequest: () => void;
   onBrowse: () => void;
@@ -53,8 +56,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background01,
   },
   iconCircle: {
-    width: 60,
-    height: 60,
+    width: iconCircleSize,
+    height: iconCircleSize,
     borderRadius: radius.full,
     backgroundColor: colors.selectedBackground,
     alignItems: 'center',

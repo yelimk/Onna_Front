@@ -6,6 +6,9 @@ import { Icon } from '@/components/icon';
 import { colors } from '@/constants/colors';
 import { floatingShadow, radius, spacing } from '@/constants/layout';
 
+/** Figma 검색창 높이 */
+const searchBarHeight = 48;
+
 type MapSearchBarProps = {
   /** 검색한 장소 이름. 있으면 뒤로·닫기가 붙은 '검색 결과' 모양이 된다. */
   query?: string;
@@ -44,7 +47,7 @@ export function MapSearchBar({ query, onPress = () => router.push('/map/search')
 const styles = StyleSheet.create({
   bar: {
     ...floatingShadow,
-    height: 48,
+    height: searchBarHeight,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,

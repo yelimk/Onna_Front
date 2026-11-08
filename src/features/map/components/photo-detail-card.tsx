@@ -10,6 +10,9 @@ import { sheetCornerRadius } from '@/features/map/constants/map-layout';
 import { usePopStyle } from '@/features/map/hooks/use-pop-style';
 import type { RecordDetail } from '@/features/map/hooks/use-record-detail';
 
+/** Figma 좋아요·남기기 버튼 높이 */
+const actionHeight = 48;
+
 const headerButtonSize = 36;
 
 /** 아직 못 연 기록의 안내. 위치가 부정확해서 못 연 것이면 멀리 있다고 하지 않는다. */
@@ -136,7 +139,7 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   action: {
-    height: 48,
+    height: actionHeight,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
