@@ -4,7 +4,7 @@ import { apiRequest } from '@/api/client';
 import type { CreatedPost, MyLocation, ReportReason } from '@/types/api';
 
 /**
- * 한 줄을 보내고 AI가 새로 만든 해시태그 이름 3~5개(# 없음)를 받는다.
+ * 한 줄을 보내고 AI가 새로 만든 해시태그 이름 4~5개(# 없음)를 받는다. 모자라면 서버가 내 선호 태그로 채운다.
  * AI 해시태그는 태그 사전에 없어서 번호 없이 이름으로만 온다. AI 응답을 최대 6초까지 기다려서 늦게 올 수 있다.
  */
 export async function getTagSuggestions(oneLine: string) {

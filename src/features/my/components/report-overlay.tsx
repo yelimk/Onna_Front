@@ -13,7 +13,8 @@ import { useTransitionProgress } from '@/hooks/use-transition-progress';
 type ReportOverlayProps = {
   visible: boolean;
   onClose: () => void;
-  onSubmit: (reason: ReportReasonId) => void;
+  /** 서버로 보내는 동안 기다리게 Promise를 돌려준다. 실패하면 신고 창이 그대로 남는다 */
+  onSubmit: (reason: ReportReasonId) => void | Promise<void>;
 };
 
 /**

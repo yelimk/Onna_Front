@@ -9,7 +9,7 @@ import { getPhotoLocation, hasLocationPermission } from '@/features/upload/utils
 import { showApiError } from '@/utils/show-api-error';
 
 /**
- * 위치 확인 화면의 '기록 완료'와 '위치 다시 찾기'.
+ * 위치 확인 화면의 '완료'와 '위치 다시 찾기'.
  * 서버가 거절하는 두 경우(얼굴, 부정확한 위치)는 사용자가 할 일이 달라서 따로 안내한다.
  * Figma에 이 안내 화면이 없어서, 다른 오류처럼 빨간 토스트로 알린다 (팀 결정). 2초 안에 읽히게 짧게 쓴다.
  */

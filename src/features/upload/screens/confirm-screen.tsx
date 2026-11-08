@@ -26,7 +26,7 @@ const pinShadowBelowTip = 8;
  * ② 기록 탭: 남기기 3/3 위치 확인.
  * 집 위치 같은 개인정보가 드러나지 않게 정확한 좌표 대신 장소 이름(반경)으로 저장한다.
  * 작은 지도는 셔터를 누른 자리를 핀으로 보여준다. 새로고침 버튼은 서버가 위치가 부정확하다고 할 때 위치를 다시 잡는다.
- * '기록 완료'에서 draft를 서버로 보낸다. 제목은 서버에 아직 칸이 없어서 보내지 않는다.
+ * '완료'에서 draft(사진, 위치, 질문, 제목, 한 줄, 해시태그)를 서버로 보낸다.
  */
 export function ConfirmScreen() {
   const { draft } = useUploadDraft();
@@ -39,7 +39,7 @@ export function ConfirmScreen() {
       header={<UploadStepHeader title="위치 확인" step={3} />}
       footer={
         <Button
-          label="기록 완료"
+          label="완료"
           variant="primary"
           disabled={!canSubmit}
           isLoading={isSubmitting}

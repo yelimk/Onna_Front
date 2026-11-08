@@ -97,6 +97,21 @@ export type MyPost = Coordinate & {
   createdAt: string;
 };
 
+/** 온보딩 1단계 '대구·경북과의 사이'. NATIVE(토박이에요), MOVED_IN(대구·경북으로 왔어요), VISITING(잠깐 머무는 중이에요) */
+export type RegionRelation = 'NATIVE' | 'MOVED_IN' | 'VISITING';
+
+/** 걷는 방식. COMMUTE(등하굣길), BREAK(공강 시간), EVENING(저녁 산책), RUNNING(러닝할 때), WEEKEND(주말 나들이) */
+export type WalkStyle = 'COMMUTE' | 'BREAK' | 'EVENING' | 'RUNNING' | 'WEEKEND';
+
+/** 한번에 걷는 시간(분). 30은 '30분 이상' */
+export type WalkMinutes = 10 | 20 | 30;
+
+/** 걷는 방식(1개 이상)과 한번에 걷는 시간. 고르기 전에 불러오면 styles는 [], minutes는 null */
+export type WalkPreference = {
+  styles: WalkStyle[];
+  minutes: WalkMinutes | null;
+};
+
 export type Badge = {
   /** FIRST_DISCOVERER(최초 발견자), WALKER(걸음왕) */
   code: string;
