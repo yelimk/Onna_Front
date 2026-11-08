@@ -39,6 +39,8 @@ type NavigationRequest = {
   destination: Coordinate;
   /** 경로 추천에서 고른 '들를 자리'. 길안내도 같은 자리를 들르도록 그대로 넘긴다. */
   stopIds: string[];
+  /** 목적지가 기록 한 건이면 그 id (지도 홈 AI 추천 경로의 마지막 자리). 길안내에서 목적지 핀을 누르면 그 사진 카드를 띄운다. */
+  destinationRecordId?: string;
   /** 이미 받은 걷는 길(지도 홈 AI 추천 경로). 주면 길안내가 같은 길을 쓰고, 없으면 길안내가 TMAP으로 새로 받는다. */
   path?: Coordinate[] | null;
 };
@@ -56,7 +58,7 @@ export const findPassedPath = (id: string | undefined) => (id && passedPath?.id 
  * '이 길로 걷기': 길안내 화면으로 간다.
  * 주소 파라미터는 문자열만 받아서 들를 자리 목록은 쉼표로 이어 붙인다.
  */
-export function openNavigation({ destinationName, destination, stopIds, path }: NavigationRequest) {
+export function openNavigation({ destinationName, destination, stopIds, destinationRecordId, path }: NavigationRequest) {
   const pathId = path && path.length > 1 ? String(Date.now()) : undefined;
   if (pathId && path) passedPath = { id: pathId, path };
   router.push({
@@ -67,6 +69,7 @@ export function openNavigation({ destinationName, destination, stopIds, path }: 
       longitude: String(destination.longitude),
       stopIds: stopIds.join(','),
       ...(pathId && { pathId }),
+      ...(destinationRecordId && { destinationRecordId }),
     },
   });
 }

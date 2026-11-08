@@ -86,7 +86,10 @@ export function NavigationScreen() {
         focus={focus}
         routePath={navigation.progress?.remainingPath ?? navigation.fullPath}
         walkedPath={navigation.progress?.walkedPath ?? null}
-        onMarkerPress={() => {}}
+        // 목적지가 기록이면(AI 추천 경로의 마지막 자리) 핀을 눌러 그 사진 카드를 띄운다. 구역 밖 기록도 여기서 열 수 있다.
+        onMarkerPress={() => {
+          if (navigation.destinationRecordId) openRecord(navigation.destinationRecordId);
+        }}
       />
 
       <View style={[styles.banner, { top: insets.top + spacing.xs }]}>

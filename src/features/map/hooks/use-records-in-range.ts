@@ -6,7 +6,7 @@ import { useHomeMapMarkers } from '@/features/map/hooks/use-home-map-markers';
 import { useLocationAccuracy } from '@/features/map/hooks/use-my-location';
 import type { Coordinate, PhotoMarker } from '@/features/map/types/home-map-marker';
 import { getDistanceMeters } from '@/features/map/utils/get-distance-meters';
-import { rememberRecords } from '@/features/map/utils/known-records';
+import { getKnownRecords, rememberRecords } from '@/features/map/utils/known-records';
 import { toMyLocation, toServerCoordinate } from '@/features/map/utils/to-coordinate';
 import { toPhotoMarker } from '@/features/map/utils/zones-to-markers';
 import type { MyLocation } from '@/types/api';
@@ -55,7 +55,7 @@ const isInRangeByServer = (current: Coordinate, record: PhotoMarker) =>
  * 길안내 '범위 내 기록들': 내 위치 열림 반경(25m) 안의 기록을 Figma처럼 AI 추천순(서버 취향 점수 순)으로 보여준다.
  * 지도 홈이 가진 기록은 구역 대표 사진(1~2장)뿐이라, 둘레 구역의 사진 목록을 따로 받아 빠지는 기록이 없게 한다.
  * 10m 걷거나 사진 주소가 만료되기 전(25분)에만 다시 받는다. 받기 전·실패하면 지도 홈 기록을 가까운 순으로 보여준다.
- * 구역 밖에 남긴 기록은 구역 사진 목록에 없어서, 지도 홈 기록에서 찾아 뒤에 가까운 순으로 붙인다.
+ * 구역 밖에 남긴 기록은 구역 사진 목록에 없어서, 지도 홈 기록과 검색·경로에서 받아 둔 기록에서 찾아 뒤에 가까운 순으로 붙인다.
  */
 export function useRecordsInRange(current: Coordinate, myLocation: Coordinate | null) {
   const { records: homeRecords } = useHomeMapMarkers(myLocation);
@@ -87,9 +87,13 @@ export function useRecordsInRange(current: Coordinate, myLocation: Coordinate | 
 
   return useMemo(() => {
     const ranked = (fetched ?? []).filter((record) => isInRangeByServer(current, record));
-    const rankedIds = new Set(ranked.map(({ id }) => id));
-    const rest = homeRecords
-      .filter((record) => !rankedIds.has(record.id) && isInRange(current, record))
+    const seenIds = new Set(ranked.map(({ id }) => id));
+    const rest = [...homeRecords, ...getKnownRecords()]
+      .filter((record) => {
+        if (seenIds.has(record.id) || !isInRange(current, record)) return false;
+        seenIds.add(record.id);
+        return true;
+      })
       .sort((a, b) => getDistanceMeters(current, a.coordinate) - getDistanceMeters(current, b.coordinate));
     return [...ranked, ...rest];
   }, [fetched, homeRecords, current]);

@@ -13,3 +13,9 @@ export function rememberRecords(records: PhotoMarker[]) {
 
 /** 받아 둔 기록 한 건. 아직 받은 적 없으면 undefined */
 export const findKnownRecord = (postId: string) => knownRecords.get(postId);
+
+/**
+ * 받아 둔 기록 전부. 지도 구역에는 구역 안 기록만 와서, 구역 밖에 남긴 기록(해시태그 검색 핀, 경로 자리)은
+ * 여기에만 있다. 길안내가 범위 안 기록·도착해서 열 기록을 찾을 때 같이 본다.
+ */
+export const getKnownRecords = () => [...knownRecords.values()];
