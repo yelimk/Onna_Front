@@ -5,8 +5,8 @@ import { getMyPosts } from '@/api/users';
 import type { PhotoMarker } from '@/features/map/types/home-map-marker';
 import { rememberRecords } from '@/features/map/utils/known-records';
 import { fromServerCoordinate } from '@/features/map/utils/to-coordinate';
+import { toHashtags } from '@/features/map/utils/to-hashtags';
 import type { MyPost } from '@/types/api';
-import { formatHashtag } from '@/utils/format-hashtag';
 
 /** 내 기록 → 지도 사진 마커. 내 사진은 거리와 상관없이 열리므로(서버 열기 규칙) 열린 모습으로 놓는다. */
 function toMyPostMarker(post: MyPost): PhotoMarker {
@@ -14,7 +14,7 @@ function toMyPostMarker(post: MyPost): PhotoMarker {
     kind: 'photo',
     id: String(post.postId),
     coordinate: fromServerCoordinate(post),
-    hashtags: post.tags.map(formatHashtag),
+    hashtags: toHashtags(post.tags),
     isOpen: true,
     imageUrl: post.imageUrl,
     title: post.title,

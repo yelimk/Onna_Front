@@ -7,7 +7,7 @@ import { openNearbyPost, useOpenedPost } from '@/features/map/hooks/use-opened-p
 import type { Coordinate } from '@/features/map/types/home-map-marker';
 import { getDistanceMeters } from '@/features/map/utils/get-distance-meters';
 import { findKnownRecord } from '@/features/map/utils/known-records';
-import { formatHashtag } from '@/utils/format-hashtag';
+import { toHashtags } from '@/features/map/utils/to-hashtags';
 
 /** 사진 카드에 필요한 기록 한 건 */
 export type RecordDetail = {
@@ -65,7 +65,7 @@ export function useRecordDetail(recordId: string, myLocation: Coordinate | null)
     id: recordId,
     title: opened?.title || found?.title || placeName,
     placeName,
-    hashtags: opened ? opened.tags.map(formatHashtag) : (found?.hashtags ?? []),
+    hashtags: opened ? toHashtags(opened.tags) : (found?.hashtags ?? []),
     comment: opened?.oneLine ?? (isMine ? (found?.comment ?? '') : ''),
     imageUrl: opened?.imageUrl ?? found?.imageUrl,
     isUnlocked: opened !== null || isMine,
