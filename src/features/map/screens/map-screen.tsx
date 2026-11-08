@@ -15,6 +15,7 @@ import { MapSearchBar } from '@/features/map/components/map-search-bar';
 import { SelectedResultCard } from '@/features/map/components/selected-result-card';
 import { openRadiusMeters } from '@/features/map/constants/map-config';
 import { mapChromeFadeMs } from '@/features/map/constants/map-motion';
+import { useAiWalkRoute } from '@/features/map/hooks/use-ai-walk-route';
 import { useHomeMapMarkers } from '@/features/map/hooks/use-home-map-markers';
 import { useHomePlace } from '@/features/map/hooks/use-home-place';
 import { useMyLocation } from '@/features/map/hooks/use-my-location';
@@ -39,6 +40,7 @@ function openMarker(marker: MapMarker) {
  * Figma '지도 홈 화면 UI'. 카카오맵 위에 사진 마커, 검색창, 탐색 모드 스위치, 남기기 버튼을 올린다.
  * 탐색 모드를 켜면 내 위치 둘레에 열림 반경을 그리고, 아래 패널에서 가장 가까운 기록을 보여준다.
  * 해시태그 검색에서 장소를 넘겨받으면 그 장소 카드를 띄우고, 경로 추천을 받을 수 있다 (Figma '지도 해시태그 검색 시 경로 추천 UI').
+ * '산책 경로 추천' 버튼은 목적지 없이 AI 추천 경로를 받아 같은 경로 카드로 보여준다.
  * 내가 남긴 기록은 지도 구역에 들어 있지 않아서(남의 사진만 옴) 따로 받아 함께 올린다.
  * 위치 권한이 없으면 지도 위에 권한 안내를 덮는다.
  * 검색창을 누르면 Figma '지도 홈 화면 애니메이션'처럼 검색창·탐색 모드만 남기고 나머지를 흐리게 지운 뒤 검색 창을 띄운다.
@@ -59,15 +61,20 @@ export function MapScreen() {
   // 검색을 닫고 지도 홈으로 돌아오면 지웠던 버튼과 이름표를 다시 보여준다.
   useFocusEffect(useCallback(() => setIsOpeningSearch(false), []));
 
-  const openSearch = () => {
-    setIsOpeningSearch(true);
-    router.push('/map/search');
-  };
-
   const { place, clearPlace } = useHomePlace(location);
   const placeRoute = usePlaceRoute(place, location);
   const [cardHeight, setCardHeight] = useState(0);
   const placeMap = useResultsMap(placeRoute.mapView ?? noPlaceView, cardHeight);
+  const aiRoute = useAiWalkRoute(location, cardHeight);
+
+  const openSearch = () => {
+    // 검색에서 장소를 골라 돌아오면 그 장소 경로를 보므로, 보고 있던 AI 추천 경로는 닫는다.
+    aiRoute.close();
+    setIsOpeningSearch(true);
+    router.push('/map/search');
+  };
+  // 장소를 고르면 장소 경로가 먼저다. 장소 카드가 떠 있는 동안에는 경로 추천 버튼이 숨겨져 둘이 함께 뜨지 않는다.
+  const card = placeRoute.card ?? aiRoute.card;
   // 남의 기록(구역)에 내 기록을 더하고, 고른 장소가 있으면 그 핀을 위에 더한다.
   const mapMarkers = useMemo<MapMarker[]>(
     () => [...markers, ...myPostMarkers, ...(place ? placeMap.markers : [])],
@@ -82,10 +89,15 @@ export function MapScreen() {
     if (next) setIsSheetExpanded(true);
   };
 
-  /** 카드의 X: 경로를 보고 있으면 장소 카드로, 아니면 장소 고르기를 끝낸다. */
-  const closePlaceCard = () => (placeRoute.routePlan ? placeRoute.closeRoute() : clearPlace());
+  /** 카드의 X: 경로를 보고 있으면 장소 카드로, 아니면 장소 고르기를 끝낸다. AI 추천 경로면 경로를 닫는다. */
+  const closeCard = () => {
+    if (!place) aiRoute.close();
+    else if (placeRoute.routePlan) placeRoute.closeRoute();
+    else clearPlace();
+  };
 
   const walkThisRoute = () => {
+    if (!place) return aiRoute.walk();
     const plan = placeRoute.routePlan;
     if (!plan) return;
     openNavigation({
@@ -101,8 +113,8 @@ export function MapScreen() {
         markers={mapMarkers}
         myLocation={location}
         openRadiusMeters={isExploring ? openRadiusMeters : null}
-        focus={place ? placeMap.focus : undefined}
-        routePath={placeMap.routePath}
+        focus={place ? placeMap.focus : aiRoute.focus}
+        routePath={place ? placeMap.routePath : aiRoute.path}
         isQuiet={isOpeningSearch}
         onMarkerPress={openMarker}
       />
@@ -113,7 +125,7 @@ export function MapScreen() {
           <ExploreModeToggle value={isExploring} onChange={changeExploring} />
         </View>
         {zonesNotice && <Badge label={zonesNotice} tone="dark" style={styles.notice} />}
-        {placeRoute.routePlan && (
+        {(placeRoute.routePlan || (!place && aiRoute.isActive)) && (
           <Animated.View style={chromeStyle}>
             <AiBadge label="AI 추천 경로" />
           </Animated.View>
@@ -121,20 +133,20 @@ export function MapScreen() {
       </View>
 
       <Animated.View style={[styles.chrome, chromeStyle]}>
-        {placeRoute.card ? (
+        {card ? (
           <SelectedResultCard
-            state={placeRoute.card}
+            state={card}
             cardHeight={cardHeight}
             onLayout={({ nativeEvent }) => setCardHeight(Math.round(nativeEvent.layout.height))}
-            onClose={closePlaceCard}
+            onClose={closeCard}
             onRecommend={placeRoute.recommendRoute}
-            onRouteExpandedChange={placeRoute.setIsRouteExpanded}
+            onRouteExpandedChange={place ? placeRoute.setIsRouteExpanded : aiRoute.setIsExpanded}
             onWalk={walkThisRoute}
           />
         ) : (
           <View style={[styles.bottom, isExploring && styles.bottomWithSheet]}>
             <View style={styles.actions}>
-              <MapActionButtons onRoutePress={openSearch} showCamera={!isRecordVisible} />
+              <MapActionButtons onRoutePress={aiRoute.open} showCamera={!isRecordVisible} />
             </View>
             {isExploring && (
               <ExploreSheet

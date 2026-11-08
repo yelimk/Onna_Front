@@ -13,7 +13,18 @@ import type { NearbyRecordSummary } from '@/features/map/utils/summarize-nearby-
 /** 고른 결과에 따라 아래에 띄울 카드. 화면이 상태를 정하고, 이 부품은 맞는 카드만 고른다. */
 export type SelectedResultState =
   | { mode: 'place'; item: SearchResultItem; nearby: NearbyRecordSummary }
-  | { mode: 'route'; item: SearchResultItem; stops: PhotoMarker[]; isLoading: boolean; isExpanded: boolean }
+  | {
+      mode: 'route';
+      /** 카드를 새로 그릴 기준. 다른 경로로 바뀌면 카드도 새로 만든다. */
+      key: string;
+      title: string;
+      details: string;
+      stops: PhotoMarker[];
+      message: string;
+      canWalk: boolean;
+      isLoading: boolean;
+      isExpanded: boolean;
+    }
   | { mode: 'hashtag'; item: SearchResultItem; nearbyRecordCount: number }
   | {
       mode: 'record';
@@ -67,8 +78,12 @@ export function SelectedResultCard({
             </View>
           )}
           <RouteCard
-            item={state.item}
+            key={state.key}
+            title={state.title}
+            details={state.details}
             stops={state.stops}
+            message={state.message}
+            canWalk={state.canWalk}
             isLoading={state.isLoading}
             isExpanded={state.isExpanded}
             onExpandedChange={onRouteExpandedChange}

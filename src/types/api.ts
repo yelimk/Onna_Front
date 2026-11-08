@@ -180,4 +180,10 @@ export type RouteRecommendation = {
   /** 들를 곳이 없으면 null */
   title: string | null;
   stops: RouteStop[];
+  /**
+   * AI 서버가 이은 실제 보행 경로(길 좌표)와 걷는 거리(m).
+   * 목적지 없이 불렀고 AI가 6초 안에 답했을 때만 오고, 목적지를 보냈거나 AI가 실패하면 null이다.
+   */
+  path: Coordinate[] | null;
+  distanceM: number | null;
 };
