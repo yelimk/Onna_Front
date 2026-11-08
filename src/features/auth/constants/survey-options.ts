@@ -41,7 +41,7 @@ export { walkDurationOptions, walkTimeOptions, type WalkDuration, type WalkTime 
 
 export type SurveyAnswers = {
   relation?: RelationOption['id'];
-  /** 서버 태그 id. 관계와 함께 서버에 저장한다 (걷는 때는 서버 보기가 정해지면 연결한다). */
+  /** 서버 태그 id. 관계·걷는 유형과 함께 '완료'에서 서버에 저장한다. */
   placeTagIds: number[];
   walkTimes: WalkTime[];
   walkDuration?: WalkDuration;

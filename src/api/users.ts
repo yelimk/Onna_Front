@@ -8,6 +8,9 @@ import type {
   OpenedSpot,
   RegionRelation,
   Tag,
+  WalkMinutes,
+  WalkPreference,
+  WalkStyle,
 } from '@/types/api';
 
 /** 내 정보. onboarded가 false면 취향 설문으로 보낸다. */
@@ -36,6 +39,16 @@ export function saveMyTags(tagIds: number[]) {
 /** 대구·경북과의 사이 저장 (온보딩 1단계). 다시 보내면 바뀐다 */
 export function saveRegionRelation(relation: RegionRelation) {
   return apiRequest<void>('/users/me/region-relation', { method: 'PUT', body: { relation } });
+}
+
+/** 전에 고른 걷는 방식·한번에 걷는 시간 (사용자 기호 설정) */
+export function getMyWalk() {
+  return apiRequest<WalkPreference>('/users/me/walk');
+}
+
+/** 걷는 방식(1개 이상)·한번에 걷는 시간(10·20·30)을 통째로 바꿔 저장한다. 비었거나 보기에 없으면 INVALID_INPUT */
+export function saveMyWalk(preference: { styles: WalkStyle[]; minutes: WalkMinutes }) {
+  return apiRequest<void>('/users/me/walk', { method: 'PUT', body: preference });
 }
 
 /** 내가 남긴 기록 (최신순). zoneId를 주면 그 구역 것만 */

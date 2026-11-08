@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 
-import { getMe, saveMyTags, saveRegionRelation } from '@/api/users';
+import { getMe, saveMyTags, saveMyWalk, saveRegionRelation } from '@/api/users';
 import { Button } from '@/components/button';
 import { ScreenContainer } from '@/components/screen-container';
 import { showToast } from '@/components/toast';
@@ -17,6 +17,7 @@ import { minPlaceCount, type SurveyAnswers } from '@/features/auth/constants/sur
 import { useTags } from '@/hooks/use-tags';
 import { formatHashtag } from '@/utils/format-hashtag';
 import { showApiError } from '@/utils/show-api-error';
+import { toWalkPreference } from '@/utils/walk-preference';
 
 const totalSteps = 3;
 
@@ -26,7 +27,7 @@ const previewNearbySpotCount = 12;
 /**
  * 시작: 온보딩 설문.
  * 1/3~3/3과 완료 화면을 한 화면에서 단계(step)만 바꿔 보여준다. step이 totalSteps보다 크면 완료 화면.
- * '완료'를 누르면 대구·경북과의 사이와 고른 자리 해시태그를 서버에 저장한다. 저장하면 다음 로그인부터 설문을 건너뛴다.
+ * '완료'를 누르면 대구·경북과의 사이, 걷는 유형, 고른 자리 해시태그를 서버에 저장한다. 저장하면 다음 로그인부터 설문을 건너뛴다.
  * 단계가 바뀌면 300ms 동안 다음 단계로 서서히 바뀐다 (Figma 프로토타입: 스마트 애니메이트 300ms, Ease out).
  * 완료 화면도 같은 방식으로 서서히 나타난다. Figma는 슬라이드 인이지만, 다른 화면으로 넘어가는 슬라이드는
  * 휴대폰 기본 넘김이라 Figma대로 못 해서, 여기만 밀려 들어오면 어색해 빼기로 했다 (팀 결정).
@@ -79,9 +80,11 @@ export function SurveyScreen() {
     if (isSaving) return;
     setIsSaving(true);
     try {
-      // 해시태그를 저장하면 온보딩이 끝난 것(onboarded)으로 바뀌어서, 관계를 먼저 저장한다.
-      // 관계 저장이 실패하면 온보딩이 끝나지 않은 채로 남아, '완료'를 다시 누르면 둘 다 다시 보낸다.
+      // 해시태그를 저장하면 온보딩이 끝난 것(onboarded)으로 바뀌어서, 관계·걷는 유형을 먼저 저장한다.
+      // 앞의 저장이 실패하면 온보딩이 끝나지 않은 채로 남아, '완료'를 다시 누르면 모두 다시 보낸다.
+      // '완료'는 세 단계를 다 골라야 눌리므로 relation·walkDuration은 여기서 늘 있다.
       if (answers.relation) await saveRegionRelation(answers.relation);
+      if (answers.walkDuration) await saveMyWalk(toWalkPreference(answers.walkTimes, answers.walkDuration));
       await saveMyTags(answers.placeTagIds);
       setStep(step + 1);
     } catch (error) {

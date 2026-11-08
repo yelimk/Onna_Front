@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { getMyTags, saveMyTags } from '@/api/users';
+import { getMyTags, getMyWalk, saveMyTags, saveMyWalk } from '@/api/users';
 import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
 import { ScreenContainer } from '@/components/screen-container';
@@ -15,25 +15,33 @@ import { ChipGroup, PreferenceCard } from '@/features/my/components/preference-c
 import { useTags } from '@/hooks/use-tags';
 import { formatHashtag } from '@/utils/format-hashtag';
 import { showApiError } from '@/utils/show-api-error';
+import { fromWalkPreference, toWalkPreference } from '@/utils/walk-preference';
 
 /**
  * ③ 마이 탭: 사용자 기호 설정 (Figma 새 버전: 해시태그 유형 카드 + 걸음 유형 카드).
- * 해시태그는 서버 태그 목록에서 고르고 '저장하기'로 통째로 바꿔 저장한다.
- * 들어오면 전에 고른 해시태그를 서버에서 받아 미리 골라 둔다.
- * 걷는 방식·시간은 서버에 저장할 곳이 아직 없어서 화면 안에서만 고른다 (백엔드에 요청해 둠).
+ * 해시태그와 걷는 유형을 고르고 '저장하기'로 통째로 바꿔 저장한다.
+ * 들어오면 전에 고른 값을 서버에서 받아 미리 골라 둔다.
+ * 고르는 기준은 온보딩 설문과 같다: 해시태그 3개 이상, 걷는 방식 1개 이상, 한번에 걷는 시간 1개.
  */
 export function PreferencesScreen() {
   const { tags, hasFailed, reload } = useTags();
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
+  const [walkTimes, setWalkTimes] = useState<WalkTime[]>([]);
+  const [walkDuration, setWalkDuration] = useState<WalkDuration>();
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     getMyTags()
       .then((myTags) => setSelectedTagIds(myTags.map((tag) => tag.id)))
       .catch(showApiError);
+    getMyWalk()
+      .then((walk) => {
+        const saved = fromWalkPreference(walk);
+        setWalkTimes(saved.walkTimes);
+        setWalkDuration(saved.walkDuration);
+      })
+      .catch(showApiError);
   }, []);
-  const [walkTimes, setWalkTimes] = useState<WalkTime[]>([]);
-  const [walkDuration, setWalkDuration] = useState<WalkDuration>();
-  const [isSaving, setIsSaving] = useState(false);
 
   const toggleTag = (tagId: number) =>
     setSelectedTagIds((ids) => (ids.includes(tagId) ? ids.filter((id) => id !== tagId) : [...ids, tagId]));
@@ -43,14 +51,22 @@ export function PreferencesScreen() {
   const save = async () => {
     // 저장하는 동안 버튼 모양은 그대로 두고, 두 번 눌러도 한 번만 보낸다
     if (isSaving) return;
-    // 서버는 3개보다 적으면 받지 않는다. 버튼은 Figma처럼 늘 주황으로 두고, 모자라면 저장하지 않고 알려준다.
+    // 서버는 기준보다 적게 고르면 받지 않는다. 버튼은 Figma처럼 늘 주황으로 두고, 모자라면 저장하지 않고 알려준다.
     if (selectedTagIds.length < minPreferredTagCount) {
       showToast(`해시태그를 ${minPreferredTagCount}개 이상 선택해 주세요`, 'error');
       return;
     }
+    if (walkTimes.length === 0) {
+      showToast('걷는 방식을 하나 이상 선택해 주세요', 'error');
+      return;
+    }
+    if (!walkDuration) {
+      showToast('한번에 걷는 시간을 선택해 주세요', 'error');
+      return;
+    }
     setIsSaving(true);
     try {
-      await saveMyTags(selectedTagIds);
+      await Promise.all([saveMyTags(selectedTagIds), saveMyWalk(toWalkPreference(walkTimes, walkDuration))]);
       router.back();
     } catch (error) {
       showApiError(error);
