@@ -129,7 +129,7 @@ src/api/                  서버 요청. 모든 요청은 client.ts를 거침
 - **디자인 값은 이름으로**: 색·글씨·간격·애니메이션 시간을 `src/constants/`에 두고 화면에서는 이름만 씁니다.
 
 <details>
-<summary><b>폴더 구조</b> (펼쳐 보기)</summary>
+<summary><b>폴더 구조</b></summary>
 
 ```
 src/
@@ -196,7 +196,7 @@ assets/           글꼴, Figma 아이콘(SVG), 이미지
 - **해시태그 다시 고르기**: 한 줄을 고치면 이전 한 줄에 맞춘 추천이므로 고른 해시태그를 지웁니다.
 
 **기록·마이**
-- **알림 빨간 점**: 서버가 '새 알림' 표시를 주지 않아, 알림 화면을 마지막으로 본 시각을 폰에 저장해 비교합니다.
+- **알림 빨간 점**: 알림 화면을 마지막으로 본 시각을 폰에 저장하고, 그 뒤에 온 알림에 빨간 점을 붙입니다. 마이 탭 종 버튼도 같은 기준을 써서 두 곳의 표시가 어긋나지 않습니다.
 - **권한 상태 다시 확인**: 설정에서 폰 설정으로 갔다가 앱으로 돌아오면 권한 상태를 다시 읽습니다.
 
 ## 6. 디자인 시스템
@@ -204,7 +204,7 @@ assets/           글꼴, Figma 아이콘(SVG), 이미지
 Figma 디자인 시스템의 값을 코드로 옮겨, 화면에서는 이름으로만 씁니다.
 
 <details>
-<summary><b>파일과 규칙</b> (펼쳐 보기)</summary>
+<summary><b>파일과 규칙</b></summary>
 
 | 파일 | 내용 |
 |---|---|
@@ -222,7 +222,7 @@ Figma 디자인 시스템의 값을 코드로 옮겨, 화면에서는 이름으�
 ## 7. 개발 환경에서 실행하기
 
 <details>
-<summary><b>설치, 환경 변수, 배포</b> (펼쳐 보기)</summary>
+<summary><b>설치, 환경 변수, 배포</b></summary>
 
 **준비물**: Node.js 22.13 이상, 폰에 Expo Go 앱
 
@@ -280,13 +280,23 @@ npx eas-cli@latest update --branch develop --environment development --message "
 | 지도 | `src/features/map` |
 | 화면 | `src/features/auth`, `upload`, `record`, `my`, `notification` |
 
-**코드 규칙** (자세한 내용은 [`AGENTS.md`](AGENTS.md))
+<details>
+<summary><b>코드 규칙</b></summary>
+
+자세한 내용은 [`AGENTS.md`](AGENTS.md)에 있습니다.
+
 - 파일은 `kebab-case`, 컴포넌트는 `PascalCase`, 함수·변수는 `camelCase`로 짓습니다.
 - 함수 이름은 하는 일을 동사로 씁니다 (`getDistance`, `uploadPhoto`).
 - 파일이 200줄을 넘거나 컴포넌트가 여러 일을 하면 나눕니다.
 - 주석은 한국어로, "무엇을"보다 "왜 이렇게 했는지"를 씁니다.
 
-**라이브러리 추가**
+</details>
+
+<details>
+<summary><b>라이브러리 추가</b></summary>
+
 - `npx expo install 패키지이름`으로 설치합니다 (Expo 버전에 맞는 버전을 골라 줍니다).
 - Expo 공식 모듈을 먼저 찾고, 없으면 Expo Go를 지원하는 것만 씁니다.
 - 라이선스는 MIT, Apache-2.0, BSD, ISC만 쓰고, 설치하면 기술 스택 표에 적습니다.
+
+</details>
