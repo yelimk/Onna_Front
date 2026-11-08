@@ -2,6 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 
+import { reportPost } from '@/api/posts';
 import { AppText } from '@/components/app-text';
 import { palette } from '@/constants/colors';
 import { screenPaddingX, spacing } from '@/constants/layout';
@@ -50,8 +51,9 @@ export function PhotoDetailScreen() {
         )}
       </View>
 
-      {/* 신고 API가 나오면 고른 이유를 서버로 보낸다. 지금은 접수 안내만 보여준다. */}
-      {isReporting && <ReportSheet onClose={() => setIsReporting(false)} onSubmit={() => {}} />}
+      {isReporting && record && (
+        <ReportSheet onClose={() => setIsReporting(false)} onSubmit={(reason) => reportPost(Number(record.id), reason)} />
+      )}
     </View>
   );
 }
