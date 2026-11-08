@@ -17,7 +17,7 @@ import { openRadiusMeters } from '@/features/map/constants/map-config';
 import { mapChromeFadeMs } from '@/features/map/constants/map-motion';
 import { useHomeMapMarkers } from '@/features/map/hooks/use-home-map-markers';
 import { useHomeRoutes } from '@/features/map/hooks/use-home-routes';
-import { setZonesCenter } from '@/features/map/hooks/use-map-zones';
+import { refreshZones, setZonesCenter } from '@/features/map/hooks/use-map-zones';
 import { useMyLocation } from '@/features/map/hooks/use-my-location';
 import { useMyMapPosts } from '@/features/map/hooks/use-my-map-posts';
 import { KakaoMapView } from '@/features/map/kakao-map/kakao-map-view';
@@ -52,8 +52,13 @@ export function MapScreen() {
   const [isOpeningSearch, setIsOpeningSearch] = useState(false);
   const chromeStyle = useFadeStyle(!isOpeningSearch, mapChromeFadeMs);
 
-  // 검색을 닫고 지도 홈으로 돌아오면 지웠던 버튼과 이름표를 다시 보여준다.
-  useFocusEffect(useCallback(() => setIsOpeningSearch(false), []));
+  // 지도 홈으로 돌아오면 검색을 열 때 지웠던 버튼과 이름표를 다시 보여주고, 그사이 남겨진 새 기록이 보이게 구역을 새로 받는다.
+  useFocusEffect(
+    useCallback(() => {
+      setIsOpeningSearch(false);
+      refreshZones();
+    }, []),
+  );
 
   const routes = useHomeRoutes(location);
 
