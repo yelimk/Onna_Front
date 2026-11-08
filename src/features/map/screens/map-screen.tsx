@@ -17,6 +17,7 @@ import { openRadiusMeters } from '@/features/map/constants/map-config';
 import { mapChromeFadeMs } from '@/features/map/constants/map-motion';
 import { useAiWalkRoute } from '@/features/map/hooks/use-ai-walk-route';
 import { useHomeMapMarkers } from '@/features/map/hooks/use-home-map-markers';
+import { setZonesCenter } from '@/features/map/hooks/use-map-zones';
 import { useHomePlace } from '@/features/map/hooks/use-home-place';
 import { useMyLocation } from '@/features/map/hooks/use-my-location';
 import { useMyMapPosts } from '@/features/map/hooks/use-my-map-posts';
@@ -117,6 +118,7 @@ export function MapScreen() {
         routePath={place ? placeMap.routePath : aiRoute.path}
         isQuiet={isOpeningSearch}
         onMarkerPress={openMarker}
+        onCenterChange={setZonesCenter}
       />
 
       <View style={[styles.top, { paddingTop: insets.top + spacing.xs }]}>

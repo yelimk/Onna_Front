@@ -58,6 +58,12 @@ export const zonesRefreshMs = 25 * 60 * 1000;
 export const zonesRefetchMeters = 30;
 
 /**
+ * 지도 가운데가 이만큼 옮겨지면 구역을 다시 받는다. 구역은 지도 가운데에서 500m(서버 기본) 안을 받으므로,
+ * 조금 끌 때마다 묻지 않고 보이는 곳이 꽤 바뀌었을 때만 묻는다.
+ */
+export const zonesCenterRefetchMeters = 200;
+
+/**
  * 경로 추천(GET /recommendations/route)에 보낼 산책 시간을 셀 때, 직선 거리에 곱하는 값.
  * 길은 직선보다 돌아가므로 조금 늘려 잡는다.
  */

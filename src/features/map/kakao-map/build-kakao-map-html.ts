@@ -181,6 +181,11 @@ export function buildKakaoMapHtml({ appKey, center, level }: KakaoMapHtmlOptions
           center: toLatLng(${JSON.stringify(center)}),
           level: ${level},
         });
+        // 움직일 때마다가 아니라 멈췄을 때만 알린다. 앱이 이 가운데 둘레의 기록을 받는다.
+        kakao.maps.event.addListener(map, 'idle', function () {
+          var center = map.getCenter();
+          post({ type: 'centerChange', center: { latitude: center.getLat(), longitude: center.getLng() } });
+        });
         post({ type: 'ready' });
       });
     }

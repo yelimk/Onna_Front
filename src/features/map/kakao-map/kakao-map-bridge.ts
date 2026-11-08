@@ -25,7 +25,9 @@ export type MapPadding = { top: number; right: number; bottom: number; left: num
 export type MapEvent =
   | { type: 'ready' }
   | { type: 'error'; message: string }
-  | { type: 'markerPress'; kind: MapMarker['kind']; markerId: string };
+  | { type: 'markerPress'; kind: MapMarker['kind']; markerId: string }
+  /** 지도를 끌거나 확대·축소해서 움직임이 멈췄을 때(카카오 idle)의 지도 가운데 */
+  | { type: 'centerChange'; center: Coordinate };
 
 /** 지도 페이지의 `window.receiveCommand`를 부르는 코드. 끝의 `true`는 iOS에서 경고가 뜨지 않게 하려고 붙인다. */
 export function toInjectedScript(command: MapCommand) {
