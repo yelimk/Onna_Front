@@ -119,4 +119,6 @@ export const kakaoMapCss = `
    */
   .chip, .cluster-label, .cluster-more, .my-location { transition: opacity ${mapChromeFadeMs}ms ease-out; }
   .quiet .chip, .quiet .cluster-label, .quiet .cluster-more, .quiet .my-location { opacity: 0; }
+  /* 다른 마커와 겹쳐서 숨긴 이름표 (hideOverlappingLabels). 자리는 그대로 두어 다시 잴 수 있게 한다. */
+  .label-hidden { visibility: hidden; }
 `;

@@ -33,6 +33,8 @@ export function buildKakaoMapHtml({ appKey, center, level }: KakaoMapHtmlOptions
   <script>
     var map = null;
     var markerOverlays = [];
+    // 이름표 겹침을 볼 때 쓰는 마커 정보 (종류, 받은 순서, 화면의 요소)
+    var markerEntries = [];
     var myLocationOverlay = null;
     var openRadiusCircle = null;
     var routeLine = null;
@@ -50,17 +52,22 @@ ${markerScript}
     var handlers = {
       setMarkers: function (command) {
         markerOverlays.forEach(function (overlay) { overlay.setMap(null); });
-        markerOverlays = command.markers.map(function (marker) {
+        markerEntries = [];
+        markerOverlays = command.markers.map(function (marker, order) {
+          var element = createMarkerElement(marker);
+          markerEntries.push({ kind: marker.kind, order: order, element: element });
           return new kakao.maps.CustomOverlay({
             map: map,
             position: toLatLng(marker.coordinate),
-            content: createMarkerElement(marker),
+            content: element,
             // 핀은 뾰족한 끝이 그 자리를 가리켜야 해서 아래 끝을 좌표에 맞춘다. 나머지는 가운데를 맞춘다.
             yAnchor: marker.kind === 'pin' ? 1 : 0.5,
             clickable: true,
             zIndex: 1,
           });
         });
+        // 지도에 붙어 자리를 잡은 다음에 재야 해서 한 프레임 뒤에 본다.
+        requestAnimationFrame(function () { hideOverlappingLabels(markerEntries); });
       },
       setMyLocation: function (command) {
         var position = toLatLng(command.coordinate);
@@ -134,6 +141,8 @@ ${markerScript}
         });
         // 움직일 때마다가 아니라 멈췄을 때만 알린다. 앱이 이 가운데 둘레의 기록을 받는다.
         kakao.maps.event.addListener(map, 'idle', function () {
+          // 확대·축소하면 마커 사이 거리가 바뀌어서 이름표를 다시 정리한다.
+          hideOverlappingLabels(markerEntries);
           var center = map.getCenter();
           post({ type: 'centerChange', center: { latitude: center.getLat(), longitude: center.getLng() } });
         });
