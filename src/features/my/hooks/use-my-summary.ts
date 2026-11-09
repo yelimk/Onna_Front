@@ -4,12 +4,7 @@ import { useCallback, useState } from 'react';
 import { getCachedMe, setCachedMe } from '@/api/me-cache';
 import { getMe, getMyAchievements } from '@/api/users';
 import { getProfileBadges } from '@/features/my/utils/get-profile-badges';
-import { mockMyPosts } from '@/mock/my-posts';
-import { mockLikedSpots, mockOpenedSpots } from '@/mock/my-spots';
 import type { Achievements, Me } from '@/types/api';
-
-/** 서버 숫자가 0이면 목록 화면처럼 예시 개수를 보여준다 (시연 전에 지운다, mock/my-posts.ts·my-spots.ts) */
-const countOrSample = (count: number | undefined, sampleCount: number) => (count ? count : sampleCount);
 
 /** 닉네임을 처음 받다 실패했을 때(인터넷이 잠깐 끊김, 출입증을 새로 받는 중 등) 다시 물어보기까지 기다리는 시간 */
 const meRetryDelayMs = 1500;
@@ -49,8 +44,8 @@ export function useMySummary() {
   return {
     nickname: me?.nickname ?? '',
     badges: getProfileBadges(achievements?.badges),
-    leftCount: countOrSample(achievements?.postedCount, mockMyPosts.length),
-    openedCount: countOrSample(achievements?.openedCount, mockOpenedSpots.length),
-    likedCount: countOrSample(achievements?.likedCount, mockLikedSpots.length),
+    leftCount: achievements?.postedCount ?? 0,
+    openedCount: achievements?.openedCount ?? 0,
+    likedCount: achievements?.likedCount ?? 0,
   };
 }

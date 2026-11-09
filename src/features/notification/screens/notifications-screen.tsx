@@ -24,8 +24,13 @@ export function NotificationsScreen() {
 
   return (
     <ScreenContainer contentTopGap={spacing.xs} header={<ScreenHeader title="알림" />}>
+      {groups?.length === 0 && (
+        <AppText variant="body01" color="textTertiary">
+          아직 받은 알림이 없어요. 누군가 내 자리를 열면 여기에서 알려 드려요.
+        </AppText>
+      )}
       <View style={styles.groups}>
-        {groups.map((group) => (
+        {(groups ?? []).map((group) => (
           <View key={group.label} style={styles.group}>
             <AppText variant="caption02" color="textTertiary">
               {group.label}

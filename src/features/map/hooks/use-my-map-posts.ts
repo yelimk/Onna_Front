@@ -28,7 +28,6 @@ function toMyPostMarker(post: MyPost): PhotoMarker {
  * 지도 구역(GET /map/zones)은 내 사진을 빼고 주고, 남의 지도에는 24시간 뒤에야 보인다.
  * 그래도 내가 남긴 자리는 바로 지도에 보여야 해서, 내 기록을 따로 받아 마커로 더한다.
  * 방금 남긴 기록도 보이도록 지도 홈에 들어올 때마다 다시 받는다 (사진 주소 30분 만료도 같이 해결된다).
- * 기록 탭의 useMyPosts는 비어 있으면 예시 기록을 보여줘서, 지도에 가짜 자리가 찍히지 않게 따로 부른다.
  */
 export function useMyMapPosts() {
   const [posts, setPosts] = useState<MyPost[]>([]);

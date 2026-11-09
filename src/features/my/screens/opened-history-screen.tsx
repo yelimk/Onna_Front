@@ -27,12 +27,18 @@ function groupByDay(spots: MySpotItem[]) {
  * 리스트 ↔ 지도 전환 버튼은 디자이너 요청으로 뺐다 (지도 보기는 Figma에서 보류).
  */
 export function OpenedHistoryScreen() {
-  const groups = groupByDay(useOpenedSpots() ?? []);
+  const spots = useOpenedSpots();
+  const groups = groupByDay(spots ?? []);
 
   return (
     <ScreenContainer
       contentTopGap={spacing.xs}
       header={<ScreenHeader title="연 자리 기록" />}>
+      {spots?.length === 0 && (
+        <AppText variant="body01" color="textTertiary">
+          아직 연 자리가 없어요. 지도에서 흐린 사진 가까이 가면 열 수 있어요.
+        </AppText>
+      )}
       <View style={styles.groups}>
         {groups.map((group) => (
           <View key={group.dateLabel} style={styles.group}>

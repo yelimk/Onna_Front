@@ -20,7 +20,7 @@ type NotificationRowProps = {
 
 /**
  * 알림 한 줄 (Figma alert). 아래 줄은 내가 남긴 한 줄을 따옴표로 묶어 보여준다. 새 알림은 오른쪽 위에 빨간 점이 붙는다.
- * 서버가 아직 한 줄을 주지 않아서(백엔드에 요청함), 한 줄이 없으면 기록 제목을 대신 보여준다.
+ * 한 줄이 비어 있는 기록이면 기록 제목을 대신 보여준다.
  */
 export function NotificationRow({ notification, isUnread, onPress }: NotificationRowProps) {
   return (

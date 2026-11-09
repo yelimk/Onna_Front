@@ -3,7 +3,6 @@ import { useCallback, useState } from 'react';
 
 import { getMyNotifications } from '@/api/users';
 import { getNotificationsSeenAt } from '@/features/notification/utils/notification-seen-at';
-import { mockNotifications } from '@/mock/notifications';
 import { parseServerDate } from '@/utils/parse-server-date';
 
 /**
@@ -18,9 +17,7 @@ export function useHasNewNotifications() {
     useCallback(() => {
       let isActive = true;
       Promise.all([getMyNotifications().catch(() => []), getNotificationsSeenAt()]).then(([result, seenAt]) => {
-        // 알림 화면과 같게, 비어 있으면 Figma 예시로 센다 (시연 전에 지운다, mock/notifications.ts)
-        const notifications = result.length === 0 ? mockNotifications : result;
-        const found = notifications.some((item) => parseServerDate(item.createdAt).getTime() > seenAt);
+        const found = result.some((item) => parseServerDate(item.createdAt).getTime() > seenAt);
         if (isActive) setHasNew(found);
       });
       return () => {
