@@ -1,16 +1,21 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import Animated from 'react-native-reanimated';
+import Animated, { SlideInDown, SlideOutDown } from 'react-native-reanimated';
 
 import { AppText } from '@/components/app-text';
 import { Icon } from '@/components/icon';
 import { colors } from '@/constants/colors';
 import { floatingShadow, radius, spacing } from '@/constants/layout';
+import { duration } from '@/constants/motion';
 import { RecordPhoto } from '@/features/map/components/record-photo';
 import { SheetHandle } from '@/features/map/components/sheet-handle';
 import { useSheetDrag } from '@/features/map/hooks/use-sheet-drag';
 import type { PhotoMarker } from '@/features/map/types/home-map-marker';
 import { openRecord } from '@/features/map/utils/open-search-result';
+
+// 탐색 모드를 켜고 끌 때 패널이 아래에서 올라오고 내려간다 (다른 아래 패널과 같은 길이, SlidingPanel 참고).
+const sheetEntering = SlideInDown.duration(duration.normal);
+const sheetExiting = SlideOutDown.duration(duration.fast);
 
 type ExploreSheetProps = {
   nearestPhoto: PhotoMarker | null;
@@ -28,7 +33,7 @@ export function ExploreSheet({ nearestPhoto, isExpanded, onExpandedChange }: Exp
   const { panHandlers, contentStyle } = useSheetDrag({ isExpanded, onExpandedChange, openHeight: recordHeight });
 
   return (
-    <View style={styles.sheet} {...panHandlers}>
+    <Animated.View entering={sheetEntering} exiting={sheetExiting} style={styles.sheet} {...panHandlers}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={isExpanded ? '가장 가까운 기록 접기' : '가장 가까운 기록 펼치기'}
@@ -42,7 +47,7 @@ export function ExploreSheet({ nearestPhoto, isExpanded, onExpandedChange }: Exp
           <NearestRecord photo={nearestPhoto} />
         </View>
       </Animated.View>
-    </View>
+    </Animated.View>
   );
 }
 

@@ -13,6 +13,7 @@ import type { RecordDetail } from '@/features/map/hooks/use-record-detail';
 /** Figma 좋아요·남기기 버튼 높이 */
 const actionHeight = 48;
 
+/** Figma 신고·닫기 버튼 칸 크기. 배경 없이 아이콘만 두고, 누르기 쉽게 칸은 36으로 둔다. */
 const headerButtonSize = 36;
 
 /** 아직 못 연 기록의 안내. 위치가 부정확해서 못 연 것이면 멀리 있다고 하지 않는다. */
@@ -65,7 +66,8 @@ export function PhotoDetailCard({ record, photoHeight, onClose, onReport, onLeav
       <View style={styles.hashtags}>
         {record.hashtags.map((hashtag) => (
           <View key={hashtag} style={styles.hashtag}>
-            <AppText variant="caption01" color="textSecondary">
+            {/* Figma 해시태그는 14px 보통 굵기 */}
+            <AppText variant="caption02" color="textSecondary">
               {hashtag}
             </AppText>
           </View>
@@ -115,11 +117,10 @@ const styles = StyleSheet.create({
   title: {
     flex: 1,
   },
+  // Figma 디자인 수정 사항: 신고·닫기 버튼 뒤의 회색 동그라미를 없앴다.
   headerButton: {
     width: headerButtonSize,
     height: headerButtonSize,
-    borderRadius: radius.full,
-    backgroundColor: colors.disabledBackground,
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -9,7 +9,11 @@ import { AiBadge } from '@/features/map/components/ai-badge';
 import { SearchQueryBar } from '@/features/map/components/search-query-bar';
 import { SearchResultsSheet } from '@/features/map/components/search-results-sheet';
 import { SearchTabs, type SearchTab } from '@/features/map/components/search-tabs';
-import { SelectedResultCard, type SelectedResultState } from '@/features/map/components/selected-result-card';
+import {
+  getSelectedResultKey,
+  SelectedResultCard,
+  type SelectedResultState,
+} from '@/features/map/components/selected-result-card';
 import { SlidingPanel } from '@/features/map/components/sliding-panel';
 import type { SortOrder } from '@/features/map/components/sort-menu';
 import { useMyLocation } from '@/features/map/hooks/use-my-location';
@@ -48,10 +52,7 @@ function getSheetMessage(tab: SearchTab, items: SearchResultItem[], options: {
  * 경로 카드를 접고 펼치거나 경로를 받는 중인 것은 같은 패널이라 이름에 넣지 않는다.
  */
 function getPanelKey(tab: SearchTab, card: SelectedResultState | null) {
-  if (!card) return `list-${tab}`;
-  if (card.mode === 'record') return `record-${card.record.id}`;
-  // 경로 카드의 key는 고른 장소의 key와 같다.
-  return `${card.mode}-${card.mode === 'route' ? card.key : card.item.key}`;
+  return card ? getSelectedResultKey(card) : `list-${tab}`;
 }
 
 /**
