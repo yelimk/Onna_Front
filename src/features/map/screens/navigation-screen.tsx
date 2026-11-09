@@ -54,6 +54,10 @@ export function NavigationScreen() {
     if (unlockedRecordId && location) openNearbyPost(unlockedRecordId, location, accuracy);
   }, [unlockedRecordId, location, accuracy]);
 
+  // '길안내 종료': 길안내를 시작한 화면(검색결과의 경로 카드, 지도 홈의 경로 카드)으로 돌아간다 (QA: 지도 홈까지 한 번에 가지 않게).
+  // 앱을 다시 켜 길안내만 남아 돌아갈 곳이 없으면 지도 홈으로 간다.
+  const endNavigation = () => (router.canGoBack() ? router.back() : router.dismissTo('/map'));
+
   const sheetHeight = Math.round(windowHeight * expandedSheetRatio);
   // Figma '목적지 도착 UI'에는 아래 패널이 없다.
   const bottomInset = hasArrived ? 0 : isSheetExpanded ? sheetHeight : collapsedSheetHeight;
@@ -93,7 +97,7 @@ export function NavigationScreen() {
       />
 
       <View style={[styles.banner, { top: insets.top + spacing.xs }]}>
-        <NavigationBanner message={getBannerMessage(navigation.progress)} onEnd={() => router.dismissTo('/map')} />
+        <NavigationBanner message={getBannerMessage(navigation.progress)} onEnd={endNavigation} />
       </View>
 
       {!hasArrived && (
