@@ -7,32 +7,37 @@ import { StyleSheet, View } from 'react-native';
 import { getTokens } from '@/api/token-storage';
 import { colors } from '@/constants/colors';
 import { splashLogoSize } from '@/constants/layout';
-import { goAfterLogin } from '@/features/auth/utils/go-after-login';
+import { getScreenAfterLogin } from '@/features/auth/utils/go-after-login';
 import { hasSeenIntro } from '@/features/auth/utils/intro-seen';
+
+/** 시작 화면 로고를 적어도 보여 주는 시간 */
+const minSplashMs = 1000;
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * 앱을 켜면 처음 지나는 화면. 저장된 출입증이 있으면 로그인 화면을 건너뛰고 바로 들어간다.
  * 로그인 전이면 처음 설치한 사람에게만 소개 3장을 보여주고, 이미 본 사람은 바로 로그인으로 보낸다.
- * 확인하는 짧은 동안 스플래시와 같은 주황 화면을 보여줘서 화면이 깜빡이지 않게 한다.
+ * 확인하는 동안 스플래시와 같은 주황 화면과 로고를 보여준다.
+ * 확인이 빨리 끝나도 로고가 깜빡 지나가지 않게, 적어도 1초는 보여 준 뒤 넘어간다 (팀 결정).
  */
 export function StartScreen() {
   useEffect(() => {
-    const goToLoginStart = async () => router.replace((await hasSeenIntro()) ? '/login' : '/intro');
+    const getLoginStart = async () => ((await hasSeenIntro()) ? '/login' : '/intro');
 
     const decideFirstScreen = async () => {
       const tokens = await getTokens();
-      if (!tokens) {
-        await goToLoginStart();
-        return;
-      }
+      if (!tokens) return getLoginStart();
       try {
-        await goAfterLogin();
+        return await getScreenAfterLogin();
       } catch {
         // 출입증이 만료돼 재발급도 실패했거나 서버에 닿지 않으면 처음부터 로그인하게 한다
-        await goToLoginStart();
+        return getLoginStart();
       }
     };
-    decideFirstScreen();
+
+    // 갈 곳을 정하는 동안 1초를 같이 센다. 정하는 데 1초보다 오래 걸리면 기다리지 않고 바로 넘어간다
+    Promise.all([decideFirstScreen(), wait(minSplashMs)]).then(([screen]) => router.replace(screen));
   }, []);
 
   return (
