@@ -15,6 +15,8 @@ type TextFieldProps = Omit<TextInputProps, 'secureTextEntry'> & {
   label?: string;
   /** 꼭 써야 하는 칸이면 이름 뒤에 빨간 * 를 붙인다 */
   required?: boolean;
+  /** 이름 옆 회색 작은 안내 (예: 해시태그 제목 옆 '최대 3개 선택'과 같은 모양). 쓰기 전에 읽어야 하는 말에 쓴다. */
+  labelHint?: string;
   /** 입력창 아래 작은 안내 문구 */
   helper?: string;
   /** 있으면 빨간 테두리와 빨간 안내 문구로 보여준다 */
@@ -42,6 +44,7 @@ type TextFieldProps = Omit<TextInputProps, 'secureTextEntry'> & {
 export function TextField({
   label,
   required = false,
+  labelHint,
   helper,
   error,
   success,
@@ -78,10 +81,17 @@ export function TextField({
   return (
     <View>
       {label && (
-        <AppText variant="caption01" color="textSecondary" style={styles.label}>
-          {label}
-          {required && <AppText variant="caption01" color="requiredMark">*</AppText>}
-        </AppText>
+        <View style={styles.labelRow}>
+          <AppText variant="caption01" color="textSecondary">
+            {label}
+            {required && <AppText variant="caption01" color="requiredMark">*</AppText>}
+          </AppText>
+          {labelHint && (
+            <AppText variant="caption03" color="textDeactivated" style={styles.labelHint}>
+              {labelHint}
+            </AppText>
+          )}
+        </View>
       )}
       <View style={styles.row}>
         <Animated.View style={[styles.box, boxStyle]}>
@@ -157,9 +167,16 @@ function getHelperColor(error: string | undefined, success: string | undefined):
 
 const styles = StyleSheet.create({
   // Figma inputfield: 이름 → 칸은 8, 칸 → 안내 문구는 4 띄우고, 이름과 안내 문구는 안쪽으로 8 들여 쓴다
-  label: {
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
     marginBottom: spacing.xs,
     paddingLeft: spacing.xs,
+  },
+  // 좁은 폰에서 안내가 길면 이름을 밀어내지 않고 안내만 줄어든다
+  labelHint: {
+    flexShrink: 1,
   },
   row: {
     flexDirection: 'row',

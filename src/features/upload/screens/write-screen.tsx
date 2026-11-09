@@ -76,6 +76,8 @@ export function WriteScreen() {
           <TextField
             label="한줄 코멘트"
             required
+            // AI는 제목이 아니라 한 줄만 읽고 해시태그를 고르고, 칸을 벗어나자마자 요청한다. 그래서 쓰기 전에 보이는 이 칸 옆에 둔다 (디자이너 요청)
+            labelHint="자세히 쓸수록 해시태그가 잘 맞아요"
             value={draft.oneLine}
             onChangeText={changeOneLine}
             onBlur={askSuggestions}
