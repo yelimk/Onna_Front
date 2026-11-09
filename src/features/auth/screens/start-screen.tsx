@@ -10,8 +10,15 @@ import { splashLogoSize } from '@/constants/layout';
 import { getScreenAfterLogin } from '@/features/auth/utils/go-after-login';
 import { hasSeenIntro } from '@/features/auth/utils/intro-seen';
 
-/** 시작 화면 로고를 적어도 보여 주는 시간 */
-const minSplashMs = 1000;
+/**
+ * 앱 코드가 켜진 때부터 로고를 적어도 보여 주는 시간.
+ * APK는 그 전에 폰이 띄우는 기본 스플래시(0.5~1초)가 더해져서, 두 환경 모두 로고가 2초 안팎으로 보이게 1.8초로 둔다.
+ * (Expo Go 약 1.8초, APK 약 2.3~2.8초)
+ */
+const minSplashMs = 1800;
+
+// 앱 코드가 처음 불러와진 시각. 글꼴을 불러오는 시간도 로고가 보이는 시간에 넣으려고 화면이 그려질 때가 아니라 여기서 잰다
+const appStartedAt = Date.now();
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -19,7 +26,7 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
  * 앱을 켜면 처음 지나는 화면. 저장된 출입증이 있으면 로그인 화면을 건너뛰고 바로 들어간다.
  * 로그인 전이면 처음 설치한 사람에게만 소개 3장을 보여주고, 이미 본 사람은 바로 로그인으로 보낸다.
  * 확인하는 동안 스플래시와 같은 주황 화면과 로고를 보여준다.
- * 확인이 빨리 끝나도 로고가 깜빡 지나가지 않게, 적어도 1초는 보여 준 뒤 넘어간다 (팀 결정).
+ * 확인이 빨리 끝나도 로고가 깜빡 지나가지 않게, 앱이 켜진 뒤 적어도 1.8초는 보여 준 뒤 넘어간다 (팀 결정).
  */
 export function StartScreen() {
   useEffect(() => {
@@ -36,8 +43,9 @@ export function StartScreen() {
       }
     };
 
-    // 갈 곳을 정하는 동안 1초를 같이 센다. 정하는 데 1초보다 오래 걸리면 기다리지 않고 바로 넘어간다
-    Promise.all([decideFirstScreen(), wait(minSplashMs)]).then(([screen]) => router.replace(screen));
+    // 갈 곳을 정하는 동안 남은 시간을 같이 센다. 정하는 데 더 오래 걸리면 기다리지 않고 바로 넘어간다
+    const remainingMs = Math.max(0, minSplashMs - (Date.now() - appStartedAt));
+    Promise.all([decideFirstScreen(), wait(remainingMs)]).then(([screen]) => router.replace(screen));
   }, []);
 
   return (
