@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { AppText } from '@/components/app-text';
 import { Icon } from '@/components/icon';
@@ -6,7 +8,7 @@ import { colors } from '@/constants/colors';
 import { floatingShadow, radius, spacing } from '@/constants/layout';
 import { RecordPhoto } from '@/features/map/components/record-photo';
 import { SheetHandle } from '@/features/map/components/sheet-handle';
-import { useVerticalSwipe } from '@/features/map/hooks/use-vertical-swipe';
+import { useSheetDrag } from '@/features/map/hooks/use-sheet-drag';
 import type { PhotoMarker } from '@/features/map/types/home-map-marker';
 import { openRecord } from '@/features/map/utils/open-search-result';
 
@@ -18,13 +20,15 @@ type ExploreSheetProps = {
 
 /**
  * 탐색 모드의 아래 패널. Figma '가장 가까운 기록 표시 / 미표시' 두 상태다.
- * 손잡이를 누르거나 위아래로 밀어서 펼치고 접는다.
+ * 손잡이를 누르거나, 패널을 손가락으로 끌어 펼치고 접는다. 끄는 동안 기록 칸이 손가락을 따라 드러난다.
  */
 export function ExploreSheet({ nearestPhoto, isExpanded, onExpandedChange }: ExploreSheetProps) {
-  const swipeHandlers = useVerticalSwipe(onExpandedChange);
+  // 기록 칸은 내용(사진 여부)에 따라 높이가 달라서 그려진 높이를 재서 펼칠 높이로 쓴다.
+  const [recordHeight, setRecordHeight] = useState(0);
+  const { panHandlers, contentStyle } = useSheetDrag({ isExpanded, onExpandedChange, openHeight: recordHeight });
 
   return (
-    <View style={styles.sheet} {...swipeHandlers}>
+    <View style={styles.sheet} {...panHandlers}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={isExpanded ? '가장 가까운 기록 접기' : '가장 가까운 기록 펼치기'}
@@ -33,7 +37,11 @@ export function ExploreSheet({ nearestPhoto, isExpanded, onExpandedChange }: Exp
         style={styles.handleArea}>
         <SheetHandle />
       </Pressable>
-      {isExpanded && <NearestRecord photo={nearestPhoto} />}
+      <Animated.View style={[styles.recordArea, contentStyle]}>
+        <View onLayout={({ nativeEvent }) => setRecordHeight(Math.round(nativeEvent.layout.height))}>
+          <NearestRecord photo={nearestPhoto} />
+        </View>
+      </Animated.View>
     </View>
   );
 }
@@ -77,6 +85,9 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.sm,
     borderRadius: radius.lg,
     backgroundColor: colors.background01,
+  },
+  recordArea: {
+    overflow: 'hidden',
   },
   handleArea: {
     alignItems: 'center',
