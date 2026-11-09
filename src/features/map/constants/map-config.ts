@@ -29,16 +29,12 @@ export const placeSearchRadiusMeters = 1500;
 export const defaultMapLevel = 3;
 
 /**
- * 이 거리 안에 들어온 사진은 열린다. 서버가 사진 열기(POST /posts/{id}/open)를 25m 안에서만 허락해서 같은 값을 쓴다.
+ * 이 거리 안에 들어온 사진은 열린다. 서버는 내 위치에서 사진의 흐린 좌표(앱이 받는 lat·lng)까지 거리로
+ * 흐림 단계(150m 안 S1, 60m 안 S2, 25m 안 OPEN)와 사진 열기(POST /posts/{id}/open)를 정한다 (2026-11-09 서버 답).
+ * 그래서 앱이 흐린 좌표로 잰 거리가 서버 기준과 같다. 위치 오차가 50m를 넘으면 서버는 25m 안이어도 열지 않는다.
  * 탐색 모드의 원, 길안내 '범위 내 기록들', 사진 카드의 '가까우면 열어 보기'가 모두 이 값을 따른다.
  */
 export const openRadiusMeters = 25;
-
-/**
- * 사진 카드가 서버에 '열어 달라'고 물어볼 거리. 열지는 서버가 실제 좌표로 25m를 보고 정한다.
- * 앱이 가진 사진 좌표는 일부러 흐린 좌표라서 25m로 거르면 실제로 가까운데도 묻지 않는 일이 생겨, 넉넉히 잡고 서버에 맡긴다.
- */
-export const openTryMeters = 100;
 
 /** 고른 장소에서 이 거리 안의 기록을 '이 근처 남겨진 기록'으로 센다. 걸어서 5분 안쪽이다. */
 export const nearbyRecordRadiusMeters = 300;

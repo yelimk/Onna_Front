@@ -2,7 +2,7 @@ import { useEffect, useSyncExternalStore } from 'react';
 import { AppState } from 'react-native';
 
 import { isApiError } from '@/api/api-error';
-import { getMapZones } from '@/api/map';
+import { getMapZones, getOutsidePosts } from '@/api/map';
 import {
   defaultMapCenter,
   zonesCenterRefetchMeters,
@@ -12,10 +12,12 @@ import {
 import type { Coordinate } from '@/features/map/types/home-map-marker';
 import { getDistanceMeters } from '@/features/map/utils/get-distance-meters';
 import { toMyLocation, toServerCoordinate } from '@/features/map/utils/to-coordinate';
-import type { Zone } from '@/types/api';
+import type { PostPreview, Zone } from '@/types/api';
 
 export type ZonesState = {
   zones: Zone[];
+  /** 구역 밖에 남긴 사진 (GET /map/outside-posts). 구역과 같은 자리·반경으로 같이 받는다. */
+  outsidePosts: PostPreview[];
   /** 받지 못했을 때 그 이유. 로그인 안 함(UNAUTHORIZED 등), 인터넷 끊김(NETWORK_ERROR) */
   errorCode: string | null;
 };
@@ -24,7 +26,7 @@ export type ZonesState = {
  * 지도 구역은 앱 전체가 하나를 같이 쓴다. 지도 홈, 묶음, 검색, 길안내가 같은 기록을 봐야
  * 한 화면에서 연 사진이 다른 화면에서 잠겨 보이는 일이 없고, 화면마다 서버에 따로 묻지 않는다.
  */
-let state: ZonesState = { zones: [], errorCode: null };
+let state: ZonesState = { zones: [], outsidePosts: [], errorCode: null };
 let lastRequest: { at: number; origin: Coordinate | null; center: Coordinate } | null = null;
 /** 지도 홈이 마지막으로 알려 준 지도 가운데. 아직 모르면 null (그때는 내 위치, 그것도 모르면 캠퍼스 가운데) */
 let mapCenter: Coordinate | null = null;
@@ -66,8 +68,12 @@ async function requestZones(location: Coordinate | null, accuracy: number | null
   try {
     // 구역은 지도 가운데 둘레(서버 기본 500m)를 받고, 흐림 단계는 서버가 내 위치로 정한다.
     // 위치를 모르면 위치 셋(lat·lng·accuracy)을 다 뺀다. 서버는 이때 맛보기·내가 연 사진만 열어 주므로 앱이 따로 잠글 필요가 없다.
-    const zones = await getMapZones(myLocation, { center: toServerCoordinate(center) });
-    setState({ zones, errorCode: null });
+    // 구역 밖 사진도 같은 자리·같은 규칙이라 같이 받는다. 이것만 못 받으면 구역 지도는 그대로 보여주고 받아 둔 것을 쓴다.
+    const [zones, outsidePosts] = await Promise.all([
+      getMapZones(myLocation, { center: toServerCoordinate(center) }),
+      getOutsidePosts(myLocation, { center: toServerCoordinate(center) }).catch(() => state.outsidePosts),
+    ]);
+    setState({ zones, outsidePosts, errorCode: null });
   } catch (error) {
     // 받은 구역은 그대로 두고 이유만 알린다. 잠깐 끊겨도 지도가 텅 비지 않게 한다.
     setState({ ...state, errorCode: isApiError(error) ? error.code : 'UNKNOWN' });

@@ -129,7 +129,18 @@ export function MapScreen() {
             />
           </SlidingPanel>
         ) : (
-          <View style={[styles.bottom, isExploring && styles.bottomWithSheet]}>
+          // 탐색 모드 시트와 오른쪽 버튼을 따로 둔다. 한 줄로 쌓으면 시트가 생기거나 펼쳐질 때 버튼이 밀려 올라간다.
+          // Figma 지도 홈은 탐색 모드를 켜도 버튼 셋이 같은 자리다.
+          <>
+            {isExploring && (
+              <View style={styles.sheetArea}>
+                <ExploreSheet
+                  nearestPhoto={nearestPhoto}
+                  isExpanded={isSheetExpanded}
+                  onExpandedChange={setIsSheetExpanded}
+                />
+              </View>
+            )}
             <View style={styles.actions}>
               <MapActionButtons
                 onMyLocationPress={moveToMyLocation}
@@ -137,14 +148,7 @@ export function MapScreen() {
                 showCamera={!isRecordVisible}
               />
             </View>
-            {isExploring && (
-              <ExploreSheet
-                nearestPhoto={nearestPhoto}
-                isExpanded={isSheetExpanded}
-                onExpandedChange={setIsSheetExpanded}
-              />
-            )}
-          </View>
+          </>
         )}
       </Animated.View>
 
@@ -178,19 +182,17 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   // Figma 지도 홈(위치 관련 추가사항): 카메라 버튼 아래 끝이 탭 바에서 24 떨어져 있다 (Figma 코드의 bottom 110은 탭 바 높이를 포함한 값).
-  bottom: {
+  // 탐색 모드를 켜고 꺼도 이 자리 그대로다.
+  actions: {
+    position: 'absolute',
+    right: screenPaddingX,
+    bottom: spacing.xl,
+  },
+  // Figma에서 탐색 모드 패널은 탭 바 바로 위에 붙어 있다. 버튼보다 먼저 그려서 겹치면 버튼이 위에 보인다.
+  sheetArea: {
     position: 'absolute',
     left: screenPaddingX,
     right: screenPaddingX,
-    bottom: spacing.xl,
-    gap: spacing.md,
-    pointerEvents: 'box-none',
-  },
-  // Figma에서 패널은 탭 바 바로 위에 붙어 있다.
-  bottomWithSheet: {
     bottom: spacing.xs,
-  },
-  actions: {
-    alignSelf: 'flex-end',
   },
 });

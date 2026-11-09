@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { getMapZones, getZonePosts } from '@/api/map';
-import { openRadiusMeters, zonesRefreshMs } from '@/features/map/constants/map-config';
+import { openRadiusMeters, zonesRefetchMeters, zonesRefreshMs } from '@/features/map/constants/map-config';
 import { useHomeMapMarkers } from '@/features/map/hooks/use-home-map-markers';
 import { useLocationAccuracy } from '@/features/map/hooks/use-my-location';
 import type { Coordinate, PhotoMarker } from '@/features/map/types/home-map-marker';
@@ -17,17 +17,12 @@ import type { MyLocation } from '@/types/api';
  */
 const inRangeZoneMeters = 300;
 
-/**
- * 이만큼 걸으면 다시 받는다. 범위 안인지는 서버가 받은 순간 위치로 잰 거리(distanceM)로 보므로,
- * 25m 반경에서 많이 벗어나기 전에 새로 받아야 목록이 맞는다.
- */
-const inRangeRefetchMeters = 10;
-
 /** 내 위치 둘레 구역의 사진을 서버 추천순(취향 점수, GET /zones/{zoneId}/posts 기본 정렬)으로 받는다. 가까운 구역부터 잇는다. */
 async function loadRankedRecords(current: Coordinate, myLocation: MyLocation | null) {
   const zones = await getMapZones(myLocation, { center: toServerCoordinate(current), radius: inRangeZoneMeters });
   const nearestZonesFirst = zones
     .filter((zone) => zone.postCount > 0)
+    // 구역 좌표는 묶음 마커 자리(첫 대표 사진)라, 그 사진이 가까운 구역부터 잇는다.
     .map((zone) => ({ zone, distance: getDistanceMeters(current, { latitude: zone.lat, longitude: zone.lng }) }))
     .sort((a, b) => a.distance - b.distance);
   const lists = await Promise.all(
@@ -40,21 +35,14 @@ async function loadRankedRecords(current: Coordinate, myLocation: MyLocation | n
   return lists.flat();
 }
 
-/** 앱이 흐린 좌표로 잰 거리. 서버 거리가 없을 때만 쓴다. */
+/** 열림 반경 안인지. 서버도 사진의 흐린 좌표까지 거리로 열어 줄지 정해서, 앱이 잰 거리가 서버 기준과 같다. 걸을 때마다 바로 다시 잰다. */
 const isInRange = (current: Coordinate, record: PhotoMarker) =>
   getDistanceMeters(current, record.coordinate) <= openRadiusMeters;
 
 /**
- * 서버가 잰 실제 거리(10m 단위)로 본다. 사진 좌표는 일부러 흐린 좌표라, 앱이 재면 실제로 가까운 사진이 25m 밖으로 나와 빠진다.
- * 서버 거리는 받은 순간 위치 기준이라 10m 걸을 때마다 다시 받는다. 위치 없이 받아 서버 거리가 없으면 앱이 잰다.
- */
-const isInRangeByServer = (current: Coordinate, record: PhotoMarker) =>
-  record.serverDistanceMeters != null ? record.serverDistanceMeters <= openRadiusMeters : isInRange(current, record);
-
-/**
  * 길안내 '범위 내 기록들': 내 위치 열림 반경(25m) 안의 기록을 Figma처럼 AI 추천순(서버 취향 점수 순)으로 보여준다.
  * 지도 홈이 가진 기록은 구역 대표 사진(1~2장)뿐이라, 둘레 구역의 사진 목록을 따로 받아 빠지는 기록이 없게 한다.
- * 10m 걷거나 사진 주소가 만료되기 전(25분)에만 다시 받는다. 받기 전·실패하면 지도 홈 기록을 가까운 순으로 보여준다.
+ * 범위 안인지는 걸을 때마다 앱이 다시 재고, 목록은 30m 걷거나 사진 주소가 만료되기 전(25분)에만 다시 받는다. 받기 전·실패하면 지도 홈 기록을 가까운 순으로 보여준다.
  * 구역 밖에 남긴 기록은 구역 사진 목록에 없어서, 지도 홈 기록과 검색·경로에서 받아 둔 기록에서 찾아 뒤에 가까운 순으로 붙인다.
  */
 export function useRecordsInRange(current: Coordinate, myLocation: Coordinate | null) {
@@ -72,7 +60,7 @@ export function useRecordsInRange(current: Coordinate, myLocation: Coordinate | 
       !last ||
       last.hasLocation !== (serverLocation !== null) ||
       Date.now() - last.at >= zonesRefreshMs ||
-      getDistanceMeters(current, last.origin) >= inRangeRefetchMeters;
+      getDistanceMeters(current, last.origin) >= zonesRefetchMeters;
     if (!isStale) return;
     // 받는 중에 다시 묻지 않도록 보내기 전에 적어 둔다. 실패해도 그 자리에서 바로 다시 묻지 않고 지도 홈 기록으로 대신한다.
     lastRequest.current = { origin: current, at: Date.now(), hasLocation: serverLocation !== null };
@@ -86,7 +74,7 @@ export function useRecordsInRange(current: Coordinate, myLocation: Coordinate | 
   }, [current, myLocation, accuracy]);
 
   return useMemo(() => {
-    const ranked = (fetched ?? []).filter((record) => isInRangeByServer(current, record));
+    const ranked = (fetched ?? []).filter((record) => isInRange(current, record));
     const seenIds = new Set(ranked.map(({ id }) => id));
     const rest = [...homeRecords, ...getKnownRecords()]
       .filter((record) => {
