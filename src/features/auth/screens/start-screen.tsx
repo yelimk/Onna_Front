@@ -1,3 +1,4 @@
+import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
@@ -5,6 +6,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { getTokens } from '@/api/token-storage';
 import { colors } from '@/constants/colors';
+import { splashLogoSize } from '@/constants/layout';
 import { goAfterLogin } from '@/features/auth/utils/go-after-login';
 import { hasSeenIntro } from '@/features/auth/utils/intro-seen';
 
@@ -37,13 +39,20 @@ export function StartScreen() {
     <View style={styles.screen}>
       {/* 주황 배경 위라 시계·배터리를 흰색으로 (Figma 스플래쉬 화면) */}
       <StatusBar style="light" />
+      {/* 앱이 켜질 때의 기본 스플래시(app.json)와 같은 그림·크기·자리에 두어, 넘어가는 순간 화면이 튀지 않게 한다.
+          Expo Go는 기본 스플래시 대신 앱 아이콘을 보여 줘서, 여기서 보이는 로고가 Figma 스플래시 화면 역할을 한다. */}
+      <Image source={require('@/assets/images/splash-logo.png')} style={styles.logo} contentFit="contain" />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  // 기본 스플래시처럼 로고를 화면 정가운데에 둔다
   screen: {
     flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: colors.primary,
   },
+  logo: splashLogoSize,
 });

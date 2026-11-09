@@ -31,6 +31,12 @@ export const screenPaddingX = spacing.lg;
 /** 제목 덩어리와 본문 덩어리 사이처럼 큰 묶음 사이 간격 (Figma 온보딩 gap 40) */
 export const sectionGap = 40;
 
+/**
+ * 스플래시 로고(핀·온나·'가까이 가면, 보여요') 그림 크기. Figma 스플래쉬 화면 로고 묶음 141×98에 사방 8을 더해 자른 그림이다.
+ * app.json expo-splash-screen의 imageWidth(157)와 같아야 기본 스플래시에서 시작 화면으로 넘어갈 때 로고가 그대로 있다.
+ */
+export const splashLogoSize = { width: 157, height: 114 } as const;
+
 /** 지도 위에 떠 있는 카드·버튼의 그림자 */
 export const floatingShadow = {
   shadowColor: palette.gray.black,
