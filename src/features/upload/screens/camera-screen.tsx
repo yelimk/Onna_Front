@@ -84,12 +84,16 @@ export function CameraScreen() {
       {/* 검은 배경 위라 시계·배터리를 흰색으로 (Figma 촬영 화면) */}
       <StatusBar style="light" />
       <View style={styles.header}>
-        <Pressable accessibilityLabel="뒤로" hitSlop={12} onPress={() => router.back()}>
+        {/* 가운데 제목은 머리 전체 폭에 겹쳐 있어서, 뒤로 버튼보다 먼저(아래에) 그려야 버튼 누름을 가로채지 않는다.
+            안드로이드는 글자(Text)에 준 pointerEvents: 'none'을 지키지 않아, 위에 있으면 뒤로 버튼이 눌리지 않았다 (QA) */}
+        <View style={styles.headerTitle}>
+          <AppText variant="subtitle03" color="textInverse" style={styles.headerTitleText}>
+            촬영
+          </AppText>
+        </View>
+        <Pressable accessibilityRole="button" accessibilityLabel="뒤로" hitSlop={12} onPress={() => router.back()}>
           <Icon name="back" color="textInverse" />
         </Pressable>
-        <AppText variant="subtitle03" color="textInverse" style={styles.headerTitle}>
-          촬영
-        </AppText>
         <AppText variant="subtitle03" color="textInverse">
           1/3
         </AppText>
@@ -140,8 +144,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    textAlign: 'center',
     pointerEvents: 'none',
+  },
+  headerTitleText: {
+    textAlign: 'center',
   },
   // 셔터를 카메라 칸 바로 아래(Figma 간격 52)에 붙여서 사진과 한 덩어리로 보이게 한다.
   // 화면이 긴 폰은 남는 공간이 셔터 아래 검은 부분으로 간다.
