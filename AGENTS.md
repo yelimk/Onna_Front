@@ -79,9 +79,9 @@ Figma(Dev Mode, MCP)의 값은 390 너비 아이폰 화면 기준이다. 폰마�
 - `src/features/<기능>/`: 기능별 코드 (`auth`, `map`, `record`, `upload`, `my`, `notification`). 화면은 `screens/`에 두고, 그 기능에서만 쓰는 부품, 훅, 함수도 이 폴더에 둔다.
 - `src/app/`의 라우트 파일은 `export { XxxScreen as default } from '@/features/...'` 한 줄만 둔다.
 - 모든 화면은 와이어프레임 기준 회색 배치(mid-fidelity)로 되어 있다. GUI 디자인을 입힐 때는 배치와 화면 이동은 유지하고 색·그림·간격만 바꾼다.
-- 가짜 데이터는 `src/mock/`와 `features/*/constants/preview-*.ts`에 있다. 화면 안에 가짜 값을 직접 쓰지 않는다.
+- 화면 안에 가짜 값을 직접 쓰지 않는다. 서버 목록이 비어 있으면 가짜 데이터 대신 빈 화면 안내를 보여준다.
 - `src/components/`: 두 개 이상의 기능이 같이 쓰는 부품만 둔다.
-- `src/hooks/`, `src/utils/`, `src/api/`, `src/mock/`, `src/types/`: 여러 기능이 같이 쓰는 훅, 순수 함수, 서버 요청, 가짜 데이터, 데이터 타입.
+- `src/hooks/`, `src/utils/`, `src/api/`, `src/types/`: 여러 기능이 같이 쓰는 훅, 순수 함수, 서버 요청, 데이터 타입.
 - 지도 담당은 주로 `features/map`, 화면 담당은 그 외 기능 폴더에서 작업해서 Git 충돌을 줄인다.
 
 ### 이름과 주석

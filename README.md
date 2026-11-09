@@ -108,7 +108,6 @@ src/
   constants/      디자인 시스템, 약관 문장, 공통 보기 값
   hooks/          공통 훅
   api/            서버 요청
-  mock/           서버 목록이 비었을 때 보여 주는 예시 데이터
   utils/          공통 함수 (날짜, 해시태그, 오류 토스트)
   types/          서버 데이터 타입
 assets/           글꼴, Figma 아이콘(SVG), 이미지
@@ -225,7 +224,7 @@ flowchart TB
 - **로그인 풀림**: 토큰을 다시 받지 못하면 `api/session-events.ts`로 알리고, 어느 화면에서든 로그인 화면으로 보냅니다 (`hooks/use-session-expired-redirect.ts`).
 - **서버 날짜**: 시간대 없이 한국 시각으로 오므로 반드시 `utils/parse-server-date.ts`로 읽습니다. 폰 시간대가 달라도 시각이 틀리지 않습니다.
 - **애니메이션 통일**: Figma 프로토타입의 시간·곡선을 `constants/motion.ts`에 모으고, 누름·고름 움직임은 훅 두 개(`hooks/use-press-progress.ts`, `use-transition-progress.ts`)로 만들어 모든 부품이 같이 씁니다.
-- **예시 데이터**: 서버 목록이 비어 있으면 `src/mock/`의 예시를 대신 보여 줍니다 (내 기록, 좋아요 내역, 연 자리 기록, 알림).
+- **빈 화면 안내**: 서버 목록이 비어 있으면 가짜 데이터 대신 "아직 연 자리가 없어요"처럼 다음에 할 일을 알려 줍니다 (내 기록, 좋아요 내역, 연 자리 기록, 알림).
 
 **온보딩**
 

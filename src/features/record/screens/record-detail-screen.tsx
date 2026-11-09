@@ -15,7 +15,6 @@ import { colors } from '@/constants/colors';
 import { radius, spacing } from '@/constants/layout';
 import { duration } from '@/constants/motion';
 import { useMyPosts } from '@/hooks/use-my-posts';
-import { mockNotificationPosts } from '@/mock/notifications';
 import { formatDate } from '@/utils/format-date';
 import { formatHashtag } from '@/utils/format-hashtag';
 import { showApiError } from '@/utils/show-api-error';
@@ -35,8 +34,7 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export function RecordDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { posts } = useMyPosts();
-  // 예시 알림을 누르고 들어오면 예시 기록에서 찾는다 (시연 전에 지운다, mock/notifications.ts)
-  const post = [...(posts ?? []), ...mockNotificationPosts].find((item) => String(item.postId) === id);
+  const post = posts?.find((item) => String(item.postId) === id);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
   // 목록을 받기 전에는 머리글만 보여준다

@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 
 import { getMyNotifications } from '@/api/users';
 import { getNotificationsSeenAt, markNotificationsSeen } from '@/features/notification/utils/notification-seen-at';
-import { mockNotifications } from '@/mock/notifications';
 import type { AppNotification } from '@/types/api';
 import { formatRelativeTime } from '@/utils/format-relative-time';
 import { parseServerDate } from '@/utils/parse-server-date';
@@ -39,14 +38,13 @@ function groupByTime(items: NotificationItem[]) {
  * - 화면을 나가면 지금 시각을 적어 두어서, 다시 들어오면 모든 점이 사라진다.
  */
 export function useNotifications() {
-  const [groups, setGroups] = useState<NotificationGroup[]>([]);
+  // null이면 아직 받는 중이다 (빈 알림 안내를 받기 전에 띄우지 않으려고 나눈다)
+  const [groups, setGroups] = useState<NotificationGroup[] | null>(null);
   const [unreadKeys, setUnreadKeys] = useState<string[]>([]);
 
   useEffect(() => {
     Promise.all([getMyNotifications().catch(() => []), getNotificationsSeenAt()]).then(([result, seenAt]) => {
-      // 비어 있으면 Figma 예시를 대신 보여준다 (시연 전에 지운다, mock/notifications.ts)
-      const notifications = result.length === 0 ? mockNotifications : result;
-      const items = notifications.map((item) => ({ ...item, key: `${item.type}-${item.postId}-${item.createdAt}` }));
+      const items = result.map((item) => ({ ...item, key: `${item.type}-${item.postId}-${item.createdAt}` }));
       setGroups(groupByTime(items));
       setUnreadKeys(items.filter((item) => parseServerDate(item.createdAt).getTime() > seenAt).map((item) => item.key));
     });

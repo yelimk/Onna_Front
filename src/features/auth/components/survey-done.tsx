@@ -11,13 +11,18 @@ type SurveyDoneProps = {
   /** 고른 자리 해시태그 이름 (서버 태그 id를 이름으로 바꾼 것) */
   placeNames: string[];
   nickname: string;
-  nearbySpotCount: number;
+  /** 근처 흐린 사진 수. 위치를 모르면 null이고, null·0이면 숫자 없는 문구를 쓴다 */
+  nearbySpotCount: number | null;
 };
 
 /** 설문 완료: 고른 취향을 요약하고 지도로 보낸다 */
 export function SurveyDone({ answers, placeNames, nickname, nearbySpotCount }: SurveyDoneProps) {
   const relationTitle = relationOptions.find((option) => option.id === answers.relation)?.title ?? '-';
   const walkItems: string[] = [...answers.walkTimes, ...(answers.walkDuration ? [answers.walkDuration] : [])];
+  const greeting = nickname ? `${nickname}님 ` : '';
+  const title = nearbySpotCount
+    ? `${greeting}근처에\n흐릿한 자리 ${nearbySpotCount}곳이 있어요`
+    : `${greeting}근처의\n흐릿한 자리를 찾아볼게요`;
 
   // 값은 조각(해시태그 하나, 걷는 때 하나)으로 나눠 둔다. 길면 조각 사이에서 줄이 바뀐다
   const rows = [
@@ -36,7 +41,7 @@ export function SurveyDone({ answers, placeNames, nickname, nearbySpotCount }: S
 
         <View style={styles.texts}>
           <AppText variant="heading01" style={styles.center}>
-            {`${nickname ? `${nickname}님 ` : ''}근처에\n흐릿한 자리 ${nearbySpotCount}곳이 있어요`}
+            {title}
           </AppText>
           <AppText variant="subtitle03" color="textSecondary" style={styles.center}>
             고른 취향에 맞는 자리부터 먼저 띄워둘게요

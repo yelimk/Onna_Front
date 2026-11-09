@@ -18,7 +18,8 @@ import { useLikedSpotList } from '@/features/my/hooks/use-my-spots';
 export function LikesScreen() {
   const likedIds = useLikedSpotIds();
   // 하트를 취소해도 빈 하트로 남아 다시 누를 수 있고, 화면을 나갔다 다시 열면 그때 빠진다 (팀 결정)
-  const listedSpots = useLikedSpotList() ?? [];
+  const spots = useLikedSpotList();
+  const listedSpots = spots ?? [];
 
   return (
     <ScreenContainer
@@ -31,6 +32,11 @@ export function LikesScreen() {
         <AppText variant="caption01">{likedIds.length}곳</AppText>
       </View>
 
+      {spots?.length === 0 && (
+        <AppText variant="body01" color="textTertiary">
+          아직 좋아요한 자리가 없어요. 열어 본 사진에 하트를 누르면 여기에 모여요.
+        </AppText>
+      )}
       <View>
         {listedSpots.map((spot, index) => (
           <Fragment key={spot.postId}>

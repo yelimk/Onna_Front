@@ -3,9 +3,7 @@ import { useCallback, useState } from 'react';
 
 import { getMyLikes, getMyOpens } from '@/api/users';
 import { setLikedSpotIds } from '@/features/my/hooks/use-liked-spots';
-import { mockLikedSpots, mockOpenedSpots } from '@/mock/my-spots';
 import type { LikedSpot, OpenedSpot } from '@/types/api';
-import type { PhotoSource } from '@/types/photo-source';
 import { formatHashtag } from '@/utils/format-hashtag';
 
 /** 좋아요 내역·연 자리 기록의 한 줄 (Figma list_l, list_m) */
@@ -13,8 +11,9 @@ export type MySpotItem = {
   postId: number;
   title: string;
   hashtags: string[];
-  photo: PhotoSource;
-  /** 상세 화면의 한 줄 코멘트. 서버가 아직 주지 않아서 비어 있을 수 있다 */
+  /** 선명한(OPEN) 사진. 서버 주소는 30분 뒤 만료된다 */
+  photo: { uri: string };
+  /** 상세 화면의 한 줄 코멘트 */
   oneLine?: string;
   /** 좋아요한 날 또는 연 날 */
   date: string;
@@ -51,11 +50,7 @@ export function useOpenedSpots() {
   useFocusEffect(
     useCallback(() => {
       getMyOpens()
-        .then((result) => {
-          // 비어 있으면 예시를 대신 보여준다 (시연 전에 지운다, mock/my-spots.ts)
-          const spots = result.length === 0 ? mockOpenedSpots : result;
-          setSpots(spots.map((spot) => toItem(spot, spot.openedAt)));
-        })
+        .then((result) => setSpots(result.map((spot) => toItem(spot, spot.openedAt))))
         .catch(() => setSpots([]));
     }, []),
   );
@@ -74,10 +69,8 @@ export function useLikedSpotList() {
     useCallback(() => {
       getMyLikes()
         .then((result) => {
-          // 비어 있으면 예시를 대신 보여준다 (시연 전에 지운다, mock/my-spots.ts)
-          const spots = result.length === 0 ? mockLikedSpots : result;
-          setSpots(spots.map((spot) => toItem(spot, spot.likedAt)));
-          setLikedSpotIds(spots.map((spot) => spot.postId));
+          setSpots(result.map((spot) => toItem(spot, spot.likedAt)));
+          setLikedSpotIds(result.map((spot) => spot.postId));
         })
         .catch(() => setSpots([]));
     }, []),

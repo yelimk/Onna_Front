@@ -14,15 +14,13 @@ import { SurveyDone } from '@/features/auth/components/survey-done';
 import { SurveyHeader } from '@/features/auth/components/survey-header';
 import { WalkStep } from '@/features/auth/components/walk-step';
 import { minPlaceCount, type SurveyAnswers } from '@/features/auth/constants/survey-options';
+import { useNearbySpotCount } from '@/features/auth/hooks/use-nearby-spot-count';
 import { useTags } from '@/hooks/use-tags';
 import { formatHashtag } from '@/utils/format-hashtag';
 import { showApiError } from '@/utils/show-api-error';
 import { toWalkPreference } from '@/utils/walk-preference';
 
 const totalSteps = 3;
-
-// 근처 흐린 자리 수는 지도 API(/map/zones)에 내 위치가 있어야 알 수 있어서, 지도 연결 전까지 예시 값을 쓴다
-const previewNearbySpotCount = 12;
 
 /**
  * 시작: 온보딩 설문.
@@ -40,6 +38,7 @@ export function SurveyScreen() {
   // 화면에 처음 들어왔을 때는 첫 단계가 바로 보이게, 단계를 한 번이라도 옮긴 뒤부터 움직인다
   const [hasMoved, setHasMoved] = useState(false);
   const { tags, hasFailed, reload } = useTags();
+  const nearbySpotCount = useNearbySpotCount();
 
   useEffect(() => {
     getMe()
@@ -106,7 +105,7 @@ export function SurveyScreen() {
             answers={answers}
             placeNames={placeNames}
             nickname={nickname}
-            nearbySpotCount={previewNearbySpotCount}
+            nearbySpotCount={nearbySpotCount}
           />
         </StepTransition>
       </ScreenContainer>
