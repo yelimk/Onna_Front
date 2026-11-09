@@ -59,8 +59,10 @@ export function NavigationScreen() {
   const endNavigation = () => (router.canGoBack() ? router.back() : router.dismissTo('/map'));
 
   const sheetHeight = Math.round(windowHeight * expandedSheetRatio);
+  // 지도를 맞출 때 아래 패널이 가리는 높이. 패널을 접고 펼 때마다 다시 맞추면 지도가 확대·축소되어서,
+  // 패널을 펼친 높이로 한 번만 맞추고 그 뒤로는 지도를 그대로 둔다 (패널만 오르내린다).
   // Figma '목적지 도착 UI'에는 아래 패널이 없다.
-  const bottomInset = hasArrived ? 0 : isSheetExpanded ? sheetHeight : collapsedSheetHeight;
+  const bottomInset = hasArrived ? 0 : sheetHeight;
 
   const markers = useMemo<MapMarker[]>(
     () =>
