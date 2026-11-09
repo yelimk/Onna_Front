@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import { getCached, setCached } from '@/api/response-cache';
 import { getMyNotifications } from '@/api/users';
 import { getNotificationsSeenAt, markNotificationsSeen } from '@/features/notification/utils/notification-seen-at';
 import type { AppNotification } from '@/types/api';
@@ -31,20 +32,35 @@ function groupByTime(items: NotificationItem[]) {
   return groups;
 }
 
+const toItems = (notifications: AppNotification[]): NotificationItem[] =>
+  notifications.map((item) => ({ ...item, key: `${item.type}-${item.postId}-${item.createdAt}` }));
+
 /**
  * 알림 목록과 빨간 점(새 알림).
+ * - 받는 동안 비어 보이지 않게 지난번 목록을 먼저 보여 주고, 새 알림은 받은 뒤 맨 위에 붙는다 (api/response-cache.ts).
  * - 화면에 들어올 때, 지난번에 나간 시각보다 늦게 온 알림에 빨간 점을 붙인다.
  * - 알림을 눌러 기록을 보고 돌아오면 그 알림만 점이 사라지고, 안 본 알림은 그대로 남는다.
  * - 화면을 나가면 지금 시각을 적어 두어서, 다시 들어오면 모든 점이 사라진다.
  */
 export function useNotifications() {
   // null이면 아직 받는 중이다 (빈 알림 안내를 받기 전에 띄우지 않으려고 나눈다)
-  const [groups, setGroups] = useState<NotificationGroup[] | null>(null);
+  const [groups, setGroups] = useState<NotificationGroup[] | null>(() => {
+    const cached = getCached('myNotifications');
+    return cached ? groupByTime(toItems(cached)) : null;
+  });
   const [unreadKeys, setUnreadKeys] = useState<string[]>([]);
 
   useEffect(() => {
-    Promise.all([getMyNotifications().catch(() => []), getNotificationsSeenAt()]).then(([result, seenAt]) => {
-      const items = result.map((item) => ({ ...item, key: `${item.type}-${item.postId}-${item.createdAt}` }));
+    // 못 받으면 기억해 둔 목록을 그대로 둔다
+    const fetchNotifications = () =>
+      getMyNotifications()
+        .then((result) => {
+          setCached('myNotifications', result);
+          return result;
+        })
+        .catch(() => getCached('myNotifications') ?? []);
+    Promise.all([fetchNotifications(), getNotificationsSeenAt()]).then(([result, seenAt]) => {
+      const items = toItems(result);
       setGroups(groupByTime(items));
       setUnreadKeys(items.filter((item) => parseServerDate(item.createdAt).getTime() > seenAt).map((item) => item.key));
     });

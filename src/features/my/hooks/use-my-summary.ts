@@ -1,7 +1,7 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 
-import { getCachedMe, setCachedMe } from '@/api/me-cache';
+import { getCached, setCached } from '@/api/response-cache';
 import { getMe, getMyAchievements } from '@/api/users';
 import { getProfileBadges } from '@/features/my/utils/get-profile-badges';
 import type { Achievements, Me } from '@/types/api';
@@ -11,12 +11,13 @@ const meRetryDelayMs = 1500;
 
 /**
  * 마이 탭 첫 화면의 닉네임, 칭호, 숫자.
- * 칭호와 숫자는 기록을 남기거나 자리를 열고 돌아오면 바뀌어서 들어올 때마다 다시 받는다.
- * 닉네임은 바뀌지 않아서 한 번 받은 값을 기억해 두고 쓴다 (api/me-cache.ts). 그래야 들어올 때 비어 보이지 않는다.
+ * 들어올 때 비어 보이지 않게 지난번 값을 먼저 보여 준다 (api/response-cache.ts).
+ * 칭호와 숫자는 기록을 남기거나 자리를 열고 돌아오면 바뀌어서, 들어올 때마다 다시 받아 바뀐 숫자만 바꾼다.
+ * 닉네임은 바뀌지 않아서 한 번 받으면 다시 묻지 않는다.
  */
 export function useMySummary() {
-  const [me, setMe] = useState<Me | null>(getCachedMe);
-  const [achievements, setAchievements] = useState<Achievements | null>(null);
+  const [me, setMe] = useState<Me | null>(() => getCached('me') ?? null);
+  const [achievements, setAchievements] = useState<Achievements | null>(() => getCached('myAchievements') ?? null);
 
   useFocusEffect(
     useCallback(() => {
@@ -25,15 +26,20 @@ export function useMySummary() {
       const loadMe = (canRetry: boolean) =>
         getMe()
           .then((loaded) => {
-            setCachedMe(loaded);
+            setCached('me', loaded);
             if (isActive) setMe(loaded);
           })
           .catch(() => {
             if (canRetry && isActive) retryTimer = setTimeout(() => loadMe(false), meRetryDelayMs);
           });
 
-      if (!getCachedMe()) loadMe(true);
-      getMyAchievements().then(setAchievements).catch(() => undefined);
+      if (!getCached('me')) loadMe(true);
+      getMyAchievements()
+        .then((loaded) => {
+          setCached('myAchievements', loaded);
+          if (isActive) setAchievements(loaded);
+        })
+        .catch(() => undefined);
       return () => {
         isActive = false;
         clearTimeout(retryTimer);
