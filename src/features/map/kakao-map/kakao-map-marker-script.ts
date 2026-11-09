@@ -52,6 +52,12 @@ export const markerScript = `
       root.addEventListener('click', function () {
         post({ type: 'markerPress', kind: marker.kind, markerId: marker.id });
       });
+      // 누르고 있는 동안 흐리게 해서 눌렸다는 걸 보여준다. 손을 떼거나 지도를 끌기 시작하면 바로 되돌린다.
+      function release() { root.classList.remove('marker-pressed'); }
+      root.addEventListener('touchstart', function () { root.classList.add('marker-pressed'); }, { passive: true });
+      root.addEventListener('touchmove', release, { passive: true });
+      root.addEventListener('touchend', release);
+      root.addEventListener('touchcancel', release);
       return root;
     }
 

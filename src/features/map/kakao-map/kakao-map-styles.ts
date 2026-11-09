@@ -1,5 +1,6 @@
 import { colors, palette } from '@/constants/colors';
 import { floatingShadow, radius, spacing } from '@/constants/layout';
+import { duration } from '@/constants/motion';
 import { typography, type TypographyVariant } from '@/constants/typography';
 import { mapChromeFadeMs } from '@/features/map/constants/map-motion';
 
@@ -12,6 +13,11 @@ export const pretendardCssUrl =
   'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css';
 
 const photoSize = 48;
+/**
+ * 마커를 누르고 있는 동안의 투명도 (QA: 기록 묶음 터치 시 요소 오퍼시티).
+ * Figma에 값이 없어서 눌렸다는 게 보이면서 사진은 알아볼 수 있는 정도로 정했다.
+ */
+const pressedMarkerOpacity = 0.6;
 const myLocationSize = 32;
 
 const fontWeights: Record<string, number> = {
@@ -58,7 +64,10 @@ export const kakaoMapCss = `
   .marker {
     display: flex; flex-direction: column; align-items: center; gap: ${spacing.xxs}px;
     padding: 0; border: 0; background: none;
+    transition: opacity ${duration.press}ms ease-out;
   }
+  /* 손가락이 닿아 있는 동안 (Figma 버튼 눌림처럼 100ms 동안 서서히) */
+  .marker-pressed { opacity: ${pressedMarkerOpacity}; }
 
   .photo {
     width: ${photoSize}px; height: ${photoSize}px; box-sizing: border-box;
