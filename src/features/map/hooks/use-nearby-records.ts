@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { getMapZones, getZonePosts } from '@/api/map';
+import { getMapZones, getOutsidePosts, getZonePosts } from '@/api/map';
 import { nearbyRecordRadiusMeters } from '@/features/map/constants/map-config';
 import { useHomeMapMarkers } from '@/features/map/hooks/use-home-map-markers';
 import type { Coordinate, PhotoMarker } from '@/features/map/types/home-map-marker';
 import { rememberRecords } from '@/features/map/utils/known-records';
 import { summarizeNearbyRecords } from '@/features/map/utils/summarize-nearby-records';
 import { toServerCoordinate } from '@/features/map/utils/to-coordinate';
-import { toPhotoMarker } from '@/features/map/utils/zones-to-markers';
+import { toOutsidePhotoMarker, toPhotoMarker } from '@/features/map/utils/zones-to-markers';
 
 /**
  * 고른 장소 둘레의 기록 전부를 서버에서 받는다.
@@ -16,6 +16,10 @@ import { toPhotoMarker } from '@/features/map/utils/zones-to-markers';
  * 세는 데는 흐림 단계가 필요 없어서 내 위치 없이 묻는다. 걸을 때마다 다시 묻지 않게 하려는 것이다.
  */
 async function loadRecordsAround(center: Coordinate) {
+  // 구역 밖에 남긴 사진도 같이 센다. 이것만 못 받으면 구역 안 기록만 센다.
+  const outside = getOutsidePosts(null, { center: toServerCoordinate(center) })
+    .then((posts) => posts.map(toOutsidePhotoMarker))
+    .catch(() => []);
   const zones = await getMapZones(null, { center: toServerCoordinate(center) });
   const lists = await Promise.all(
     zones
@@ -27,7 +31,7 @@ async function loadRecordsAround(center: Coordinate) {
           .catch(() => zone.previews.map((preview) => toPhotoMarker(zone, preview))),
       ),
   );
-  return lists.flat();
+  return [...lists.flat(), ...(await outside)];
 }
 
 const toKey = (center: Coordinate | null) => (center ? `${center.latitude},${center.longitude}` : null);

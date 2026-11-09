@@ -31,6 +31,16 @@ export function getMapZones(myLocation: MyLocation | null, { center, radius }: Z
   });
 }
 
+/**
+ * 지도: 영남대 구역 밖에 남긴 남의 사진 (구역 묶음에 들지 않아 사진마다 마커를 따로 띄운다).
+ * 지도 중심 반경 안에서 가까운 순 최대 50장. 위치·중심·흐림 단계 규칙은 getMapZones와 같다. 맛보기(isTeaser)는 늘 false다.
+ */
+export function getOutsidePosts(myLocation: MyLocation | null, { center, radius }: ZonesOptions = {}) {
+  return apiRequest<PostPreview[]>('/map/outside-posts', {
+    query: { ...myLocation, centerLat: center?.lat, centerLng: center?.lng, radius },
+  });
+}
+
 /** 묶음 안 사진 정렬: 추천순(기본), 좋아요 많은 순, 가까운 순(위치 없으면 추천순) */
 export type ZonePostsSort = 'recommend' | 'likes' | 'distance';
 

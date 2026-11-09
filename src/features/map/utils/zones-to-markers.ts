@@ -8,6 +8,15 @@ import { toHashtags } from '@/features/map/utils/to-hashtags';
  * 열렸는지와 얼마나 흐린지는 서버가 내 위치로 정한 stage를 그대로 따른다 (위치 없이 부르면 맛보기·내가 연 사진만 OPEN).
  */
 export function toPhotoMarker(zone: Zone, preview: PostPreview): PhotoMarker {
+  return toRecord(preview, zone.name);
+}
+
+/** 구역 밖에 남긴 사진 → 지도 기록. 구역 이름이 없어서 장소 이름은 비워 두고, 카드가 동네 이름으로 대신한다. */
+export function toOutsidePhotoMarker(preview: PostPreview): PhotoMarker {
+  return toRecord(preview, undefined);
+}
+
+function toRecord(preview: PostPreview, placeName: string | undefined): PhotoMarker {
   return {
     kind: 'photo',
     id: String(preview.postId),
@@ -17,7 +26,7 @@ export function toPhotoMarker(zone: Zone, preview: PostPreview): PhotoMarker {
     serverDistanceMeters: preview.distanceM,
     imageUrl: preview.imageUrl,
     title: preview.title,
-    placeName: zone.name,
+    placeName,
   };
 }
 
