@@ -31,7 +31,7 @@ export function RecordScreen() {
           </Pressable>
         )}
         {posts?.length === 0 && (
-          <AppText variant="body01" color="textTertiary">
+          <AppText variant="body01" color="textTertiary" keepAll>
             아직 남긴 자리가 없어요. 지도의 카메라 버튼으로 첫 자리를 남겨 보세요.
           </AppText>
         )}

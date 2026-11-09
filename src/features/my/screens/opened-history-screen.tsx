@@ -35,7 +35,7 @@ export function OpenedHistoryScreen() {
       contentTopGap={spacing.xs}
       header={<ScreenHeader title="연 자리 기록" />}>
       {spots?.length === 0 && (
-        <AppText variant="body01" color="textTertiary">
+        <AppText variant="body01" color="textTertiary" keepAll>
           아직 연 자리가 없어요. 지도에서 흐린 사진 가까이 가면 열 수 있어요.
         </AppText>
       )}

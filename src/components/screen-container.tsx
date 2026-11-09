@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { colors } from '@/constants/colors';
 import { screenPaddingX, spacing } from '@/constants/layout';
+import { useScreenInsets } from '@/hooks/use-screen-insets';
 
 type ScreenContainerProps = {
   children: ReactNode;
@@ -31,10 +31,16 @@ export function ScreenContainer({
   background = 'white',
   contentTopGap,
 }: ScreenContainerProps) {
+  // 안전 영역을 이 화면이 직접 재지 않고 앱이 켜질 때 잰 값과 맞춰 쓴다 (아이폰 남기기 창에서 위가 안 비던 문제, use-screen-insets.ts)
+  const insets = useScreenInsets();
+
   return (
-    <SafeAreaView
-      style={[styles.safeArea, background === 'gray' && styles.grayBackground]}
-      edges={withBottomInset ? ['top', 'bottom'] : ['top']}>
+    <View
+      style={[
+        styles.safeArea,
+        background === 'gray' && styles.grayBackground,
+        { paddingTop: insets.top, paddingBottom: withBottomInset ? insets.bottom : 0 },
+      ]}>
       {header && <View style={styles.header}>{header}</View>}
       <ScrollView
         contentContainerStyle={[styles.content, contentTopGap !== undefined && { paddingTop: contentTopGap }]}
@@ -42,7 +48,7 @@ export function ScreenContainer({
         {children}
       </ScrollView>
       {footer && <View style={styles.footer}>{footer}</View>}
-    </SafeAreaView>
+    </View>
   );
 }
 

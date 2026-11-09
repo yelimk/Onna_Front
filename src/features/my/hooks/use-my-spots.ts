@@ -1,6 +1,7 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 
+import { getCached, setCached } from '@/api/response-cache';
 import { getMyLikes, getMyOpens } from '@/api/users';
 import { setLikedSpotIds } from '@/features/my/hooks/use-liked-spots';
 import type { LikedSpot, OpenedSpot } from '@/types/api';
@@ -43,14 +44,26 @@ function toItem(spot: OpenedSpot | LikedSpot, date: string): MySpotItem {
   return item;
 }
 
-/** 내가 연 자리 (최근에 연 순서). spots가 null이면 아직 불러오는 중이다 */
+const toOpenedItems = (spots: OpenedSpot[]) => spots.map((spot) => toItem(spot, spot.openedAt));
+const toLikedItems = (spots: LikedSpot[]) => spots.map((spot) => toItem(spot, spot.likedAt));
+
+/**
+ * 내가 연 자리 (최근에 연 순서). spots가 null이면 처음 불러오는 중이다.
+ * 받는 동안 비어 보이지 않게 지난번 목록을 먼저 보여 준다 (api/response-cache.ts).
+ */
 export function useOpenedSpots() {
-  const [spots, setSpots] = useState<MySpotItem[] | null>(null);
+  const [spots, setSpots] = useState<MySpotItem[] | null>(() => {
+    const cached = getCached('myOpens');
+    return cached ? toOpenedItems(cached) : null;
+  });
 
   useFocusEffect(
     useCallback(() => {
       getMyOpens()
-        .then((result) => setSpots(result.map((spot) => toItem(spot, spot.openedAt))))
+        .then((result) => {
+          setCached('myOpens', result);
+          setSpots(toOpenedItems(result));
+        })
         .catch(() => setSpots([]));
     }, []),
   );
@@ -61,15 +74,20 @@ export function useOpenedSpots() {
 /**
  * 내가 좋아요한 자리 (최근에 누른 순서). 받은 목록으로 좋아요 상태(use-liked-spots)도 맞춘다.
  * 목록은 화면에 들어올 때만 받아서, 그 안에서 하트를 취소해도 줄이 빠지지 않고 빈 하트로 남는다 (팀 결정).
+ * 받는 동안 비어 보이지 않게 지난번 목록을 먼저 보여 준다 (api/response-cache.ts).
  */
 export function useLikedSpotList() {
-  const [spots, setSpots] = useState<MySpotItem[] | null>(null);
+  const [spots, setSpots] = useState<MySpotItem[] | null>(() => {
+    const cached = getCached('myLikes');
+    return cached ? toLikedItems(cached) : null;
+  });
 
   useFocusEffect(
     useCallback(() => {
       getMyLikes()
         .then((result) => {
-          setSpots(result.map((spot) => toItem(spot, spot.likedAt)));
+          setCached('myLikes', result);
+          setSpots(toLikedItems(result));
           setLikedSpotIds(result.map((spot) => spot.postId));
         })
         .catch(() => setSpots([]));

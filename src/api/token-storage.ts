@@ -1,7 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
-import { clearCachedMe } from '@/api/me-cache';
+import { clearCachedResponses } from '@/api/response-cache';
 
 const accessTokenKey = 'onna.accessToken';
 const refreshTokenKey = 'onna.refreshToken';
@@ -32,7 +32,7 @@ export async function saveTokens({ accessToken, refreshToken }: Tokens) {
 }
 
 export async function clearTokens() {
-  // 로그아웃·탈퇴·로그인 풀림이 모두 여기를 지나서, 앞 계정의 닉네임이 다음 계정에 보이지 않게 같이 지운다
-  clearCachedMe();
+  // 로그아웃·탈퇴·로그인 풀림이 모두 여기를 지나서, 앞 계정의 기록·닉네임이 다음 계정에 보이지 않게 같이 지운다
+  clearCachedResponses();
   await Promise.all([storage.remove(accessTokenKey), storage.remove(refreshTokenKey)]);
 }

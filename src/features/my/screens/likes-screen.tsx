@@ -33,7 +33,7 @@ export function LikesScreen() {
       </View>
 
       {spots?.length === 0 && (
-        <AppText variant="body01" color="textTertiary">
+        <AppText variant="body01" color="textTertiary" keepAll>
           아직 좋아요한 자리가 없어요. 열어 본 사진에 하트를 누르면 여기에 모여요.
         </AppText>
       )}

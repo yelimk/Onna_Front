@@ -3,7 +3,6 @@ import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
 import { AppState, Linking, Pressable, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/app-text';
 import { Icon } from '@/components/icon';
@@ -14,6 +13,7 @@ import { getRegionName } from '@/features/map/api/get-region-name';
 import { useUploadDraft } from '@/features/upload/upload-draft';
 import { getPhotoLocation } from '@/features/upload/utils/get-photo-location';
 import { normalizePhoto } from '@/features/upload/utils/normalize-photo';
+import { useScreenInsets } from '@/hooks/use-screen-insets';
 
 // Figma Shutter: 바깥 주황 고리 72, 안쪽 흰 원 사이에 검은 틈
 const shutterSize = 72;
@@ -32,6 +32,7 @@ const shutterTopGap = 52;
  */
 export function CameraScreen() {
   const { updateDraft } = useUploadDraft();
+  const insets = useScreenInsets();
   const [permission, requestPermission, getPermission] = useCameraPermissions();
 
   // 거절한 뒤 폰 설정에서 카메라를 켜고 돌아와도 훅은 스스로 다시 확인하지 않아서, 앱이 다시 앞으로 올 때마다 확인한다
@@ -88,7 +89,8 @@ export function CameraScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.screen}>
+    // 남기기 창이 아래에서 올라오는 동안 안전 영역을 잘못 재지 않게 앱이 켜질 때 잰 값과 맞춰 쓴다 (use-screen-insets.ts)
+    <View style={[styles.screen, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       {/* 검은 배경 위라 시계·배터리를 흰색으로 (Figma 촬영 화면) */}
       <StatusBar style="light" />
       <View style={styles.header}>
@@ -130,7 +132,7 @@ export function CameraScreen() {
           <View style={styles.shutterInner} />
         </Pressable>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 

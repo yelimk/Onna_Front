@@ -1,8 +1,7 @@
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { getMyTags, getMyWalk, saveMyTags, saveMyWalk } from '@/api/users';
 import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
 import { ScreenContainer } from '@/components/screen-container';
@@ -10,38 +9,24 @@ import { ScreenHeader } from '@/components/screen-header';
 import { showToast } from '@/components/toast';
 import { spacing } from '@/constants/layout';
 import { minPreferredTagCount } from '@/constants/preferred-tags';
-import { walkDurationOptions, walkTimeOptions, type WalkDuration, type WalkTime } from '@/constants/walk-options';
+import { walkDurationOptions, walkTimeOptions, type WalkTime } from '@/constants/walk-options';
 import { ChipGroup, PreferenceCard } from '@/features/my/components/preference-card';
+import { useSavedPreferences } from '@/features/my/hooks/use-saved-preferences';
 import { useTags } from '@/hooks/use-tags';
 import { formatHashtag } from '@/utils/format-hashtag';
 import { showApiError } from '@/utils/show-api-error';
-import { fromWalkPreference, toWalkPreference } from '@/utils/walk-preference';
 
 /**
  * ③ 마이 탭: 사용자 기호 설정 (Figma 새 버전: 해시태그 유형 카드 + 걸음 유형 카드).
  * 해시태그와 걷는 유형을 고르고 '저장하기'로 통째로 바꿔 저장한다.
- * 들어오면 전에 고른 값을 서버에서 받아 미리 골라 둔다.
+ * 들어오면 전에 고른 값을 미리 골라 둔다 (use-saved-preferences.ts).
  * 고르는 기준은 온보딩 설문과 같다: 해시태그 3개 이상, 걷는 방식 1개 이상, 한번에 걷는 시간 1개.
  */
 export function PreferencesScreen() {
   const { tags, hasFailed, reload } = useTags();
-  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
-  const [walkTimes, setWalkTimes] = useState<WalkTime[]>([]);
-  const [walkDuration, setWalkDuration] = useState<WalkDuration>();
+  const { selectedTagIds, setSelectedTagIds, walkTimes, setWalkTimes, walkDuration, setWalkDuration, savePreferences } =
+    useSavedPreferences();
   const [isSaving, setIsSaving] = useState(false);
-
-  useEffect(() => {
-    getMyTags()
-      .then((myTags) => setSelectedTagIds(myTags.map((tag) => tag.id)))
-      .catch(showApiError);
-    getMyWalk()
-      .then((walk) => {
-        const saved = fromWalkPreference(walk);
-        setWalkTimes(saved.walkTimes);
-        setWalkDuration(saved.walkDuration);
-      })
-      .catch(showApiError);
-  }, []);
 
   const toggleTag = (tagId: number) =>
     setSelectedTagIds((ids) => (ids.includes(tagId) ? ids.filter((id) => id !== tagId) : [...ids, tagId]));
@@ -66,7 +51,7 @@ export function PreferencesScreen() {
     }
     setIsSaving(true);
     try {
-      await Promise.all([saveMyTags(selectedTagIds), saveMyWalk(toWalkPreference(walkTimes, walkDuration))]);
+      await savePreferences(tags ?? [], walkDuration);
       router.back();
     } catch (error) {
       showApiError(error);
