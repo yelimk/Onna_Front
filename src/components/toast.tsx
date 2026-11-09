@@ -49,6 +49,12 @@ const toastMotions = {
 
 export type ToastMotionName = keyof typeof toastMotions;
 
+/** 토스트가 내려와서 보이다가 올라가 사라질 때까지 걸리는 시간. 토스트를 다 보여 준 뒤 다음 일을 할 때 쓴다 */
+export function getToastDurationMs(motion: ToastMotionName = 'standard') {
+  const { enterMs, visibleMs, exitMs } = toastMotions[motion];
+  return enterMs + visibleMs + exitMs;
+}
+
 type ToastMessage = { id: number; message: string; type: ToastType; motion: ToastMotionName };
 
 // 토스트 높이를 재기 전에 쓰는 값 (Figma 토스트 높이 48)

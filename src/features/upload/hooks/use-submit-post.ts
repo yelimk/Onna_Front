@@ -1,12 +1,14 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { isApiError } from '@/api/api-error';
 import { createPost } from '@/api/posts';
-import { showToast } from '@/components/toast';
+import { getToastDurationMs, showToast } from '@/components/toast';
 import { useUploadDraft } from '@/features/upload/upload-draft';
 import { getPhotoLocation, hasLocationPermission } from '@/features/upload/utils/get-photo-location';
 import { showApiError } from '@/utils/show-api-error';
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * 위치 확인 화면의 '완료'와 '위치 다시 찾기'.
@@ -17,6 +19,7 @@ export function useSubmitPost() {
   const { draft, updateDraft } = useUploadDraft();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
+  const isLeavingRef = useRef(false);
 
   const canSubmit =
     !!draft.photoUri && !!draft.location && draft.questionId !== undefined && !isLocating;
@@ -37,8 +40,9 @@ export function useSubmitPost() {
   };
 
   const submit = async () => {
-    // 올리는 동안 버튼에 도는 동그라미를 보여주고(Figma 사진 올릴 때 로딩), 두 번 눌러도 한 번만 보낸다
-    if (isSubmitting) return;
+    // 올리는 동안 버튼에 도는 동그라미를 보여주고(Figma 사진 올릴 때 로딩), 두 번 눌러도 한 번만 보낸다.
+    // 얼굴로 거절돼 촬영 화면으로 돌아가는 동안에도 다시 보내지 않는다(isLeavingRef)
+    if (isSubmitting || isLeavingRef.current) return;
     if (!draft.photoUri || !draft.location || draft.questionId === undefined) return;
     setIsSubmitting(true);
     try {
@@ -53,9 +57,14 @@ export function useSubmitPost() {
       router.dismissTo('/record');
     } catch (error) {
       if (isApiError(error, 'FACE_DETECTED')) {
-        showToast('얼굴이 포함되어 있어요. 다시 찍어 주세요', 'error');
-        // 다시 찍을 버튼이 이 화면에 없어서 촬영 화면으로 바로 돌려보낸다.
-        // 처음부터 다시 올리는 것과 같게 질문·제목·한 줄·해시태그를 모두 비운다 (팀 결정). 질문이 비면 한 줄 남기기에서 새로 받는다.
+        // Figma처럼 이 화면에서 토스트를 먼저 보여 주고, 토스트가 사라지면 촬영 화면으로 보낸다 (팀 결정).
+        // 이 화면에는 다시 찍을 버튼이 없어서 직접 돌려보낸다. 거절은 이미 끝났으니 기다리는 동안 버튼의 동그라미는 멈춘다.
+        isLeavingRef.current = true;
+        setIsSubmitting(false);
+        showToast('사진에 얼굴이 포함되어 있어요', 'error');
+        await wait(getToastDurationMs());
+        isLeavingRef.current = false;
+        // 처음부터 다시 올리는 것과 같게 질문·제목·한 줄·해시태그를 모두 비운다. 질문이 비면 한 줄 남기기에서 새로 받는다.
         updateDraft({ questionId: undefined, question: undefined, title: '', oneLine: '', hashtags: [] });
         router.dismissTo('/upload/camera');
       } else if (isApiError(error, 'RETRY_LOCATION')) {
