@@ -66,6 +66,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.md,
     borderRadius: radius.md,
+    // 회색 칸이 사진에 붙지 않게 안쪽 여백 8을 두고, 같은 만큼 바깥으로 넓혀 사진·글 자리는 그대로 둔다
+    marginHorizontal: -spacing.xs,
+    paddingHorizontal: spacing.xs,
   },
   photo: {
     width: photoSize,
