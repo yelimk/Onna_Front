@@ -54,10 +54,6 @@ export const typography = {
   button04: style(fontFamily.regular, 14, 1.4),
   button05: style(fontFamily.bold, 12, 1.4),
   button06: style(fontFamily.regular, 12, 1.4),
-
-  // Figma 스타일 목록에는 없지만, 사진 목록 한 줄(list_l, list_m)을 누르고 있을 때 글자가 한 단계 작아지는 크기
-  listTitlePressed: style(fontFamily.semiBold, 15, 1.4),
-  listCaptionPressed: style(fontFamily.regular, 13, 1.4),
 } as const;
 
 export type TypographyVariant = keyof typeof typography;

@@ -3,7 +3,7 @@ import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 
 import { Icon, type IconName } from '@/components/icon';
 import { colors, type ColorName } from '@/constants/colors';
-import { floatingShadow, radius } from '@/constants/layout';
+import { floatingShadow, radius, softShadow } from '@/constants/layout';
 import { duration } from '@/constants/motion';
 import { usePressProgress } from '@/hooks/use-press-progress';
 
@@ -20,8 +20,10 @@ type IconButtonProps = {
    * 회색은 180ms 동안 서서히 덮인다 (Figma 프로토타입 bell_circle pressed: 디졸브 180ms, Ease out).
    */
   showPressed?: boolean;
-  /** 그림자 없이 둔다. Figma 마이 알림 종은 지도 위 버튼과 달리 그림자가 거의 없다(회색 4%) */
-  flat?: boolean;
+  /**
+   * 그림자 모양. floating: 지도 위에 떠 있는 버튼(기본), soft: 흰 바탕 위 버튼처럼 옅게 퍼지는 그림자(Figma 마이 알림 종)
+   */
+  shadow?: 'floating' | 'soft';
   /** 아이콘 크기. 기본은 버튼의 절반 (Figma 마이 알림 종은 48 버튼에 26 아이콘) */
   iconSize?: number;
   /** 오른쪽 위 빨간 점 (예: 새 알림). 점 테두리는 버튼이 놓인 바탕색과 같게 칠해서 버튼과 떨어져 보이게 한다 */
@@ -42,7 +44,7 @@ export function IconButton({
   emphasized = false,
   size = 44,
   showPressed = false,
-  flat = false,
+  shadow = 'floating',
   iconSize,
   showBadge = false,
   badgeOutlineColor = 'background01',
@@ -56,7 +58,12 @@ export function IconButton({
       accessibilityLabel={accessibilityLabel}
       onPress={onPress}
       {...pressHandlers}
-      style={[styles.button, !flat && floatingShadow, { width: size, height: size }, emphasized && styles.emphasized]}>
+      style={[
+        styles.button,
+        shadow === 'soft' ? softShadow : floatingShadow,
+        { width: size, height: size },
+        emphasized && styles.emphasized,
+      ]}>
       {/* 흰 동그라미 위에 회색 동그라미를 겹쳐 두고 투명도만 바꾼다. 아이콘은 회색 위에 그대로 보인다 */}
       <Animated.View pointerEvents="none" style={[styles.pressed, pressedStyle]} />
       <Icon name={icon} size={iconSize ?? size / 2} />

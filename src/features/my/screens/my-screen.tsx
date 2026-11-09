@@ -31,7 +31,7 @@ export function MyScreen() {
           icon="bell"
           size={48}
           iconSize={bellIconSize}
-          flat
+          shadow="soft"
           showPressed
           // Figma 마이 알림 종: 새 알림이 있으면 오른쪽 위 빨간 점. 테두리는 마이 회색 바탕색
           showBadge={hasNewNotifications}

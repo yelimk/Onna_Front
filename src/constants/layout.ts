@@ -40,6 +40,15 @@ export const floatingShadow = {
   elevation: 4,
 } as const;
 
+/** 흰 바탕 위 동그라미 버튼의 옅은 그림자 (Figma 마이 알림 종 bell_circle: drop shadow 0 0 16, 검정 8%) */
+export const softShadow = {
+  shadowColor: palette.gray.black,
+  shadowOpacity: 0.08,
+  shadowRadius: 16,
+  shadowOffset: { width: 0, height: 0 },
+  elevation: 3,
+} as const;
+
 /** 소개·설문 완료 그림의 흐린 사진 카드 그림자 (Figma drop shadow 0 0 12, 검정 16%) */
 export const photoShadow = {
   shadowColor: palette.gray.black,
