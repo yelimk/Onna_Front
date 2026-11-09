@@ -1,7 +1,7 @@
 import type { ClusterMarker, HomeMapMarker, PhotoMarker } from '@/features/map/types/home-map-marker';
 import { fromServerCoordinate } from '@/features/map/utils/to-coordinate';
 import type { PostPreview, Zone } from '@/types/api';
-import { formatHashtag } from '@/utils/format-hashtag';
+import { toHashtags } from '@/features/map/utils/to-hashtags';
 
 /**
  * 서버의 사진 한 장 → 지도 기록. 자리는 사진마다 오는 좌표(일부러 흐린 좌표)를 쓴다.
@@ -12,8 +12,9 @@ export function toPhotoMarker(zone: Zone, preview: PostPreview): PhotoMarker {
     kind: 'photo',
     id: String(preview.postId),
     coordinate: fromServerCoordinate(preview),
-    hashtags: preview.tags.map(formatHashtag),
+    hashtags: toHashtags(preview.tags),
     isOpen: preview.stage === 'OPEN',
+    serverDistanceMeters: preview.distanceM,
     imageUrl: preview.imageUrl,
     title: preview.title,
     placeName: zone.name,
@@ -22,7 +23,9 @@ export function toPhotoMarker(zone: Zone, preview: PostPreview): PhotoMarker {
 
 /** Figma '#단골자리 · 공강벤치'처럼 첫 태그에만 #을 붙인다. */
 function joinTopTags(tags: string[]) {
-  return tags.map((tag, index) => (index === 0 ? formatHashtag(tag) : formatHashtag(tag).slice(1))).join(' · ');
+  return toHashtags(tags)
+    .map((hashtag, index) => (index === 0 ? hashtag : hashtag.slice(1)))
+    .join(' · ');
 }
 
 function toClusterMarker(zone: Zone): ClusterMarker {

@@ -34,6 +34,8 @@ let latest: { origin: Coordinate | null; accuracy: number | null } = { origin: n
 const listeners = new Set<() => void>();
 /** 오래됐는지 보는 간격 */
 const staleCheckMs = 30 * 1000;
+/** 이 시간 안에 받은 구역이면 지도 홈에 다시 들어와도 또 묻지 않는다. 탭을 빠르게 오갈 때 같은 요청이 몰리지 않게 한다. */
+const focusRefreshMs = 10 * 1000;
 
 function setState(next: ZonesState) {
   state = next;
@@ -85,6 +87,16 @@ async function requestZones(location: Coordinate | null, accuracy: number | null
  */
 export function setZonesCenter(center: Coordinate) {
   mapCenter = center;
+  requestZones(latest.origin, latest.accuracy);
+}
+
+/**
+ * 지도 홈에 다시 들어올 때 구역을 새로 받는다. 걷거나 지도를 옮기지 않아도, 그사이 남겨진 새 기록이 바로 보이게 한다.
+ * (QA: 예시 기록을 넣은 뒤 지도에 아무것도 안 뜨다가 앱을 껐다 켜야 보였음)
+ */
+export function refreshZones() {
+  if (isFetching || (lastRequest && Date.now() - lastRequest.at < focusRefreshMs)) return;
+  lastRequest = null;
   requestZones(latest.origin, latest.accuracy);
 }
 

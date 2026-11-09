@@ -1,9 +1,9 @@
 import { Pressable, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 
 import { AppText } from '@/components/app-text';
-import { PhotoPlaceholder } from '@/components/photo-placeholder';
 import { radius, spacing } from '@/constants/layout';
 import { CardCloseButton, MapBottomCard } from '@/features/map/components/map-bottom-card';
+import { RecordPhoto } from '@/features/map/components/record-photo';
 import type { PhotoMarker } from '@/features/map/types/home-map-marker';
 import { formatDistance } from '@/features/map/utils/format-distance';
 
@@ -18,6 +18,11 @@ type RecordPlaceCardProps = {
   onClose: () => void;
   /** 카드를 누르면 지도 홈에서 이 장소로 경로를 추천받으러 간다. */
   onOpen: () => void;
+  /**
+   * 사진을 누르면 이 기록의 사진 카드를 띄운다. 가까이 있으면 서버가 열어 준다.
+   * 구역 밖에 남긴 기록은 지도 홈에 마커가 없어서, 여기가 사진 카드로 들어가는 길이다.
+   */
+  onOpenPhoto: () => void;
   onLayout: (event: LayoutChangeEvent) => void;
 };
 
@@ -25,8 +30,18 @@ type RecordPlaceCardProps = {
  * Figma '지도 해시태그 선택 시 경로 추천 UI (화면 축소 버전) > 해시태그 표시'의 아래 카드.
  * 해시태그 결과에서 기록 핀 하나를 누르면, 그 기록이 남겨진 장소와 고른 해시태그를 보여준다.
  * 카드를 누르면 지도 홈에서 이 장소를 고른 상태로 연다 (Figma '지도 해시태그 검색 시 경로 추천 UI').
+ * 사진만 누르면 그 기록의 사진 카드를 띄운다 (Figma에는 없는 길이지만, 구역 밖 기록을 열 곳이 따로 없어서 둔다).
  */
-export function RecordPlaceCard({ record, hashtag, regionName, distanceMeters, onClose, onOpen, onLayout }: RecordPlaceCardProps) {
+export function RecordPlaceCard({
+  record,
+  hashtag,
+  regionName,
+  distanceMeters,
+  onClose,
+  onOpen,
+  onOpenPhoto,
+  onLayout,
+}: RecordPlaceCardProps) {
   const details = [regionName, distanceMeters !== null && `내 위치에서 ${formatDistance(distanceMeters)}`]
     .filter(Boolean)
     .join(' · ');
@@ -34,12 +49,14 @@ export function RecordPlaceCard({ record, hashtag, regionName, distanceMeters, o
   return (
     <MapBottomCard onLayout={onLayout}>
       <View style={styles.row}>
+        <Pressable accessibilityRole="button" accessibilityLabel="사진과 한 줄 보기" onPress={onOpenPhoto}>
+          <RecordPhoto imageUrl={record.imageUrl} width={photoSize} height={photoSize} style={styles.photo} />
+        </Pressable>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`${record.placeName ?? regionName}에서 경로 추천받기`}
           onPress={onOpen}
           style={styles.content}>
-          <PhotoPlaceholder width={photoSize} height={photoSize} style={styles.photo} />
           <View style={styles.texts}>
             <AppText variant="heading03" numberOfLines={1}>
               {record.placeName ?? regionName}

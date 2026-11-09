@@ -8,7 +8,7 @@ import { useRecordsInRange } from '@/features/map/hooks/use-records-in-range';
 import type { Coordinate } from '@/features/map/types/home-map-marker';
 import type { WalkRoute } from '@/features/map/types/walk-route';
 import { getDistanceMeters } from '@/features/map/utils/get-distance-meters';
-import { findKnownRecord } from '@/features/map/utils/known-records';
+import { findKnownRecord, getKnownRecords } from '@/features/map/utils/known-records';
 import { findPassedPath } from '@/features/map/utils/open-search-result';
 import { locateOnRoute, splitRoute } from '@/features/map/utils/route-progress';
 
@@ -19,6 +19,8 @@ type NavigationParams = {
   stopIds?: string;
   /** 지도 홈 AI 추천 경로에서 받은 길의 번호 (openNavigation) */
   pathId?: string;
+  /** 목적지가 기록 한 건이면 그 id (지도 홈 AI 추천 경로의 마지막 자리) */
+  destinationRecordId?: string;
 };
 
 /** 들를 자리·목적지에 이만큼(m) 다가오면 도착한 것으로 본다. GPS 오차를 생각한 값이다. */
@@ -99,14 +101,16 @@ export function useWalkNavigation(myLocation: Coordinate | null) {
   // 도착하면 목적지에 가장 가까이 남겨진 기록 하나가 열린다 (Figma '사진 해금 UI'). 없으면 열 기록이 없다.
   const unlockedRecord = useMemo(() => {
     if (!progress?.hasArrived || !destination) return null;
-    // 지도 홈 기록은 구역 대표 사진뿐이라, 범위 내 기록(구역 사진 전체)도 같이 본다.
-    // AI 추천 경로는 마지막 자리(대표 사진이 아닐 수 있음)가 목적지라서 이게 없으면 도착해도 열리지 않을 수 있다.
-    const nearest = [...recordsInRange, ...records]
+    // 목적지가 기록이면(AI 추천 경로의 마지막 자리) 그 기록을 연다. 구역 밖 기록일 수 있어 지도 구역에서는 못 찾는다.
+    const destinationRecord = params.destinationRecordId ? findKnownRecord(params.destinationRecordId) : undefined;
+    if (destinationRecord) return destinationRecord;
+    // 지도 홈 기록은 구역 대표 사진뿐이라, 범위 내 기록(구역 사진 전체)과 검색·경로에서 받아 둔 기록(구역 밖 포함)도 같이 본다.
+    const nearest = [...recordsInRange, ...records, ...getKnownRecords()]
       .map((record) => ({ record, distance: getDistanceMeters(destination, record.coordinate) }))
       .filter(({ distance }) => distance <= unlockMatchMeters)
       .sort((a, b) => a.distance - b.distance)[0];
     return nearest?.record ?? null;
-  }, [progress?.hasArrived, destination, records, recordsInRange]);
+  }, [progress?.hasArrived, destination, records, recordsInRange, params.destinationRecordId]);
 
   return {
     destinationName: params.destinationName ?? '',
@@ -116,5 +120,6 @@ export function useWalkNavigation(myLocation: Coordinate | null) {
     progress,
     recordsInRange,
     unlockedRecord,
+    destinationRecordId: params.destinationRecordId ?? null,
   };
 }

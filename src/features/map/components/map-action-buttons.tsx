@@ -5,25 +5,36 @@ import { Icon } from '@/components/icon';
 import { colors } from '@/constants/colors';
 import { floatingShadow, radius, spacing } from '@/constants/layout';
 
-const routeButtonSize = 48;
+/** 흰 사각 버튼(내 위치, 산책 경로 추천) 크기 */
+const squareButtonSize = 48;
 const cameraButtonSize = 56;
 
 type MapActionButtonsProps = {
+  /** 지도를 내 위치로 옮긴다. 지도는 지도 홈이 가지고 있어서 지도 홈의 함수를 받는다. */
+  onMyLocationPress: () => void;
   /** 목적지 없이 AI 추천 경로를 받는다. 경로 카드는 지도 홈이 띄워서 지도 홈의 함수를 받는다. */
   onRoutePress: () => void;
   /** 탐색 모드에서 가장 가까운 기록을 펼치면 Figma대로 카메라 버튼을 숨긴다. */
   showCamera?: boolean;
 };
 
-/** 지도 오른쪽 아래 버튼: 산책 경로 추천(AI 추천 경로), 지금 이 자리 남기기 */
-export function MapActionButtons({ onRoutePress, showCamera = true }: MapActionButtonsProps) {
+/** 지도 오른쪽 아래 버튼 (위에서부터): 내 위치로 가기, 산책 경로 추천(AI 추천 경로), 지금 이 자리 남기기 */
+export function MapActionButtons({ onMyLocationPress, onRoutePress, showCamera = true }: MapActionButtonsProps) {
   return (
     <View style={styles.column}>
+      {/* Figma '위치 관련 추가사항': 다른 곳을 둘러보다가 내 위치로 돌아오는 버튼. 경로 버튼과 같은 흰 사각 버튼이다. */}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="내 위치로 가기"
+        onPress={onMyLocationPress}
+        style={styles.squareButton}>
+        <Icon name="myLocation" size={24} />
+      </Pressable>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="산책 경로 추천"
         onPress={onRoutePress}
-        style={styles.routeButton}>
+        style={styles.squareButton}>
         <Icon name="route" size={24} />
       </Pressable>
       {showCamera && <CameraButton />}
@@ -49,10 +60,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
   },
-  routeButton: {
+  squareButton: {
     ...floatingShadow,
-    width: routeButtonSize,
-    height: routeButtonSize,
+    width: squareButtonSize,
+    height: squareButtonSize,
     borderRadius: radius.md,
     backgroundColor: colors.background01,
     alignItems: 'center',

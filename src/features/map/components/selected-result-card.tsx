@@ -8,6 +8,7 @@ import { RouteCard } from '@/features/map/components/route-card';
 import { RouteStartCard } from '@/features/map/components/route-start-card';
 import type { PhotoMarker } from '@/features/map/types/home-map-marker';
 import type { SearchResultItem } from '@/features/map/types/search-result-item';
+import { openRecord } from '@/features/map/utils/open-search-result';
 import type { NearbyRecordSummary } from '@/features/map/utils/summarize-nearby-records';
 
 /** 고른 결과에 따라 아래에 띄울 카드. 화면이 상태를 정하고, 이 부품은 맞는 카드만 고른다. */
@@ -111,6 +112,7 @@ export function SelectedResultCard({
           distanceMeters={state.distanceMeters}
           onClose={onClose}
           onOpen={() => onOpenRecord?.(state.record, state.regionName)}
+          onOpenPhoto={() => openRecord(state.record.id)}
           onLayout={onLayout}
         />
       );

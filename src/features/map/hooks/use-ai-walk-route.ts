@@ -122,6 +122,7 @@ export function useAiWalkRoute(myLocation: Coordinate | null, bottomInset: numbe
       destinationName: last.placeName ?? last.title ?? '',
       destination: last.coordinate,
       stopIds: stops.slice(0, -1).map(({ id }) => id),
+      destinationRecordId: last.id,
       // 지도에 그린 길(AI 길, 없으면 TMAP·직선)을 길안내도 그대로 쓴다.
       path: route?.path,
     });
