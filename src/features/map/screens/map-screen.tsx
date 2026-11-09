@@ -12,7 +12,8 @@ import { ExploreSheet } from '@/features/map/components/explore-sheet';
 import { LocationPermissionCard } from '@/features/map/components/location-permission-card';
 import { MapActionButtons } from '@/features/map/components/map-action-buttons';
 import { MapSearchBar } from '@/features/map/components/map-search-bar';
-import { SelectedResultCard } from '@/features/map/components/selected-result-card';
+import { getSelectedResultKey, SelectedResultCard } from '@/features/map/components/selected-result-card';
+import { SlidingPanel } from '@/features/map/components/sliding-panel';
 import { openRadiusMeters } from '@/features/map/constants/map-config';
 import { mapChromeFadeMs } from '@/features/map/constants/map-motion';
 import { useHomeMapMarkers } from '@/features/map/hooks/use-home-map-markers';
@@ -115,15 +116,18 @@ export function MapScreen() {
 
       <Animated.View style={[styles.chrome, chromeStyle]}>
         {routes.card ? (
-          <SelectedResultCard
-            state={routes.card}
-            cardHeight={routes.cardHeight}
-            onLayout={({ nativeEvent }) => routes.setCardHeight(Math.round(nativeEvent.layout.height))}
-            onClose={routes.closeCard}
-            onRecommend={routes.recommendRoute}
-            onRouteExpandedChange={routes.setIsRouteExpanded}
-            onWalk={routes.walkThisRoute}
-          />
+          // Figma '지도 경로 탐색 애니메이션': 카드가 아래에서 올라오고, 장소 카드 → 경로 카드처럼 바뀌면 이전 카드가 내려간 뒤 새 카드가 올라온다.
+          <SlidingPanel key={getSelectedResultKey(routes.card)}>
+            <SelectedResultCard
+              state={routes.card}
+              cardHeight={routes.cardHeight}
+              onLayout={({ nativeEvent }) => routes.setCardHeight(Math.round(nativeEvent.layout.height))}
+              onClose={routes.closeCard}
+              onRecommend={routes.recommendRoute}
+              onRouteExpandedChange={routes.setIsRouteExpanded}
+              onWalk={routes.walkThisRoute}
+            />
+          </SlidingPanel>
         ) : (
           <View style={[styles.bottom, isExploring && styles.bottomWithSheet]}>
             <View style={styles.actions}>

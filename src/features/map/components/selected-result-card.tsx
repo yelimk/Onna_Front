@@ -35,6 +35,16 @@ export type SelectedResultState =
       distanceMeters: number | null;
     };
 
+/**
+ * 카드마다 다른 이름. SlidingPanel의 key로 쓰면 이름이 바뀔 때 이전 카드가 내려가고 새 카드가 올라온다.
+ * 경로 카드를 접고 펼치거나 경로를 받는 중인 것은 같은 카드라 이름에 넣지 않는다.
+ */
+export function getSelectedResultKey(state: SelectedResultState) {
+  if (state.mode === 'record') return `record-${state.record.id}`;
+  // 경로 카드의 key는 고른 장소(또는 AI 추천 경로)의 key와 같다.
+  return `${state.mode}-${state.mode === 'route' ? state.key : state.item.key}`;
+}
+
 type SelectedResultCardProps = {
   state: SelectedResultState;
   cardHeight: number;
