@@ -8,16 +8,24 @@ import { toHashtags } from '@/features/map/utils/to-hashtags';
  * 열렸는지와 얼마나 흐린지는 서버가 내 위치로 정한 stage를 그대로 따른다 (위치 없이 부르면 맛보기·내가 연 사진만 OPEN).
  */
 export function toPhotoMarker(zone: Zone, preview: PostPreview): PhotoMarker {
+  return toRecord(preview, zone.name);
+}
+
+/** 구역 밖에 남긴 사진 → 지도 기록. 구역 이름이 없어서 장소 이름은 비워 두고, 카드가 동네 이름으로 대신한다. */
+export function toOutsidePhotoMarker(preview: PostPreview): PhotoMarker {
+  return toRecord(preview, undefined);
+}
+
+function toRecord(preview: PostPreview, placeName: string | undefined): PhotoMarker {
   return {
     kind: 'photo',
     id: String(preview.postId),
     coordinate: fromServerCoordinate(preview),
     hashtags: toHashtags(preview.tags),
     isOpen: preview.stage === 'OPEN',
-    serverDistanceMeters: preview.distanceM,
     imageUrl: preview.imageUrl,
     title: preview.title,
-    placeName: zone.name,
+    placeName,
   };
 }
 
@@ -32,6 +40,7 @@ function toClusterMarker(zone: Zone): ClusterMarker {
   return {
     kind: 'cluster',
     id: String(zone.zoneId),
+    // 서버가 정한 묶음 마커 자리 (첫 대표 사진 좌표). 구역이 넓어도 마커 위에 서면 그 사진이 열린다.
     coordinate: fromServerCoordinate(zone),
     label: joinTopTags(zone.topTags),
     // 서버가 이름표에 못 넣은 나머지 태그 종류 수를 준다 ('+11개 더').

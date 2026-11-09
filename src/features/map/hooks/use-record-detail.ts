@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
 
-import { openRadiusMeters, openTryMeters } from '@/features/map/constants/map-config';
+import { openRadiusMeters } from '@/features/map/constants/map-config';
 import { useHomeMapMarkers } from '@/features/map/hooks/use-home-map-markers';
 import { useLocationAccuracy } from '@/features/map/hooks/use-my-location';
 import { openNearbyPost, useOpenedPost } from '@/features/map/hooks/use-opened-posts';
@@ -41,17 +41,11 @@ export function useRecordDetail(recordId: string, myLocation: Coordinate | null)
   const { opened, openErrorCode } = useOpenedPost(recordId);
 
   const found = useMemo(() => records.find(({ id }) => id === recordId) ?? findKnownRecord(recordId), [records, recordId]);
-  const appDistance = found && myLocation ? getDistanceMeters(myLocation, found.coordinate) : null;
-  const isNearby = appDistance !== null && appDistance <= openRadiusMeters;
-  // 사진 좌표는 일부러 흐린 좌표라 앱의 거리 계산은 대략이다. 열지는 서버가 실제 좌표로 정하므로, 그럴 만하면 묻는다.
-  // - 앱이 잰 거리가 넉넉한 범위(openTryMeters) 안이거나, 서버가 잰 거리가 그 안이거나
-  // - 서버가 이미 열림(OPEN, 예전에 연 사진 포함)이라고 했거나, 어디서 왔는지 모르는 기록(목록에 없음)이면
-  const isWorthTrying =
-    found === undefined ||
-    found.isOpen ||
-    (appDistance !== null && appDistance <= openTryMeters) ||
-    (found.serverDistanceMeters ?? Infinity) <= openTryMeters;
-  const shouldTryOpen = !opened && myLocation !== null && isWorthTrying;
+  // 서버도 사진의 흐린 좌표까지 거리로 열어 줄지 정해서, 앱이 잰 25m가 서버 기준과 같다.
+  const isNearby = found !== undefined && myLocation !== null && getDistanceMeters(myLocation, found.coordinate) <= openRadiusMeters;
+  // 가까우면 서버에 열어 달라고 한다. 서버가 이미 열림(OPEN: 25m 안, 맛보기, 예전에 연 사진)이라고 했거나
+  // 어디서 왔는지 모르는 기록(목록에 없음)도 서버가 판단하게 물어본다.
+  const shouldTryOpen = !opened && myLocation !== null && (found === undefined || isNearby || found.isOpen);
 
   useEffect(() => {
     if (shouldTryOpen && myLocation) openNearbyPost(recordId, myLocation, accuracy);
