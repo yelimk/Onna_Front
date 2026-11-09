@@ -1,14 +1,21 @@
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
+import { Pressable, StyleSheet, type LayoutChangeEvent } from 'react-native';
+import Animated, { LinearTransition } from 'react-native-reanimated';
 
 import { Icon } from '@/components/icon';
 import { colors } from '@/constants/colors';
 import { radius, screenPaddingX, spacing } from '@/constants/layout';
+import { duration, easeOut } from '@/constants/motion';
 import { SheetHandle } from '@/features/map/components/sheet-handle';
 import { sheetCornerRadius } from '@/features/map/constants/map-layout';
 import { useVerticalSwipe } from '@/features/map/hooks/use-vertical-swipe';
 
 const closeButtonSize = 36;
+/**
+ * 경로 카드를 접고 펼칠 때 카드 크기가 한 번에 바뀌지 않고 부드럽게 늘고 준다.
+ * 카드 안 내용(들를 자리 목록)은 펼침 상태에 따라 그리거나 빼서, 손가락을 따라오게 하지 않고 크기 변화만 움직인다.
+ */
+const cardResize = LinearTransition.duration(duration.normal).easing(easeOut);
 
 type MapBottomCardProps = {
   /** 지도가 카드에 가리지 않게 맞추려고 카드 높이를 알린다. */
@@ -28,7 +35,7 @@ export function MapBottomCard({ onLayout, collapse, children }: MapBottomCardPro
   const swipeHandlers = useVerticalSwipe(collapse?.onExpandedChange ?? noop);
 
   return (
-    <View style={styles.card} onLayout={onLayout} {...(collapse ? swipeHandlers : {})}>
+    <Animated.View layout={cardResize} style={styles.card} onLayout={onLayout} {...(collapse ? swipeHandlers : {})}>
       {collapse ? (
         <Pressable
           accessibilityRole="button"
@@ -42,7 +49,7 @@ export function MapBottomCard({ onLayout, collapse, children }: MapBottomCardPro
         <SheetHandle />
       )}
       {children}
-    </View>
+    </Animated.View>
   );
 }
 
