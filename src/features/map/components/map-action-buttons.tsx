@@ -37,7 +37,8 @@ export function MapActionButtons({ onMyLocationPress, onRoutePress, showCamera =
         style={styles.squareButton}>
         <Icon name="route" size={24} />
       </Pressable>
-      {showCamera && <CameraButton />}
+      {/* 카메라를 숨겨도 그 자리를 비워 둔다. 그래야 위의 두 버튼이 내려오지 않고 같은 자리에 있다 (Figma 탐색 모드). */}
+      {showCamera ? <CameraButton /> : <View style={styles.cameraSlot} />}
     </View>
   );
 }
@@ -68,6 +69,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background01,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  // 빈 자리라 터치는 아래 지도·패널로 넘긴다.
+  cameraSlot: {
+    width: cameraButtonSize,
+    height: cameraButtonSize,
+    pointerEvents: 'none',
   },
   cameraButton: {
     ...floatingShadow,
