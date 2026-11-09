@@ -49,14 +49,23 @@ const toastMotions = {
 
 export type ToastMotionName = keyof typeof toastMotions;
 
+/** 토스트가 내려와서 보이다가 올라가 사라질 때까지 걸리는 시간. 토스트를 다 보여 준 뒤 다음 일을 할 때 쓴다 */
+export function getToastDurationMs(motion: ToastMotionName = 'standard') {
+  const { enterMs, visibleMs, exitMs } = toastMotions[motion];
+  return enterMs + visibleMs + exitMs;
+}
+
 type ToastMessage = { id: number; message: string; type: ToastType; motion: ToastMotionName };
 
 // 토스트 높이를 재기 전에 쓰는 값 (Figma 토스트 높이 48)
 const defaultToastHeight = 48;
 
-// 어느 화면에서든 부를 수 있게 토스트 상태를 화면 밖(모듈)에 하나만 둔다
+// 어느 화면에서든 부를 수 있게 토스트 상태를 화면 밖(모듈)에 둔다
 let nextId = 0;
-const listeners = new Set<(toast: ToastMessage) => void>();
+// 토스트 자리(ToastHost)는 루트에 하나 있고, 화면 전체를 덮는 창(남기기)에도 하나 더 둔다.
+// 덮는 창은 루트보다 위에 그려져서 루트 토스트가 그 뒤에 가려지기 때문이다.
+// 가장 나중에 열린(맨 위) 자리에만 보내서, 지금 보이는 화면 위에 토스트가 한 번만 뜨게 한다.
+const listeners: ((toast: ToastMessage) => void)[] = [];
 
 /**
  * 화면 위에 잠깐 떴다 사라지는 알림. 알림창(Alert)과 달리 버튼을 누르지 않아도 되는 짧은 결과에 쓴다.
@@ -65,10 +74,13 @@ const listeners = new Set<(toast: ToastMessage) => void>();
  */
 export function showToast(message: string, type: ToastType = 'plain', motion: ToastMotionName = 'standard') {
   const toast = { id: ++nextId, message, type, motion };
-  listeners.forEach((listener) => listener(toast));
+  listeners.at(-1)?.(toast);
 }
 
-/** 루트 레이아웃(app/_layout.tsx)에 한 번만 둔다. 가장 최근 토스트 하나만 보여준다. */
+/**
+ * 토스트가 뜨는 자리. 루트 레이아웃(app/_layout.tsx)과, 루트를 덮는 전체 화면 창(app/upload/_layout.tsx)에 둔다.
+ * 가장 최근 토스트 하나만 보여준다.
+ */
 export function ToastHost() {
   const insets = useSafeAreaInsets();
   const [toast, setToast] = useState<ToastMessage | null>(null);
@@ -81,9 +93,9 @@ export function ToastHost() {
 
   useEffect(() => {
     const listener = (next: ToastMessage) => setToast(next);
-    listeners.add(listener);
+    listeners.push(listener);
     return () => {
-      listeners.delete(listener);
+      listeners.splice(listeners.indexOf(listener), 1);
     };
   }, []);
 
