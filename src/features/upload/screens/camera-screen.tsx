@@ -66,7 +66,9 @@ export function CameraScreen() {
       // 몰래 찍는 것처럼 보이지 않게 셔터 소리를 켠다 (팀 결정)
       const photo = await cameraRef.current.takePictureAsync({ quality: 0.8, shutterSound: true });
       const photoUri = await normalizePhoto(photo);
-      updateDraft({ photoUri });
+      // 한 줄 남기기에서 뒤로 와 다시 찍으면 다른 자리·다른 순간일 수 있어서, 앞 사진에 쓴 글을 모두 비운다 (팀 결정).
+      // 얼굴 거절로 돌아올 때와 같다. 질문이 비면 한 줄 남기기에서 새 질문을 받는다.
+      updateDraft({ photoUri, questionId: undefined, question: undefined, title: '', oneLine: '', hashtags: [] });
       router.push('/upload/write');
     } catch {
       // 카메라가 잠깐 바쁘거나 전환 중이면 실패한다. 다시 누르면 되므로 안내만 띄운다.
