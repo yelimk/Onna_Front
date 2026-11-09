@@ -23,7 +23,6 @@ function toRecord(preview: PostPreview, placeName: string | undefined): PhotoMar
     coordinate: fromServerCoordinate(preview),
     hashtags: toHashtags(preview.tags),
     isOpen: preview.stage === 'OPEN',
-    serverDistanceMeters: preview.distanceM,
     imageUrl: preview.imageUrl,
     title: preview.title,
     placeName,
