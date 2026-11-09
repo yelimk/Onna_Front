@@ -1,8 +1,8 @@
 import { useCameraPermissions, type CameraView } from 'expo-camera';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useRef, useState } from 'react';
-import { Linking, Pressable, StyleSheet, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { AppState, Linking, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/app-text';
@@ -32,7 +32,15 @@ const shutterTopGap = 52;
  */
 export function CameraScreen() {
   const { updateDraft } = useUploadDraft();
-  const [permission, requestPermission] = useCameraPermissions();
+  const [permission, requestPermission, getPermission] = useCameraPermissions();
+
+  // 거절한 뒤 폰 설정에서 카메라를 켜고 돌아와도 훅은 스스로 다시 확인하지 않아서, 앱이 다시 앞으로 올 때마다 확인한다
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') getPermission();
+    });
+    return () => subscription.remove();
+  }, [getPermission]);
   const cameraRef = useRef<CameraView>(null);
   const [isReady, setIsReady] = useState(false);
   const [isTaking, setIsTaking] = useState(false);
