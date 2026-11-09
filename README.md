@@ -196,7 +196,7 @@ flowchart TB
 
 | 화면 | 기능 |
 |---|---|
-| 내 기록 | 남긴 기록을 사진, 제목, 한 줄, 해시태그, 날짜, 받은 좋아요 수와 함께 최신순으로 보여 줍니다. 리스트 / 지도 보기를 바꿀 수 있습니다. |
+| 내 기록 | 남긴 기록을 사진, 제목, 한 줄, 해시태그, 날짜, 받은 좋아요 수와 함께 최신순으로 보여 줍니다. 누르고 있으면 줄 배경이 회색으로 바뀝니다. |
 | 기록 상세 | 사진, 한 줄, 해시태그를 보고, 확인 창을 거쳐 기록을 지웁니다. |
 
 **마이 탭**
@@ -207,7 +207,7 @@ flowchart TB
 |---|---|
 | 마이 | 닉네임, 칭호, 남긴 자리·연 자리·좋아한 자리 수를 보여 줍니다. 칭호는 초보 탐험가(온보딩하면 누구나) 뒤에 얻은 칭호(최초 발견자, 걸음왕)가 붙습니다. 새 알림이 있으면 종에 빨간 점이 뜹니다. |
 | 알림 | 내 기록이 열리거나 대표 사진이 됐을 때 알려 줍니다. '5분 전', '작년'처럼 지금과의 차이로 묶고, 누르면 기록 상세로 갑니다. |
-| 좋아요 내역·연 자리 기록 | 리스트 / 지도 보기를 바꿀 수 있고, 상세에서 좋아요 취소와 신고를 할 수 있습니다. |
+| 좋아요 내역·연 자리 기록 | 누르고 있으면 줄 배경이 회색으로 바뀌고, 상세에서 좋아요 취소와 신고를 할 수 있습니다. |
 | 사용자 기호 설정 | 전에 고른 해시태그와 걷는 유형을 불러와 바꿉니다. 온보딩과 같은 기준(해시태그 3개 이상, 걷는 방식 1개 이상, 한 번에 걷는 시간 1개)으로 저장합니다. |
 | 설정 | 권한 상태(누르면 폰 설정으로 이동), 로그인 계정, 약관, 로그아웃, 회원 탈퇴가 있습니다. |
 
@@ -272,7 +272,7 @@ Figma 디자인 시스템의 값을 코드로 옮겨, 화면에서는 이름으�
 
 - 색은 `colors`의 이름으로, 글씨는 `Text` 대신 `AppText`로 씁니다. 어기면 ESLint 경고가 뜹니다.
 - Figma 값 중 글씨·여백·모서리·색은 그대로, 화면 너비(390)와 고정 위치는 폰 크기에 맞게 바꿔 옮깁니다 (`AGENTS.md` "Figma 수치 옮기기").
-- 화면은 공통 부품으로 먼저 조립합니다: `ScreenContainer`, `ScreenHeader`, `Button`, `TextField`, `Checkbox`, `Radio`, `Toggle`, `Chip`, `Badge`, `Icon`, `IconButton`, `SegmentedToggle`, `LikeButton`, `Toast`, `ConfirmDialog`, `LoadingSpinner`, `PressHighlight`, `PhotoPlaceholder`, `MapPlaceholder`, `AppTabBar`.
+- 화면은 공통 부품으로 먼저 조립합니다: `ScreenContainer`, `ScreenHeader`, `Button`, `TextField`, `Checkbox`, `Radio`, `Toggle`, `Chip`, `Badge`, `Icon`, `IconButton`, `LikeButton`, `Toast`, `ConfirmDialog`, `LoadingSpinner`, `PressHighlight`, `PhotoPlaceholder`, `MapPlaceholder`, `AppTabBar`.
 
 </details>
 

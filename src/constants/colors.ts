@@ -85,8 +85,8 @@ export const colors = {
   requiredMark: palette.error[3],
   // 흐린 사진 중 '내 취향' 사진의 주황 테두리 (Figma Primary/300)
   photoHighlightFrame: palette.primary[300],
-  // 회색 칸 위에 얹는 옅은 동그라미 버튼 (Figma reload_circle, Gray/200 40%)
-  softCircleButton: 'rgba(225, 225, 225, 0.4)',
+  // 회색 칸 위에 얹는 옅은 동그라미 버튼 (Figma reload_circle, Gray/200 80%. 디자이너 요청으로 40%에서 바뀜)
+  softCircleButton: 'rgba(225, 225, 225, 0.8)',
   // 흰 동그라미 버튼을 누르고 있을 때 배경 (Figma bell_circle pressed, Gray/100)
   pressedCircleButton: palette.gray[100],
   // 확인 창 뒤를 어둡게 덮는 막 (Figma 삭제 확인, Gray/800 80%)
