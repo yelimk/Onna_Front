@@ -32,6 +32,7 @@ function toClusterMarker(zone: Zone): ClusterMarker {
   return {
     kind: 'cluster',
     id: String(zone.zoneId),
+    // 서버가 정한 묶음 마커 자리 (첫 대표 사진 좌표). 구역이 넓어도 마커 위에 서면 그 사진이 열린다.
     coordinate: fromServerCoordinate(zone),
     label: joinTopTags(zone.topTags),
     // 서버가 이름표에 못 넣은 나머지 태그 종류 수를 준다 ('+11개 더').

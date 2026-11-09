@@ -28,6 +28,7 @@ async function loadRankedRecords(current: Coordinate, myLocation: MyLocation | n
   const zones = await getMapZones(myLocation, { center: toServerCoordinate(current), radius: inRangeZoneMeters });
   const nearestZonesFirst = zones
     .filter((zone) => zone.postCount > 0)
+    // 구역 좌표는 묶음 마커 자리(첫 대표 사진)라, 그 사진이 가까운 구역부터 잇는다.
     .map((zone) => ({ zone, distance: getDistanceMeters(current, { latitude: zone.lat, longitude: zone.lng }) }))
     .sort((a, b) => a.distance - b.distance);
   const lists = await Promise.all(

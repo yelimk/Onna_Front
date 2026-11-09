@@ -54,6 +54,11 @@ export type PostPreview = Coordinate & {
   distanceM: number | null;
 };
 
+/**
+ * 지도 구역 한 곳. lat·lng는 구역 가운데가 아니라 묶음 마커 자리다:
+ * 대표 사진이 있으면 첫 대표 사진(previews[0])의 흐린 좌표, 없으면 구역 가운데 (2026-11-09 서버 변경).
+ * 마커 위에 서면 그 대표 사진의 열림 반경(25m) 안에 든다.
+ */
 export type Zone = Coordinate & {
   zoneId: number;
   name: string;
