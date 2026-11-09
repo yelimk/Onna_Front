@@ -173,11 +173,12 @@ const styles = StyleSheet.create({
   notice: {
     alignSelf: 'center',
   },
+  // Figma 지도 홈(위치 관련 추가사항): 카메라 버튼 아래 끝이 탭 바에서 24 떨어져 있다 (Figma 코드의 bottom 110은 탭 바 높이를 포함한 값).
   bottom: {
     position: 'absolute',
     left: screenPaddingX,
     right: screenPaddingX,
-    bottom: spacing.lg,
+    bottom: spacing.xl,
     gap: spacing.md,
     pointerEvents: 'box-none',
   },
