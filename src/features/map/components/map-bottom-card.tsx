@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { Pressable, StyleSheet, type LayoutChangeEvent } from 'react-native';
+import { Pressable, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import Animated, { LinearTransition, useAnimatedStyle } from 'react-native-reanimated';
 
 import { Icon } from '@/components/icon';
@@ -22,7 +22,10 @@ type CardCollapse = {
   label: string;
   /** 접으면 가려지는 아래 부분 (들를 자리, '이 길로 걷기') */
   content: ReactNode;
-  /** 접었을 때 카드 위에 떠 있는 것 (Figma '경로·장소 정보 UI'의 카메라 버튼). 접히는 만큼 서서히 나타난다. */
+  /**
+   * 접은 카드 바로 위에 서 있는 것 (Figma '경로·장소 정보 UI'의 카메라 버튼).
+   * 카드를 끌어도 따라 움직이지 않고 그 자리에 있다. 펼치면 카드가 위로 덮는다.
+   */
   floating?: ReactNode;
 };
 
@@ -54,23 +57,21 @@ function CollapsibleCard({ onLayout, collapse, children }: Required<Omit<MapBott
   const { isExpanded, onExpandedChange, label, content, floating } = collapse;
   // 접을 때 내려가는 거리 = 접히는 부분 높이 + 그 위 간격. 그래야 접었을 때 제목 아래 여백이 펼쳤을 때와 같다.
   const [contentHeight, setContentHeight] = useState(0);
-  // 카메라 버튼을 펼친 카드 윗변 위에 두고 카드와 같이 밀어 내린다. 카드 밖이라 안드로이드에서도 눌린다.
+  // 카메라 버튼은 접은 카드 윗변 위에 고정한다 (사용자 결정: 지도 홈 버튼처럼 카드를 따라 움직이지 않음). 카드 밖이라 안드로이드에서도 눌린다.
   const [cardHeight, setCardHeight] = useState(0);
   const slideHeight = contentHeight > 0 ? contentHeight + cardGap : 0;
   const { panHandlers, openAmount } = useSheetDrag({ isExpanded, onExpandedChange, openHeight: slideHeight });
 
   const slideStyle = useAnimatedStyle(() => ({ transform: [{ translateY: slideHeight - openAmount.get() }] }));
   const contentStyle = useAnimatedStyle(() => ({ opacity: slideHeight > 0 ? openAmount.get() / slideHeight : 1 }));
-  const floatingStyle = useAnimatedStyle(() => ({ opacity: slideHeight > 0 ? 1 - openAmount.get() / slideHeight : 0 }));
 
   return (
     <>
+      {/* 카드보다 먼저 그려서, 카드를 펼치면 카드가 이 위를 덮는다. */}
       {floating && (
-        <Animated.View
-          style={[styles.floating, { bottom: cardHeight + spacing.md }, slideStyle, floatingStyle]}
-          pointerEvents={isExpanded ? 'none' : 'box-none'}>
+        <View style={[styles.floating, { bottom: cardHeight - slideHeight + spacing.md }]} pointerEvents="box-none">
           {floating}
-        </Animated.View>
+        </View>
       )}
       <Animated.View
         style={[styles.card, slideStyle]}

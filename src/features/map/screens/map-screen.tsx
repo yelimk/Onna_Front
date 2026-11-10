@@ -80,7 +80,6 @@ export function MapScreen() {
   );
 
   const showPermissionCard = !isChecking && !isGranted && !isBrowsing;
-  const isRecordVisible = isExploring && isSheetExpanded;
 
   const changeExploring = (next: boolean) => {
     setIsExploring(next);
@@ -129,7 +128,7 @@ export function MapScreen() {
           </SlidingPanel>
         ) : (
           // 탐색 모드 시트와 오른쪽 버튼을 따로 둔다. 한 줄로 쌓으면 시트가 생기거나 펼쳐질 때 버튼이 밀려 올라간다.
-          // Figma 지도 홈은 탐색 모드를 켜도 버튼 셋이 같은 자리다.
+          // 버튼 셋은 탐색 모드를 켜고 끄거나 시트를 펼쳐도 늘 같은 자리다 (사용자 결정). 시트보다 나중에 그려 겹치면 버튼이 위에 보인다.
           <>
             {isExploring && (
               <View style={styles.sheetArea}>
@@ -141,11 +140,7 @@ export function MapScreen() {
               </View>
             )}
             <View style={styles.actions}>
-              <MapActionButtons
-                onMyLocationPress={moveToMyLocation}
-                onRoutePress={routes.openAiRoute}
-                showCamera={!isRecordVisible}
-              />
+              <MapActionButtons onMyLocationPress={moveToMyLocation} onRoutePress={routes.openAiRoute} />
             </View>
           </>
         )}
@@ -187,11 +182,12 @@ const styles = StyleSheet.create({
     right: screenPaddingX,
     bottom: spacing.xl,
   },
-  // Figma에서 탐색 모드 패널은 탭 바 바로 위에 붙어 있다. 버튼보다 먼저 그려서 겹치면 버튼이 위에 보인다.
+  // Figma 탐색 모드 패널: 펼치면 탭 바 위에 뜨고, 접으면 탭 바 뒤로 내려가 손잡이만 보인다 (오르내림은 ExploreSheet).
+  // 버튼보다 먼저 그려서 겹치면 버튼이 위에 보인다.
   sheetArea: {
     position: 'absolute',
     left: screenPaddingX,
     right: screenPaddingX,
-    bottom: spacing.xs,
+    bottom: 0,
   },
 });

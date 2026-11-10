@@ -14,12 +14,10 @@ type MapActionButtonsProps = {
   onMyLocationPress: () => void;
   /** 목적지 없이 AI 추천 경로를 받는다. 경로 카드는 지도 홈이 띄워서 지도 홈의 함수를 받는다. */
   onRoutePress: () => void;
-  /** 탐색 모드에서 가장 가까운 기록을 펼치면 Figma대로 카메라 버튼을 숨긴다. */
-  showCamera?: boolean;
 };
 
 /** 지도 오른쪽 아래 버튼 (위에서부터): 내 위치로 가기, 산책 경로 추천(AI 추천 경로), 지금 이 자리 남기기 */
-export function MapActionButtons({ onMyLocationPress, onRoutePress, showCamera = true }: MapActionButtonsProps) {
+export function MapActionButtons({ onMyLocationPress, onRoutePress }: MapActionButtonsProps) {
   return (
     <View style={styles.column}>
       {/* Figma '위치 관련 추가사항': 다른 곳을 둘러보다가 내 위치로 돌아오는 버튼. 경로 버튼과 같은 흰 사각 버튼이다. */}
@@ -37,8 +35,7 @@ export function MapActionButtons({ onMyLocationPress, onRoutePress, showCamera =
         style={styles.squareButton}>
         <Icon name="route" size={24} />
       </Pressable>
-      {/* 카메라를 숨겨도 그 자리를 비워 둔다. 그래야 위의 두 버튼이 내려오지 않고 같은 자리에 있다 (Figma 탐색 모드). */}
-      {showCamera ? <CameraButton /> : <View style={styles.cameraSlot} />}
+      <CameraButton />
     </View>
   );
 }
@@ -71,11 +68,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   // 빈 자리라 터치는 아래 지도·패널로 넘긴다.
-  cameraSlot: {
-    width: cameraButtonSize,
-    height: cameraButtonSize,
-    pointerEvents: 'none',
-  },
   cameraButton: {
     ...floatingShadow,
     width: cameraButtonSize,
