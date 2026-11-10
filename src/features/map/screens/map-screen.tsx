@@ -120,7 +120,6 @@ export function MapScreen() {
           <SlidingPanel key={getSelectedResultKey(routes.card)}>
             <SelectedResultCard
               state={routes.card}
-              cardHeight={routes.cardHeight}
               onLayout={({ nativeEvent }) => routes.setCardHeight(Math.round(nativeEvent.layout.height))}
               onClose={routes.closeCard}
               onRecommend={routes.recommendRoute}

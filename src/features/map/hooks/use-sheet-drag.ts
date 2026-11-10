@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { PanResponder } from 'react-native';
 import { cancelAnimation, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
@@ -23,6 +23,7 @@ type SheetDragOptions = {
  * 손잡이를 누르는 등 밖에서 isExpanded를 바꿔도 같은 움직임으로 따라간다.
  * - panHandlers: 끌 수 있는 곳(손잡이·제목)에 펼쳐 넣는다
  * - contentStyle: 접히는 부분을 감싼 Animated.View에 넣는다 (overflow: 'hidden'과 같이)
+ * - openAmount: 지금 펼쳐진 높이(0~openHeight). 높이 대신 카드를 밀어 내리는 등 다른 움직임을 만들 때 쓴다.
  * 앱 최상단에 제스처 라이브러리 설정이 없어서, React Native 기본 PanResponder로 손가락을 받는다.
  */
 export function useSheetDrag({ isExpanded, onExpandedChange, openHeight }: SheetDragOptions) {
@@ -30,8 +31,15 @@ export function useSheetDrag({ isExpanded, onExpandedChange, openHeight }: Sheet
   /** 손가락을 대는 순간의 높이. 끄는 동안 이 값에서 손가락이 움직인 만큼 더하고 뺀다. */
   const dragStartHeight = useSharedValue(0);
 
+  /** 지난번 펼칠 높이. 0이면 아직 재기 전이다. */
+  const lastOpenHeight = useRef(openHeight);
+
   useEffect(() => {
-    contentHeight.set(withTiming(isExpanded ? openHeight : 0, settleAnimation));
+    const target = isExpanded ? openHeight : 0;
+    // 처음 잰 높이는 움직이지 않고 바로 놓는다. 펼친 채로 나타난 카드가 접힌 모양에서 펼쳐지는 것처럼 보이지 않게 한다.
+    const isFirstMeasure = lastOpenHeight.current === 0;
+    lastOpenHeight.current = openHeight;
+    contentHeight.set(isFirstMeasure ? target : withTiming(target, settleAnimation));
   }, [isExpanded, openHeight, contentHeight]);
 
   // 펼침 상태·펼칠 높이가 바뀔 때만 새로 만든다. 둘 다 손을 뗀 뒤나 처음 잴 때만 바뀌어서 끄는 도중에 바뀌지 않는다.
@@ -59,5 +67,5 @@ export function useSheetDrag({ isExpanded, onExpandedChange, openHeight }: Sheet
 
   const contentStyle = useAnimatedStyle(() => ({ height: contentHeight.get() }));
 
-  return { panHandlers, contentStyle };
+  return { panHandlers, contentStyle, openAmount: contentHeight };
 }

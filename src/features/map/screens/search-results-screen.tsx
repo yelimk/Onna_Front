@@ -122,7 +122,6 @@ export function SearchResultsScreen() {
           {selection.card ? (
             <SelectedResultCard
               state={selection.card}
-              cardHeight={cardHeight}
               onLayout={({ nativeEvent }: LayoutChangeEvent) => setCardHeight(Math.round(nativeEvent.layout.height))}
               onClose={selection.close}
               onRecommend={selection.recommendRoute}

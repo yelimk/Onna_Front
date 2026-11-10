@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { getRouteRecommendation } from '@/api/map';
+import { getMyWalk } from '@/api/users';
 import { spacing } from '@/constants/layout';
 import { getWalkRoute } from '@/features/map/api/get-walk-route';
 import type { SelectedResultState } from '@/features/map/components/selected-result-card';
@@ -28,12 +29,23 @@ const failedRoute: AiRoute = { title: null, stops: [], path: null, distanceMeter
 const edge = spacing.xxl;
 
 /**
+ * 사용자 기호에 저장한 '한번에 걷는 시간'(10·20·30분). 서버는 경로 길이에 minutes만 쓰고 저장값은 보지 않아서 앱이 실어 보낸다.
+ * 고르기 전이거나 못 받으면 undefined로 두어 서버 기본(20분)을 따른다. 기다리느라 경로를 못 받는 일이 없게 실패는 삼킨다.
+ */
+function loadSavedWalkMinutes() {
+  return getMyWalk()
+    .then(({ minutes }) => minutes ?? undefined)
+    .catch(() => undefined);
+}
+
+/**
  * 목적지 없이 서버에 산책 경로를 받는다. 서버는 내 취향에 맞는 안 연 사진을 고르고, AI 서버가 그 자리를 실제 걷는 길로 잇는다.
  * AI가 길을 못 주면(path null) 앱이 TMAP으로 잇는다. TMAP도 못 쓰면 직선이다.
  */
 async function loadAiRoute(start: Coordinate, signal: AbortSignal): Promise<AiRoute> {
   try {
-    const response = await getRouteRecommendation(toServerCoordinate(start));
+    const minutes = await loadSavedWalkMinutes();
+    const response = await getRouteRecommendation(toServerCoordinate(start), { minutes });
     const stops = toStopRecords(response);
     // 길안내 화면이 들를 자리의 위치·해시태그를 다시 찾을 수 있게 기억해 둔다.
     rememberRecords(stops);
