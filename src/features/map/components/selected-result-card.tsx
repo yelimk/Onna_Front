@@ -1,8 +1,6 @@
-import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
+import type { LayoutChangeEvent } from 'react-native';
 
-import { spacing, screenPaddingX } from '@/constants/layout';
 import { HashtagSummaryCard } from '@/features/map/components/hashtag-summary-card';
-import { CameraButton } from '@/features/map/components/map-action-buttons';
 import { RecordPlaceCard } from '@/features/map/components/record-place-card';
 import { RouteCard } from '@/features/map/components/route-card';
 import { RouteStartCard } from '@/features/map/components/route-start-card';
@@ -47,7 +45,6 @@ export function getSelectedResultKey(state: SelectedResultState) {
 
 type SelectedResultCardProps = {
   state: SelectedResultState;
-  cardHeight: number;
   onLayout: (event: LayoutChangeEvent) => void;
   onClose: () => void;
   onRecommend: (hashtags: string[]) => void;
@@ -59,7 +56,6 @@ type SelectedResultCardProps = {
 
 export function SelectedResultCard({
   state,
-  cardHeight,
   onLayout,
   onClose,
   onRecommend,
@@ -81,28 +77,20 @@ export function SelectedResultCard({
       );
     case 'route':
       return (
-        <>
-          {/* Figma '경로·장소 정보 UI': 카드를 접으면 카드 위에 카메라 버튼이 나온다. */}
-          {!state.isExpanded && (
-            <View style={[styles.camera, { bottom: cardHeight + spacing.md }]}>
-              <CameraButton />
-            </View>
-          )}
-          <RouteCard
-            key={state.key}
-            title={state.title}
-            details={state.details}
-            stops={state.stops}
-            message={state.message}
-            canWalk={state.canWalk}
-            isLoading={state.isLoading}
-            isExpanded={state.isExpanded}
-            onExpandedChange={onRouteExpandedChange}
-            onClose={onClose}
-            onWalk={onWalk}
-            onLayout={onLayout}
-          />
-        </>
+        <RouteCard
+          key={state.key}
+          title={state.title}
+          details={state.details}
+          stops={state.stops}
+          message={state.message}
+          canWalk={state.canWalk}
+          isLoading={state.isLoading}
+          isExpanded={state.isExpanded}
+          onExpandedChange={onRouteExpandedChange}
+          onClose={onClose}
+          onWalk={onWalk}
+          onLayout={onLayout}
+        />
       );
     case 'hashtag':
       return (
@@ -128,10 +116,3 @@ export function SelectedResultCard({
       );
   }
 }
-
-const styles = StyleSheet.create({
-  camera: {
-    position: 'absolute',
-    right: screenPaddingX,
-  },
-});
