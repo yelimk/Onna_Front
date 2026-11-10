@@ -52,7 +52,7 @@
 | 위치·권한 | expo-location, expo-notifications (권한 요청만) |
 | 기기 저장 | expo-secure-store (로그인 토큰), AsyncStorage (최근 검색 등) |
 | 글꼴 | Pretendard (SIL OFL 1.1) |
-| 배포 | EAS Update |
+| 배포 | EAS Update (Expo Go), EAS Build (안드로이드 APK, expo-build-properties로 http 서버 연결 허용) |
 | 코드 검사 | ESLint, TypeScript |
 
 - **Expo Go에 들어 있는 모듈만 썼습니다.** 앱을 새로 빌드하지 않아도 팀원과 기획·디자인 담당까지 iOS·Android 폰에서 QR 하나로 바로 확인할 수 있어, 짧은 해커톤 기간에 피드백을 빠르게 주고받았습니다.
@@ -312,6 +312,12 @@ EXPO_PUBLIC_API_URL=            # (선택) 서버 주소. 비우면 src/api/conf
 
 ```bash
 npx eas-cli@latest update --branch develop --environment development --message "바뀐 내용"
+```
+
+안드로이드 APK는 EAS Build로 만듭니다 (`eas.json`의 `preview`). 서버가 `http` 주소라 `expo-build-properties`로 http 연결을 허용해 두었습니다.
+
+```bash
+npx eas-cli@latest build -p android --profile preview
 ```
 
 </details>
