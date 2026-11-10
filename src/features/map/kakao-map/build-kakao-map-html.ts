@@ -33,7 +33,7 @@ export function buildKakaoMapHtml({ appKey, center, level }: KakaoMapHtmlOptions
   <script>
     var map = null;
     var markerOverlays = [];
-    // 이름표 겹침을 볼 때 쓰는 마커 정보 (종류, 받은 순서, 화면의 요소)
+    // 마커 겹침(사진 벌리기·이름표 숨기기)을 볼 때 쓰는 마커 정보 (종류, 받은 순서, 화면의 요소)
     var markerEntries = [];
     var myLocationOverlay = null;
     var openRadiusCircle = null;
@@ -67,7 +67,7 @@ ${markerScript}
           });
         });
         // 지도에 붙어 자리를 잡은 다음에 재야 해서 한 프레임 뒤에 본다.
-        requestAnimationFrame(function () { hideOverlappingLabels(markerEntries); });
+        requestAnimationFrame(function () { layOutMarkers(markerEntries); });
       },
       setMyLocation: function (command) {
         var position = toLatLng(command.coordinate);
@@ -141,8 +141,8 @@ ${markerScript}
         });
         // 움직일 때마다가 아니라 멈췄을 때만 알린다. 앱이 이 가운데 둘레의 기록을 받는다.
         kakao.maps.event.addListener(map, 'idle', function () {
-          // 확대·축소하면 마커 사이 거리가 바뀌어서 이름표를 다시 정리한다.
-          hideOverlappingLabels(markerEntries);
+          // 확대·축소하면 마커 사이 거리가 바뀌어서 포개진 사진과 이름표를 다시 정리한다.
+          layOutMarkers(markerEntries);
           var center = map.getCenter();
           post({ type: 'centerChange', center: { latitude: center.getLat(), longitude: center.getLng() } });
         });

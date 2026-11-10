@@ -1,7 +1,9 @@
+import { spacing } from '@/constants/layout';
+
 /**
  * 지도 페이지(WebView) 안에서 마커 HTML을 만드는 스크립트. build-kakao-map-html.ts가 <script> 안에 그대로 넣는다.
  * 지도 페이지가 길어져서 마커 모양(사진·묶음·핀·결과 표시)만 따로 뒀다. 브라우저에서 돌아 TypeScript 검사를 받지 못한다.
- * 쓰는 것: 페이지의 post(event). 내놓는 것: createElement, setPhoto, createMarkerElement, hideOverlappingLabels
+ * 쓰는 것: 페이지의 post(event). 내놓는 것: createElement, setPhoto, createMarkerElement, layOutMarkers
  */
 export const markerScript = `
     // 해시태그는 사용자가 쓴 글이라 innerHTML 대신 textContent로 넣는다.
@@ -93,5 +95,58 @@ export const markerScript = `
           }
           rects.forEach(function (rect) { placed.push({ owner: entry, rect: rect }); });
         });
+    }
+
+    // 사진·묶음 마커는 서버 좌표대로 놓으면 거의 같은 자리의 두 기록(QA: 내 기록 두 개)이 포개져서 위의 것만 눌린다.
+    // 그래서 화면에서 포개진 마커끼리 모아 옆으로 벌려 놓는다. 화면 거리로 재므로 확대해서 저절로 떨어지면 원래 자리로 돌아온다.
+    // 핀(고른 장소)과 결과 표시는 정확한 자리를 가리켜야 해서 옮기지 않는다.
+    var spreadKinds = { photo: true, cluster: true };
+    var spreadGap = ${spacing.xxs};
+
+    function spreadOverlappingMarkers(entries) {
+      var items = [];
+      entries.forEach(function (entry) {
+        if (!spreadKinds[entry.kind]) return;
+        // 지난번에 벌려 둔 만큼을 지우고 원래 자리에서 다시 잰다.
+        entry.element.style.transform = '';
+        var rect = entry.element.querySelector('.photo, .stack').getBoundingClientRect();
+        items.push({ entry: entry, x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, size: Math.max(rect.width, rect.height) });
+      });
+
+      // 사진끼리 닿으면 한 무리로 묶는다. A와 B, B와 C가 닿으면 A·B·C를 함께 벌려야 다시 포개지지 않는다.
+      var groupOf = items.map(function (_, index) { return index; });
+      function findGroup(index) { return groupOf[index] === index ? index : (groupOf[index] = findGroup(groupOf[index])); }
+      items.forEach(function (a, i) {
+        items.forEach(function (b, j) {
+          var reach = (a.size + b.size) / 2 + spreadGap;
+          if (j > i && Math.abs(a.x - b.x) < reach && Math.abs(a.y - b.y) < reach) groupOf[findGroup(j)] = findGroup(i);
+        });
+      });
+      var groups = {};
+      items.forEach(function (item, index) { (groups[findGroup(index)] = groups[findGroup(index)] || []).push(item); });
+
+      Object.keys(groups).forEach(function (key) {
+        var group = groups[key];
+        if (group.length < 2) return;
+        // 왼쪽에 있던 사진이 계속 왼쪽에 오게 해서, 확대·축소할 때 사진끼리 자리가 뒤바뀌지 않게 한다.
+        group.sort(function (a, b) { return (a.x - b.x) || (a.entry.order - b.entry.order); });
+        var centerX = group.reduce(function (sum, item) { return sum + item.x; }, 0) / group.length;
+        var centerY = group.reduce(function (sum, item) { return sum + item.y; }, 0) / group.length;
+        var step = Math.max.apply(null, group.map(function (item) { return item.size; })) + spreadGap;
+        // 두 장이면 나란히, 세 장 이상이면 이웃끼리 step만큼 떨어지도록 무리 가운데를 둘러 원으로 놓는다 (왼쪽부터 시계 방향).
+        var ringRadius = group.length === 2 ? step / 2 : step / (2 * Math.sin(Math.PI / group.length));
+        group.forEach(function (item, index) {
+          var angle = Math.PI + (2 * Math.PI * index) / group.length;
+          var dx = centerX + ringRadius * Math.cos(angle) - item.x;
+          var dy = centerY + ringRadius * Math.sin(angle) - item.y;
+          item.entry.element.style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
+        });
+      });
+    }
+
+    // 사진을 먼저 벌린 뒤 벌린 자리로 이름표 겹침을 본다.
+    function layOutMarkers(entries) {
+      spreadOverlappingMarkers(entries);
+      hideOverlappingLabels(entries);
     }
 `;
