@@ -1,7 +1,7 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Badge } from '@/components/badge';
@@ -52,9 +52,6 @@ export function MapScreen() {
   const [isBrowsing, setIsBrowsing] = useState(false);
   const [isOpeningSearch, setIsOpeningSearch] = useState(false);
   const chromeStyle = useFadeStyle(!isOpeningSearch, mapChromeFadeMs);
-  // 탐색 모드 패널을 펼치면 그만큼 오른쪽 버튼을 올려, 패널에 가리지 않고 카메라 버튼도 계속 보이게 한다.
-  const buttonLift = useSharedValue(0);
-  const actionsLiftStyle = useAnimatedStyle(() => ({ transform: [{ translateY: -buttonLift.get() }] }));
 
   // 지도 홈으로 돌아오면 검색을 열 때 지웠던 버튼과 이름표를 다시 보여주고, 그사이 남겨진 새 기록이 보이게 구역을 새로 받는다.
   useFocusEffect(
@@ -130,8 +127,8 @@ export function MapScreen() {
             />
           </SlidingPanel>
         ) : (
-          // 탐색 모드 시트와 오른쪽 버튼을 따로 둔다. 한 줄로 쌓으면 시트가 생길 때 버튼이 밀려 올라간다.
-          // Figma 지도 홈은 탐색 모드를 켜도(시트를 접은 채로는) 버튼 셋이 같은 자리고, 시트를 펼칠 때만 buttonLift만큼 올라간다.
+          // 탐색 모드 시트와 오른쪽 버튼을 따로 둔다. 한 줄로 쌓으면 시트가 생기거나 펼쳐질 때 버튼이 밀려 올라간다.
+          // 버튼 셋은 탐색 모드를 켜고 끄거나 시트를 펼쳐도 늘 같은 자리다 (사용자 결정). 시트보다 나중에 그려 겹치면 버튼이 위에 보인다.
           <>
             {isExploring && (
               <View style={styles.sheetArea}>
@@ -139,13 +136,12 @@ export function MapScreen() {
                   nearestPhoto={nearestPhoto}
                   isExpanded={isSheetExpanded}
                   onExpandedChange={setIsSheetExpanded}
-                  aboveLift={buttonLift}
                 />
               </View>
             )}
-            <Animated.View style={[styles.actions, actionsLiftStyle]}>
+            <View style={styles.actions}>
               <MapActionButtons onMyLocationPress={moveToMyLocation} onRoutePress={routes.openAiRoute} />
-            </Animated.View>
+            </View>
           </>
         )}
       </Animated.View>
