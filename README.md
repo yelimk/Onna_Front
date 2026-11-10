@@ -242,6 +242,7 @@ flowchart TB
 - **카카오맵 역할 나누기**: `features/map/kakao-map/`을 지도 띄우기, 지도 페이지, 마커 스크립트, 마커 CSS, 앱↔지도 메시지 다섯 파일로 나눴습니다. 마커는 HTML이라 디자인 시스템 값을 CSS로 바꿔 넣습니다.
 - **내 기록 바로 보이기**: 지도 구역에는 남의 사진만 오므로(24시간 뒤 공개), 내 기록은 따로 받아 지도에 바로 올립니다 (`features/map/hooks/use-my-map-posts.ts`).
 - **구역 밖 기록**: 영남대 구역(14곳) 밖에 남긴 사진은 구역 묶음에 들지 않아서 `GET /map/outside-posts`로 따로 받아 사진 한 장 마커로 올립니다(구역과 같은 자리·반경·다시 받기). 해시태그 검색 기록 카드의 사진, 길안내 범위 내 기록·목적지 핀으로도 사진 카드를 열 수 있습니다. 열지는 서버가 25m 기준으로 정합니다.
+- **포개진 마커 벌리기**: 거의 같은 자리에 남긴 사진 마커가 화면에서 서로 닿으면 한 무리로 묶어, 두 장은 좌우로 나란히, 세 장 이상은 원으로 벌려 각각 누를 수 있게 합니다. 확대해서 저절로 떨어지면 원래 자리로 돌아옵니다. 고른 장소 핀은 정확한 자리를 가리켜야 해서 옮기지 않습니다 (`features/map/kakao-map/kakao-map-marker-script.ts`).
 - **아래 시트 끌기**: 검색결과·묶음 기록·범위 내 기록·탐색 모드 패널은 손잡이를 손가락으로 끌면 목록 높이가 손가락을 따라오고, 손을 떼면 반 넘게 열렸는지(또는 휙 민 방향)로 끝까지 펼치거나 접습니다 (`features/map/hooks/use-sheet-drag.ts`). 경로 카드는 높이 대신 카드 전체가 손가락을 따라 내려가서, 접고 펼쳐도 지도가 확대·축소되지 않습니다.
 - **실패해도 쓸 수 있게**: 서버 경로 추천이 실패하면 앱이 고른 해시태그의 자리를 직접 고르고, AI 추천 경로에 걷는 길이 오지 않으면 TMAP으로 잇고, TMAP이 실패하면 직선으로, 카카오 키가 없으면 회색 지도로 대신합니다. 위치 권한이 없어도 캠퍼스 가운데를 기준으로 둘러볼 수 있습니다.
 - **좋아요 즉시 반영**: 누르자마자 바꾸고, 서버가 거절하면 되돌린 뒤 알립니다.
@@ -276,7 +277,7 @@ Figma 디자인 시스템의 값을 코드로 옮겨, 화면에서는 이름으�
 
 - 색은 `colors`의 이름으로, 글씨는 `Text` 대신 `AppText`로 씁니다. 어기면 ESLint 경고가 뜹니다.
 - Figma 값 중 글씨·여백·모서리·색은 그대로, 화면 너비(390)와 고정 위치는 폰 크기에 맞게 바꿔 옮깁니다 (`AGENTS.md` "Figma 수치 옮기기").
-- 화면은 공통 부품으로 먼저 조립합니다: `ScreenContainer`, `ScreenHeader`, `Button`, `TextField`, `Checkbox`, `Radio`, `Toggle`, `Chip`, `Badge`, `Icon`, `IconButton`, `LikeButton`, `Toast`, `ConfirmDialog`, `LoadingSpinner`, `PressHighlight`, `PhotoPlaceholder`, `MapPlaceholder`, `AppTabBar`.
+- 화면은 공통 부품으로 먼저 조립합니다: `ScreenContainer`, `ScreenHeader`, `Button`, `TextField`, `Checkbox`, `Radio`, `Chip`, `Badge`, `Icon`, `IconButton`, `LikeButton`, `Toast`, `ConfirmDialog`, `LoadingSpinner`, `PressHighlight`, `PhotoPlaceholder`, `MapPlaceholder`, `AppTabBar`.
 
 </details>
 
