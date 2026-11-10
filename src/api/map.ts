@@ -7,6 +7,7 @@ import type {
   PostPreview,
   RouteRecommendation,
   Zone,
+  ZoneName,
 } from '@/types/api';
 
 /**
@@ -39,6 +40,14 @@ export function getOutsidePosts(myLocation: MyLocation | null, { center, radius 
   return apiRequest<PostPreview[]>('/map/outside-posts', {
     query: { ...myLocation, centerLat: center?.lat, centerLng: center?.lng, radius },
   });
+}
+
+/**
+ * 올리기 전 위치 확인 화면에 보여 줄 구역 이름. 업로드와 같은 기준(구역 반경 안에서 가운데가 가장 가까운 구역)이다.
+ * 업로드는 흐린 좌표로 구역을 정해서, 구역 경계 근처에서는 실제로 들어가는 구역이 이 이름과 다를 수 있다.
+ */
+export function getZoneAt({ lat, lng }: Coordinate) {
+  return apiRequest<ZoneName>('/map/zone-at', { query: { lat, lng } });
 }
 
 /** 묶음 안 사진 정렬: 추천순(기본), 좋아요 많은 순, 가까운 순(위치 없으면 추천순) */
