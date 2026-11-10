@@ -19,8 +19,6 @@ import { openRecord } from '@/features/map/utils/open-search-result';
 
 /** Figma에서 위쪽 지도는 화면의 약 3분의 1이고, 나머지를 기록 목록이 차지한다. */
 const expandedSheetRatio = 0.62;
-/** 접었을 때 남는 손잡이와 제목 높이 */
-const collapsedSheetHeight = 84;
 
 /**
  * Figma '지도 묶음 기록 표시 UI'. 지도 홈에서 사진 묶음을 누르면 온다.
@@ -42,12 +40,13 @@ export function ClusterScreen() {
   const sheetHeight = Math.round(windowHeight * expandedSheetRatio);
 
   const mapMarkers = useMemo<HomeMapMarker[]>(() => (cluster ? [{ ...cluster, isSelected: true }] : []), [cluster]);
+  // 시트를 접고 펼 때마다 다시 맞추면 지도가 확대·축소되어서, 펼친 높이로 한 번만 맞추고 그 뒤로는 시트만 오르내린다 (길안내와 같다).
   const focus = useMemo(
     () => ({
       coordinates: cluster ? [cluster.coordinate] : [],
-      padding: { top: 0, right: 0, bottom: isSheetExpanded ? sheetHeight : collapsedSheetHeight, left: 0 },
+      padding: { top: 0, right: 0, bottom: sheetHeight, left: 0 },
     }),
-    [cluster, isSheetExpanded, sheetHeight],
+    [cluster, sheetHeight],
   );
 
   return (

@@ -29,8 +29,6 @@ import { sortByDistance } from '@/features/map/utils/to-search-result-items';
 
 /** 펼친 목록은 화면의 이만큼을 차지한다. Figma에서 지도와 목록이 거의 반씩이다. */
 const expandedSheetRatio = 0.45;
-/** 접었을 때 남는 손잡이와 정렬 버튼 높이 */
-const collapsedSheetHeight = 92;
 
 const hashtagOnlyMessage = '해시태그 검색은 장소 검색 결과가 제공되지 않습니다';
 
@@ -80,7 +78,8 @@ export function SearchResultsScreen() {
   const selection = useResultSelection({ items, allItems, initialKey: select ?? null, myLocation: location });
 
   const sheetHeight = Math.round(windowHeight * expandedSheetRatio);
-  const bottomInset = selection.card ? cardHeight : isSheetExpanded ? sheetHeight : collapsedSheetHeight;
+  // 목록을 접고 펼 때마다 다시 맞추면 지도가 확대·축소되어서, 펼친 높이로 맞추고 그 뒤로는 목록만 오르내린다 (길안내와 같다).
+  const bottomInset = selection.card ? cardHeight : sheetHeight;
   const { markers, focus, routePath } = useResultsMap(selection.mapView, bottomInset);
 
   const selectItem = (item: SearchResultItem) => {
