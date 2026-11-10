@@ -45,7 +45,8 @@ export const markerScript = `
         } else {
           root.appendChild(stack);
           root.appendChild(createElement('span', 'cluster-label', marker.label));
-          root.appendChild(createElement('span', 'cluster-more', '+' + marker.moreCount + '개 더'));
+          // 태그가 이름표에 다 들어가 남은 종류가 없으면 '+0개 더'가 되므로 뺀다 (백엔드 전달사항 11/10).
+          if (marker.moreCount > 0) root.appendChild(createElement('span', 'cluster-more', '+' + marker.moreCount + '개 더'));
         }
       } else {
         root.appendChild(setPhoto(createElement('div', 'photo ' + (marker.isOpen ? 'photo-open' : 'photo-locked')), marker.imageUrl));
