@@ -1,0 +1,163 @@
+import type { Coordinate } from '@/features/map/types/home-map-marker';
+import {
+  kakaoMapCss,
+  openRadiusCircleStyle,
+  pretendardCssUrl,
+  routeLineStyle,
+  walkedRouteLineStyle,
+} from '@/features/map/kakao-map/kakao-map-styles';
+import { markerScript } from '@/features/map/kakao-map/kakao-map-marker-script';
+
+type KakaoMapHtmlOptions = {
+  appKey: string;
+  center: Coordinate;
+  level: number;
+};
+
+/**
+ * WebView에 띄울 카카오맵 페이지.
+ * 아래 <script>는 WebView 안 브라우저에서 돌아서 TypeScript 검사를 받지 못한다.
+ * 그래서 메시지 처리만 하고, 무엇을 그릴지는 모두 앱(kakao-map-view.tsx)이 정해서 보낸다.
+ */
+export function buildKakaoMapHtml({ appKey, center, level }: KakaoMapHtmlOptions) {
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <link rel="stylesheet" href="${pretendardCssUrl}" />
+  <style>${kakaoMapCss}</style>
+</head>
+<body>
+  <div id="map"></div>
+  <script>
+    var map = null;
+    var markerOverlays = [];
+    // 마커 겹침(사진 벌리기·이름표 숨기기)을 볼 때 쓰는 마커 정보 (종류, 받은 순서, 화면의 요소)
+    var markerEntries = [];
+    var myLocationOverlay = null;
+    var openRadiusCircle = null;
+    var routeLine = null;
+    var walkedRouteLine = null;
+
+    function post(event) {
+      window.ReactNativeWebView.postMessage(JSON.stringify(event));
+    }
+
+    function toLatLng(coordinate) {
+      return new kakao.maps.LatLng(coordinate.latitude, coordinate.longitude);
+    }
+
+${markerScript}
+    var handlers = {
+      setMarkers: function (command) {
+        markerOverlays.forEach(function (overlay) { overlay.setMap(null); });
+        markerEntries = [];
+        markerOverlays = command.markers.map(function (marker, order) {
+          var element = createMarkerElement(marker);
+          markerEntries.push({ kind: marker.kind, order: order, element: element });
+          return new kakao.maps.CustomOverlay({
+            map: map,
+            position: toLatLng(marker.coordinate),
+            content: element,
+            // 핀은 뾰족한 끝이 그 자리를 가리켜야 해서 아래 끝을 좌표에 맞춘다. 나머지는 가운데를 맞춘다.
+            yAnchor: marker.kind === 'pin' ? 1 : 0.5,
+            clickable: true,
+            zIndex: 1,
+          });
+        });
+        // 지도에 붙어 자리를 잡은 다음에 재야 해서 한 프레임 뒤에 본다.
+        requestAnimationFrame(function () { layOutMarkers(markerEntries); });
+      },
+      setMyLocation: function (command) {
+        var position = toLatLng(command.coordinate);
+        if (myLocationOverlay) {
+          myLocationOverlay.setPosition(position);
+          return;
+        }
+        var dot = createElement('div', 'my-location');
+        dot.appendChild(createElement('div', 'my-location-dot'));
+        // 내 위치가 사진 마커를 가리면 누를 수 없어서 마커(zIndex 1)보다 아래에 둔다.
+        myLocationOverlay = new kakao.maps.CustomOverlay({ map: map, position: position, content: dot, zIndex: 0 });
+      },
+      setOpenRadius: function (command) {
+        if (openRadiusCircle) openRadiusCircle.setMap(null);
+        openRadiusCircle = null;
+        if (!command.circle) return;
+        var options = ${JSON.stringify(openRadiusCircleStyle)};
+        options.map = map;
+        options.center = toLatLng(command.circle.center);
+        options.radius = command.circle.radiusMeters;
+        // 원이 마커를 가리지 않도록 내 위치(0)와 마커(1)보다 아래에 둔다.
+        options.zIndex = -1;
+        openRadiusCircle = new kakao.maps.Circle(options);
+      },
+      setRoute: function (command) {
+        if (routeLine) routeLine.setMap(null);
+        if (walkedRouteLine) walkedRouteLine.setMap(null);
+        routeLine = drawLine(command.path, ${JSON.stringify(routeLineStyle)});
+        walkedRouteLine = drawLine(command.walkedPath, ${JSON.stringify(walkedRouteLineStyle)});
+      },
+      setQuiet: function (command) {
+        document.body.classList.toggle('quiet', command.isQuiet);
+      },
+      moveTo: function (command) {
+        map.panTo(toLatLng(command.coordinate));
+      },
+      fitBounds: function (command) {
+        if (command.coordinates.length === 0) return;
+        var p = command.padding;
+        if (command.coordinates.length === 1) {
+          // 한 곳이면 확대 단계는 그대로 두고, 가리는 영역을 뺀 남은 지도 가운데에 오도록 민다.
+          map.setCenter(toLatLng(command.coordinates[0]));
+          map.panBy((p.right - p.left) / 2, (p.bottom - p.top) / 2);
+          return;
+        }
+        var bounds = new kakao.maps.LatLngBounds();
+        command.coordinates.forEach(function (coordinate) { bounds.extend(toLatLng(coordinate)); });
+        map.setBounds(bounds, p.top, p.right, p.bottom, p.left);
+      },
+    };
+
+    function drawLine(path, style) {
+      if (!path || path.length < 2) return null;
+      var options = style;
+      options.map = map;
+      options.path = path.map(toLatLng);
+      // 선이 핀을 가리지 않도록 마커(1)보다 아래에 둔다.
+      options.zIndex = 0;
+      return new kakao.maps.Polyline(options);
+    }
+
+    window.receiveCommand = function (command) {
+      if (map && handlers[command.type]) handlers[command.type](command);
+    };
+
+    function startMap() {
+      kakao.maps.load(function () {
+        map = new kakao.maps.Map(document.getElementById('map'), {
+          center: toLatLng(${JSON.stringify(center)}),
+          level: ${level},
+        });
+        // 움직일 때마다가 아니라 멈췄을 때만 알린다. 앱이 이 가운데 둘레의 기록을 받는다.
+        kakao.maps.event.addListener(map, 'idle', function () {
+          // 확대·축소하면 마커 사이 거리가 바뀌어서 포개진 사진과 이름표를 다시 정리한다.
+          layOutMarkers(markerEntries);
+          var center = map.getCenter();
+          post({ type: 'centerChange', center: { latitude: center.getLat(), longitude: center.getLng() } });
+        });
+        post({ type: 'ready' });
+      });
+    }
+
+    function failMap() {
+      post({ type: 'error', message: '카카오맵을 불러오지 못했어요. 키와 등록한 도메인을 확인해 주세요.' });
+    }
+  </script>
+  <script
+    src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=${encodeURIComponent(appKey)}&autoload=false"
+    onload="startMap()"
+    onerror="failMap()"></script>
+</body>
+</html>`;
+}

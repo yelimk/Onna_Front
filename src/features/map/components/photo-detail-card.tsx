@@ -1,0 +1,167 @@
+import { Pressable, StyleSheet, View } from 'react-native';
+import Animated from 'react-native-reanimated';
+
+import { AppText } from '@/components/app-text';
+import { Icon } from '@/components/icon';
+import { colors, palette } from '@/constants/colors';
+import { radius, spacing } from '@/constants/layout';
+import { RecordPhoto } from '@/features/map/components/record-photo';
+import { sheetCornerRadius } from '@/features/map/constants/map-layout';
+import { usePopStyle } from '@/features/map/hooks/use-pop-style';
+import type { RecordDetail } from '@/features/map/hooks/use-record-detail';
+
+/** Figma 좋아요·남기기 버튼 높이 */
+const actionHeight = 48;
+
+/** Figma 신고·닫기 버튼 칸 크기. 배경 없이 아이콘만 두고, 누르기 쉽게 칸은 36으로 둔다. */
+const headerButtonSize = 36;
+
+/** 아직 못 연 기록의 안내. 위치가 부정확해서 못 연 것이면 멀리 있다고 하지 않는다. */
+function getLockedMessage(openErrorCode: string | null) {
+  if (openErrorCode === 'RETRY_LOCATION') return '위치를 정확히 잡는 중이에요. 잠시만 기다려 주세요';
+  return '한줄 코멘트는 가까이 가면 열려요';
+}
+
+type PhotoDetailCardProps = {
+  record: RecordDetail;
+  photoHeight: number;
+  onClose: () => void;
+  onReport: () => void;
+  onLeaveMine: () => void;
+  onToggleLike: () => void;
+};
+
+/**
+ * Figma '지도 사진 남기기 UI'의 흰 사진 카드. 다른 사람이 이 자리에 남긴 사진 한 장을 크게 보여준다.
+ * - 열린 기록: 한 줄, 해시태그, '나도 이 자리에 남기기', '좋아요' (Figma '장소 사진 촬영 후 화면', '코멘트 작성' 화면)
+ * - 아직 안 열린 기록: 한 줄 대신 '가까이 가면 열려요' 안내만, 버튼 없음 (Figma '사진 신고' 화면)
+ * - 내 기록: 신고·좋아요 없이 '나도 이 자리에 남기기'만
+ */
+export function PhotoDetailCard({ record, photoHeight, onClose, onReport, onLeaveMine, onToggleLike }: PhotoDetailCardProps) {
+  // Figma '기록 남기기 상세 애니메이션': 좋아요를 누르면 하트가 빨갛게 바뀌며 톡 튄다.
+  const heartStyle = usePopStyle(record.isLiked);
+
+  return (
+    <View style={styles.card}>
+      <View style={styles.header}>
+        <AppText variant="heading03" numberOfLines={1} style={styles.title}>
+          {record.title}
+        </AppText>
+        {record.isUnlocked && !record.isMine && (
+          <Pressable accessibilityRole="button" accessibilityLabel="신고" onPress={onReport} style={styles.headerButton}>
+            <Icon name="report" size={20} color="error" />
+          </Pressable>
+        )}
+        <Pressable accessibilityRole="button" accessibilityLabel="닫기" onPress={onClose} style={styles.headerButton}>
+          <Icon name="close" size={20} />
+        </Pressable>
+      </View>
+
+      <RecordPhoto imageUrl={record.imageUrl} width="100%" height={photoHeight} style={styles.photo} />
+
+      <AppText variant="button02" color={record.isUnlocked ? 'textPrimary' : 'textDeactivated'}>
+        {record.isUnlocked ? record.comment : getLockedMessage(record.openErrorCode)}
+      </AppText>
+
+      <View style={styles.hashtags}>
+        {record.hashtags.map((hashtag) => (
+          <View key={hashtag} style={styles.hashtag}>
+            {/* Figma 해시태그는 14px 보통 굵기 */}
+            <AppText variant="caption02" color="textSecondary">
+              {hashtag}
+            </AppText>
+          </View>
+        ))}
+      </View>
+
+      {record.isUnlocked && (
+        <View style={styles.actions}>
+          <Pressable accessibilityRole="button" onPress={onLeaveMine} style={[styles.action, styles.leaveMine]}>
+            <AppText variant="button03" color="textInverse">
+              나도 이 자리에 남기기
+            </AppText>
+          </Pressable>
+          {!record.isMine && (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityState={{ selected: record.isLiked }}
+              onPress={onToggleLike}
+              style={[styles.action, styles.like, record.isLiked && styles.liked]}>
+              <Animated.View style={heartStyle}>
+                <Icon name={record.isLiked ? 'heartFilled' : 'heart'} size={20} color={record.isLiked ? 'error' : 'textDeactivated'} />
+              </Animated.View>
+              <AppText variant="button03" color={record.isLiked ? 'error' : 'textDeactivated'}>
+                좋아요
+              </AppText>
+            </Pressable>
+          )}
+        </View>
+      )}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  // Figma 카드 모서리 32, 사진 모서리 22
+  card: {
+    gap: spacing.md,
+    padding: spacing.lg,
+    borderRadius: sheetCornerRadius,
+    backgroundColor: colors.background01,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  title: {
+    flex: 1,
+  },
+  // Figma 디자인 수정 사항: 신고·닫기 버튼 뒤의 회색 동그라미를 없앴다.
+  headerButton: {
+    width: headerButtonSize,
+    height: headerButtonSize,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  photo: {
+    borderRadius: radius.xl,
+  },
+  hashtags: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+  },
+  hashtag: {
+    paddingVertical: spacing.xxs,
+    paddingHorizontal: spacing.xs,
+    borderRadius: radius.sm,
+    backgroundColor: colors.background02,
+  },
+  actions: {
+    flexDirection: 'row',
+    gap: spacing.xs,
+  },
+  action: {
+    height: actionHeight,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xxs,
+    borderRadius: radius.md,
+  },
+  leaveMine: {
+    flex: 2,
+    backgroundColor: colors.primary,
+  },
+  like: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: colors.borderDeactivated,
+    backgroundColor: colors.background01,
+  },
+  // Figma 좋아요 누른 테두리(#FF6165)는 용도별 색 이름에 없어서 팔레트의 옅은 오류 색을 쓴다.
+  liked: {
+    borderColor: palette.error[3],
+  },
+});

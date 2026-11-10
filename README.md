@@ -1,309 +1,370 @@
-# KkoKko_Front
+<div align="center">
 
-<!-- 프로젝트 소개, 팀원, 역할은 팀에서 함께 작성 예정 -->
+# 온나 (Onna) 프론트엔드
 
-「가까이」 앱의 프론트엔드 레포지토리입니다.
+**무뚝뚝한 겉 안의 따뜻한 정, 속정을 사진과 한 줄로 남기고 걸어가서 열어 보는 앱**
 
-## 작업 전에 꼭 읽어주세요
+![React Native](https://img.shields.io/badge/React_Native-0.88-61DAFB?logo=react&logoColor=white)
+![Expo](https://img.shields.io/badge/Expo-SDK_58-000020?logo=expo&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Expo Router](https://img.shields.io/badge/Expo_Router-000020?logo=expo&logoColor=white)
+![Kakao Map](https://img.shields.io/badge/Kakao_Map-FFCD00?logo=kakao&logoColor=black)
 
-처음 받았다면 아래 5가지만 보고 시작하면 돼요. 자세한 내용은 아래 각 섹션에 있어요.
+[프로젝트 설명](#1-프로젝트-설명) · [앱 실행하기](#2-앱-실행하기) · [기술 스택](#3-기술-스택) · [아키텍처](#4-아키텍처) · [사용자 흐름](#43-사용자-흐름) · [프론트엔드 협업 방법](#7-프론트엔드-협업-방법)
 
-**1. 실행해보기**
+</div>
 
-```bash
-npm install
-npx expo start
-```
+<!-- 팀원, 역할은 팀에서 함께 작성 예정 -->
 
-QR을 폰으로 찍어 Expo Go에서 열리는지 확인해요. → [실행 방법](#실행-방법)
+## 1. 프로젝트 설명
 
-**2. 내 브랜치에서 작업하기**
+온나는 대구·경북의 **속정**(겉은 무뚝뚝해도 속으로 상대를 챙기는 마음)을 사진과 한 줄로 남기고, 다른 사람이 남긴 자리에 걸어가 열어 보는 앱입니다.
 
-| 브랜치 | 들어 있는 것 |
+| 핵심 기능 | 설명 |
 |---|---|
-| `main` | 시연·제출용. 보여줘도 되는 것만 |
-| `develop` | 팀 작업을 모으는 곳. 덜 완성됐어도 **앱이 안 깨지는** 것만 |
-| `feature/이름-작업` | 각자 작업하는 곳. 예: `feature/yelim-common-components`, `feature/jonggyun-map-home` |
+| 남기기 | 앱 카메라로 찍은 사진에 제목과 한 줄을 붙여 이름 없이 남깁니다. AI가 한 줄을 읽고 해시태그를 추천합니다. |
+| 늦게, 흐리게 닿기 | 남긴 기록은 24시간 뒤 다른 사람의 지도에 흐리게 나타나고, 그 자리에 가까이(25m) 가야 열립니다. |
+| 산책 경로 | 장소·해시태그로 찾고, 고른 해시태그의 자리를 잇는 산책 경로로 길안내를 받습니다. 지도 홈의 경로 버튼을 누르면 목적지 없이 취향에 맞는 자리를 잇는 AI 추천 경로를 받습니다. |
+| 내 기록 | 남긴 기록, 좋아요한 자리, 연 자리를 모아 보고, 내 기록이 열리면 알림을 받습니다. |
+| 온보딩 | 이메일 회원가입 뒤 취향 설문(해시태그·걷는 유형)으로 첫 지도를 맞춥니다. |
 
-최신 `develop`에서 내 브랜치를 만들어요.
+## 2. 앱 실행하기
 
-```bash
-git checkout develop
-git pull origin develop
-git checkout -b feature/이름-작업
-```
+| 방법 | 대상 | 설치 |
+|---|---|---|
+| Android APK | Android | <!-- APK 링크 --> 링크에서 받아 설치합니다 |
+| Expo Go | iOS·Android | Expo Go 앱을 설치하고 <!-- QR 이미지 --> QR을 찍습니다 |
 
-작업이 끝나면 PR을 올려서 **`develop`에 합쳐요.** PR 올리기 전에 `git pull origin develop`으로 최신 내용을 한 번 받아요. `develop`을 `main`에 합치는 건 시연·제출 전에 둘이 확인하고 해요.
+> Expo Go로는 onna-app 팀에 속한 Expo 계정으로 로그인한 사람만 열 수 있습니다(Expo 정책). 팀 밖에서 확인할 때는 Android APK를 씁니다.
 
-**3. 내 폴더에서 작업하기**
-
-| 담당 | 주로 작업하는 폴더 |
-|---|---|
-| 지도 | `src/features/map` |
-| 화면 | `src/features/auth`, `record`, `upload`, `my`, `notification` |
-
-여러 기능이 같이 쓰는 파일(`components/`, `constants/`, 화면 이동 설정, `package.json`)을 고칠 때는 상대에게 먼저 한마디 해요. → [폴더 구조](#폴더-구조)
-
-**4. 디자인 시스템 지키기**
-
-- 색은 `colors`에서 가져다 쓰기 (`#FB8C00` 직접 쓰기 ❌)
-- 글씨는 `AppText` 쓰기 (`Text` ❌)
-
-어기면 VS Code에 노란 줄이 떠요. → [디자인 시스템](#디자인-시스템)
-
-Figma Dev Mode 값은 **글씨·여백·모서리·색은 그대로**, **화면 너비(390)·고정 위치는 폰 크기에 맞게** 바꿔서 옮겨요. 자세한 기준은 `AGENTS.md`의 "Figma 수치 옮기기"에 있어요.
-
-**5. 끝나면 검사하고 PR 올리기**
-
-```bash
-npx expo lint
-npx tsc --noEmit
-```
-
-둘 다 통과하면 PR을 올려요. PR 화면에 뜨는 체크리스트 3개를 확인해주세요.
-
-뭘 해야 할지는 아래 [남은 일](#남은-일)에 담당별로 정리돼 있어요.
-
-## 기술 스택
+## 3. 기술 스택
 
 | 구분 | 사용 기술 |
 |---|---|
-| 프레임워크 | React Native 0.88 + Expo SDK 58 |
+| 프레임워크 | React Native 0.88, Expo SDK 58 |
 | 언어 | TypeScript |
 | 화면 이동 | Expo Router (파일 기반 라우팅) |
-| 이미지 | expo-image |
-| 글꼴 | Pretendard (SIL Open Font License 1.1) |
-| 코드 검사 | ESLint (eslint-config-expo), TypeScript 타입 검사 |
+| 애니메이션 | react-native-reanimated |
+| 지도 | 카카오맵 JavaScript SDK (react-native-webview 안에 띄움) |
+| 외부 API | 카카오 로컬 API (장소 검색), TMAP 보행자 경로 API |
+| 카메라·사진 | expo-camera, expo-image-manipulator, expo-file-system, expo-image |
+| 스플래시 | expo-splash-screen (앱을 켤 때 주황 배경과 온나 로고) |
+| 위치·권한 | expo-location, expo-notifications (권한 요청만) |
+| 기기 저장 | expo-secure-store (로그인 토큰), AsyncStorage (최근 검색 등) |
+| 글꼴 | Pretendard (SIL OFL 1.1) |
+| 배포 | EAS Update (Expo Go), EAS Build (안드로이드 APK, expo-build-properties로 http 서버 연결 허용) |
+| 코드 검사 | ESLint, TypeScript |
 
-## 실행 방법
+- **Expo Go에 들어 있는 모듈만 썼습니다.** 앱을 새로 빌드하지 않아도 팀원과 기획·디자인 담당까지 iOS·Android 폰에서 QR 하나로 바로 확인할 수 있어, 짧은 해커톤 기간에 피드백을 빠르게 주고받았습니다.
+- **지도는 카카오맵 JavaScript SDK를 WebView로 띄웠습니다.** 앱용 카카오맵 SDK는 Expo Go에 없어서 별도 빌드가 필요합니다. WebView 방식은 iOS·Android가 같은 지도 코드를 쓰고 Expo Go에서 바로 열립니다.
+- 라이브러리는 모두 MIT 라이선스입니다.
 
-### 준비물
+## 4. 아키텍처
 
-- Node.js 20 이상
-- 폰에 **Expo Go** 앱 설치 (App Store / Play 스토어)
+### 4.1 시스템 구성
 
-### 실행
+```
+폰 (iOS · Android)
+└─ 온나 앱 (Expo · React Native)
+   ├─ 카카오맵 JavaScript SDK (WebView)   지도
+   ├─ 온나 서버 (REST API · 로그인 토큰)    기록, 지도 구역, 검색, 알림
+   │  └─ AI 서버                          해시태그 추천, 산책 경로, 얼굴 확인
+   ├─ 카카오 로컬 API                     장소 검색
+   └─ TMAP 보행자 경로 API                실제 걷는 길
+
+EAS Update → 팀원 폰에 새 버전 배포
+```
+
+### 4.2 앱 내부 구조
+
+```
+src/app/                  라우트. 파일마다 한 줄로 기능 폴더의 화면을 꺼냄
+  ↓
+src/features/<기능>/      화면(screens)과 그 기능만 쓰는 부품·훅·함수
+  ↓
+src/components, hooks, utils, constants   두 기능 이상이 같이 쓰는 것 (디자인 시스템 포함)
+  ↓
+src/api/                  서버 요청. 모든 요청은 client.ts를 거침
+```
+
+- **라우트와 화면 분리**: `src/app/`의 파일은 `export { MapScreen as default } from '@/features/map/screens/map-screen';` 한 줄이라, 주소와 화면을 따로 바꿀 수 있습니다.
+- **기능별 폴더**: 기능 코드는 그 기능 폴더에 두고, 디자인 시스템 부품·서버 요청·데이터 타입처럼 앱 전체가 쓰는 것은 공통 폴더에 둡니다. 공통 폴더는 기능 폴더를 가져다 쓰지 않습니다. 기능끼리는 필요한 부품만 가져다 씁니다 (예: 남기기 위치 확인의 작은 지도, 마이 좋아요 상세의 신고 창은 지도 기능의 것을 씁니다).
+- **화면은 그리기, 훅은 데이터**: 서버에서 받고 다시 받고 실패를 처리하는 일은 `use-*.ts` 훅이 맡고, 화면은 결과만 그립니다.
+- **서버 요청 한 곳**: 모든 요청이 `api/client.ts`를 거쳐 토큰 붙이기, 만료 시 재발급, 오류 변환을 한 번에 처리합니다.
+
+<details>
+<summary><b>폴더 구조</b></summary>
+
+```
+src/
+  app/            라우트 (Expo Router)
+  features/
+    auth/           시작, 소개, 로그인, 회원가입, 권한, 취향 설문
+    map/            지도, 검색, 경로 추천, 길안내, 사진 카드, 카카오맵(kakao-map/)
+    upload/         남기기 (촬영 → 한 줄 → 위치 확인)
+    record/         내 기록 목록, 기록 상세
+    my/             마이, 좋아요 내역, 연 자리 기록, 사용자 기호 설정, 설정, 약관
+    notification/   알림 목록
+  components/     공통 부품
+  constants/      디자인 시스템, 약관 문장, 공통 보기 값
+  hooks/          공통 훅
+  api/            서버 요청
+  utils/          공통 함수 (날짜, 해시태그, 오류 토스트)
+  types/          서버 데이터 타입
+assets/           글꼴, Figma 아이콘(SVG), 이미지
+```
+
+기능 폴더 안은 `screens/`, `components/`, `hooks/`, `utils/`, `constants/`로 같은 모양입니다.
+
+</details>
+
+### 4.3 사용자 흐름
+
+```mermaid
+flowchart TB
+    Start(["앱 시작"]) --> Logged{"로그인 상태?"}
+    Logged -- 예 --> MapHome
+    Logged -- 아니요 --> Intro["소개 (처음 한 번)"] --> Login["로그인 · 회원가입"] --> Perm["권한 안내"] --> Survey["취향 설문"] --> MapHome
+
+    subgraph Tabs["아래 탭"]
+        MapHome["지도"]
+        Record["기록"]
+        My["마이"]
+    end
+
+    MapHome --> Search["검색 → 검색결과"] --> Route["경로 추천"] --> Nav["길안내"] --> Open["열렸어요"]
+    MapHome --> AiRoute["AI 추천 경로<br/>경로 버튼"] --> Nav
+    MapHome --> Photo["사진 카드<br/>열기 · 좋아요 · 신고"]
+    Photo --> Upload
+    MapHome --> Upload["남기기<br/>촬영 → 한 줄 → 위치 확인"] --> Record
+    Record --> RecordDetail["기록 상세 · 삭제"]
+    My --> MyMenu["알림 · 좋아요 내역 · 연 자리 기록<br/>사용자 기호 설정 · 설정"]
+```
+
+<details>
+<summary><b>화면별 기능</b></summary>
+
+**시작과 온보딩**
+
+처음 설치하면 소개를 보고, 로그인·회원가입 뒤 권한과 취향을 골라 시작합니다.
+
+| 화면 | 기능 |
+|---|---|
+| 시작 | 주황 배경에 온나 로고를 약 2초 보여 주는 동안 로그인 상태를 확인합니다. 저장된 로그인이 있으면 바로 지도로 갑니다. 소개는 처음 설치한 사람에게만 보여 줍니다. |
+| 소개 | 서비스를 설명하는 3장입니다. |
+| 로그인 | 이메일과 비밀번호로 로그인합니다. 틀리면 해당 칸에 오류를 보여 줍니다. |
+| 회원가입 | 이메일 → 비밀번호 → 닉네임 → 약관 4단계입니다. 오류는 칸을 떠날 때 보여 주고, 고치면 바로 지웁니다. 닉네임은 입력을 멈추면 사용 가능 여부를 알려 줍니다. 약관마다 화살표를 눌러 전문을 볼 수 있습니다. |
+| 권한 안내 | 위치·카메라·알림 권한을 요청합니다. |
+| 취향 설문 | 대구·경북과의 관계(1/3) → 끌리는 자리 해시태그 3개 이상(2/3) → 걷는 방식·한 번에 걷는 시간(3/3) → 고른 내용 요약입니다. '완료'를 누르면 세 단계 답을 모두 서버에 저장하고, 요약 화면에 내 근처 흐릿한 자리 수를 서버에서 세어 보여 줍니다. 취향으로 첫 지도를 맞추기 때문에 건너뛸 수 없습니다. |
+
+**지도에서 둘러보고 열기**
+
+주변 사진은 흐리게 보이고, 그 자리에 가까이(25m) 가야 열립니다.
+
+| 화면 | 기능 |
+|---|---|
+| 지도 홈 | 주변에 남겨진 사진을 사진 마커와 묶음 마커로 보여 줍니다. 사진은 내 위치에서 멀수록 흐리고, 걸어서 가까워지면 점점 선명해집니다. 다른 곳을 보다가 오른쪽 아래 '내 위치' 버튼을 누르면 내 위치로 돌아옵니다. |
+| 탐색 모드 | 스위치를 켜면 내 위치 둘레에 사진이 열리는 반경(25m)을 그리고, 가장 가까운 기록을 아래에 띄웁니다. 패널을 접으면 탭 바 뒤로 내려가 손잡이만 보입니다. 오른쪽 버튼 셋(내 위치·경로 추천·카메라)은 패널을 펼쳐도 같은 자리에 있습니다. |
+| 묶음 목록 | 묶음 마커를 누르면 그 구역의 기록을 AI 추천순으로 보여 줍니다. |
+| 사진 카드 | 가까이 있으면 사진이 열려 선명한 사진과 한 줄이 보입니다. 좋아요, 신고, '나도 이 자리에 남기기'를 할 수 있습니다. 멀면 가까이 가라고 안내합니다. |
+
+**검색과 산책 경로**
+
+장소·해시태그로 찾고, 고른 해시태그의 자리를 잇는 산책 경로로 길안내를 받습니다.
+
+| 화면 | 기능 |
+|---|---|
+| 검색 | 장소 이름이나 `#해시태그`로 찾습니다. 장소는 서비스 지역(영남대 캠퍼스와 학교 앞, 캠퍼스 가운데에서 1.5km 안)에서만 찾습니다. 최근 검색기록이 남습니다. |
+| 검색결과 | 장소 / 해시태그 탭, 결과를 보여 주는 지도, 가까운순·정확도순 목록이 있습니다. |
+| 경로 추천 | 목적지 근처 기록의 해시태그를 고르면, 그 해시태그가 붙은 자리를 들르는 AI 추천 경로를 실제 걷는 길로 그립니다. |
+| AI 추천 경로 | 지도 홈의 경로 버튼을 누르면 목적지 없이, 아직 열지 않은 자리 중 취향에 맞는 곳을 이어 걷는 경로를 AI가 실제 걷는 길로 그립니다. 길이는 사용자 기호에 저장한 '한 번에 걷는 시간'에 맞춥니다(고르기 전이면 20분). '이 길로 걷기'를 누르면 마지막 자리까지 길안내를 받습니다. |
+| 길안내 | 걸어온 길과 남은 길, 다음 자리까지 남은 시간, 열림 반경(25m) 안 기록을 AI 추천순으로 보여 줍니다. 목적지에 닿으면 '열렸어요' 화면으로 사진이 열립니다. |
+
+**남기기**
+
+앱 카메라로 찍고, 한 줄과 AI 추천 해시태그를 붙여 그 자리에 남깁니다.
+
+| 화면 | 기능 |
+|---|---|
+| 촬영 | 앱 카메라로만 찍습니다 (갤러리 권한 없음). 사진은 갤러리에 저장하지 않고, 셔터를 누른 순간의 위치를 씁니다. 다시 찍으면 앞 사진에 쓴 글을 비우고 질문도 새로 받습니다. |
+| 한 줄 | 질문 아래에 제목(10자)과 한 줄(40자)을 씁니다. AI가 추천한 해시태그 중 1~3개를 고릅니다. |
+| 위치 확인 | 작은 지도로 남길 자리와 구역 이름(구역 밖이면 동네 이름)을 확인하고, 필요하면 위치를 다시 찾습니다. 얼굴이 보이면 '사진에 얼굴이 포함되어 있어요' 안내를 보여 준 뒤 촬영 화면으로 돌아가고, 위치 오차가 크면 다시 찾기를 안내합니다. |
+
+**기록 탭**
+
+내가 남긴 기록을 모아 보고 지웁니다.
+
+| 화면 | 기능 |
+|---|---|
+| 내 기록 | 남긴 기록을 사진, 제목, 한 줄, 해시태그, 날짜, 받은 좋아요 수와 함께 최신순으로 보여 줍니다. |
+| 기록 상세 | 사진, 한 줄, 해시태그를 보고, 확인 창을 거쳐 기록을 지웁니다. |
+
+**마이 탭**
+
+알림, 좋아요·연 자리 기록, 취향, 계정을 관리합니다.
+
+| 화면 | 기능 |
+|---|---|
+| 마이 | 닉네임, 칭호, 남긴 자리·연 자리·좋아한 자리 수를 보여 줍니다. 칭호는 초보 탐험가(온보딩하면 누구나) 뒤에 얻은 칭호(최초 발견자, 걸음왕)가 붙습니다. 새 알림이 있으면 종에 빨간 점이 뜹니다. |
+| 알림 | 내 기록이 열리거나 대표 사진이 됐을 때 알려 줍니다. '5분 전', '작년'처럼 지금과의 차이로 묶고, 누르면 기록 상세로 갑니다. |
+| 좋아요 내역·연 자리 기록 | 좋아요한 자리와 연 자리를 모아 보고, 상세에서 좋아요 취소와 신고를 할 수 있습니다. |
+| 사용자 기호 설정 | 전에 고른 해시태그와 걷는 유형을 불러와 바꿉니다. 온보딩과 같은 기준(해시태그 3개 이상, 걷는 방식 1개 이상, 한 번에 걷는 시간 1개)으로 저장합니다. |
+| 설정 | 권한 상태(누르면 폰 설정으로 이동), 로그인 계정, 약관, 로그아웃, 회원 탈퇴가 있습니다. |
+
+</details>
+
+### 4.4 구현 상세
+
+앱을 만들며 고민한 점을 기능별로 정리했습니다.
+
+<details>
+<summary><b>기능별 구현 상세</b></summary>
+
+**공통**
+
+- **로그인 풀림**: 토큰을 다시 받지 못하면 `api/session-events.ts`로 알리고, 어느 화면에서든 로그인 화면으로 보냅니다 (`hooks/use-session-expired-redirect.ts`).
+- **서버 날짜**: 시간대 없이 한국 시각으로 오므로 반드시 `utils/parse-server-date.ts`로 읽습니다. 폰 시간대가 달라도 시각이 틀리지 않습니다.
+- **애니메이션 통일**: Figma 프로토타입의 시간·곡선을 `constants/motion.ts`에 모으고, 누름·고름 움직임은 훅 두 개(`hooks/use-press-progress.ts`, `use-transition-progress.ts`)로 만들어 모든 부품이 같이 씁니다.
+- **한 번 받은 서버 답 기억**: 내 기록, 기록 상세, 좋아요 내역, 연 자리 기록, 알림, 사용자 기호 설정, 마이 탭 숫자는 지난번에 받은 값을 먼저 보여 주고 뒤에서 새로 받아 바뀐 부분만 바꿉니다. 그래서 들어갈 때 화면이 잠깐 비어 보이지 않습니다. 로그아웃·탈퇴·로그인 풀림 때 모두 지워 다른 계정에 보이지 않게 합니다 (`api/response-cache.ts`).
+- **빈 화면 안내**: 서버 목록이 비어 있으면 가짜 데이터 대신 "아직 연 자리가 없어요"처럼 다음에 할 일을 알려 줍니다 (내 기록, 좋아요 내역, 연 자리 기록, 알림).
+
+**온보딩**
+
+- **회원가입 오류**: 치는 도중에는 오류를 띄우지 않고 칸을 떠날 때 보여 주며, 고치면 바로 지웁니다 (`features/auth/hooks/use-field-error-timing.ts`). 입력 규칙은 `features/auth/utils/signup-rules.ts`에 모았습니다.
+- **저장 순서**: 설문 '완료'에서 대구·경북과의 사이 → 걷는 유형 → 해시태그 순으로 저장합니다. 해시태그를 저장하는 순간 서버가 온보딩을 끝난 것으로 보므로 맨 뒤에 두어, 앞의 저장이 실패해도 다시 '완료'로 모두 보낼 수 있게 했습니다.
+- **화면 글자와 서버 값 나누기**: 걷는 유형은 화면에서 '등하굣길', '10분'처럼 GUI 문구로 다루고, 보내고 받을 때만 서버 값(`COMMUTE`, `10`)으로 바꿉니다 (`constants/walk-options.ts`, `utils/walk-preference.ts`).
+- **스플래시 시간**: 앱이 켜진 때부터 1.8초를 로그인 확인과 함께 세서, 확인이 빨라도 로고가 깜빡 지나가지 않고 느리면 기다리지 않습니다. 기본 스플래시와 시작 화면의 로고를 같은 크기·자리에 두어 넘어갈 때 튀지 않습니다.
+- **같은 기준 한 곳에**: 해시태그 최소 개수(`constants/preferred-tags.ts`)와 약관 문장(`constants/terms.ts`)을 한 파일에 두고 회원가입·설문과 마이 탭이 같이 씁니다.
+
+**지도**
+
+- **흐림과 열기**: 서버가 내 위치에서 사진의 흐린 좌표까지 거리로 정한 흐림 단계(150m 안 `S1`, 60m 안 `S2`, 25m 안 `OPEN`)대로 사진을 보여 주고, 30m 걸을 때마다 다시 받습니다. 앱도 같은 흐린 좌표로 거리를 재서 25m 안의 사진만 열어 달라고 합니다. 어느 구역을 받을지는 내 위치가 아니라 지도 기준이라, 지도 가운데에서 500m 안 구역을 받고 지도를 200m 넘게 옮기면 다시 받습니다. 사진 주소가 30분 뒤 만료되므로 25분마다 다시 받고, 그사이 남겨진 새 기록이 보이도록 지도 홈에 다시 들어올 때도 받습니다(10초 안에 받았으면 건너뜀).
+- **카카오맵 역할 나누기**: `features/map/kakao-map/`을 지도 띄우기, 지도 페이지, 마커 스크립트, 마커 CSS, 앱↔지도 메시지 다섯 파일로 나눴습니다. 마커는 HTML이라 디자인 시스템 값을 CSS로 바꿔 넣습니다.
+- **내 기록 바로 보이기**: 지도 구역에는 남의 사진만 오므로(24시간 뒤 공개), 내 기록은 따로 받아 지도에 바로 올립니다 (`features/map/hooks/use-my-map-posts.ts`).
+- **구역 밖 기록**: 영남대 구역(14곳) 밖에 남긴 사진은 구역 묶음에 들지 않아서 `GET /map/outside-posts`로 따로 받아 사진 한 장 마커로 올립니다(구역과 같은 자리·반경·다시 받기). 해시태그 검색 기록 카드의 사진, 길안내 범위 내 기록·목적지 핀으로도 사진 카드를 열 수 있습니다. 열지는 서버가 25m 기준으로 정합니다.
+- **포개진 마커 벌리기**: 거의 같은 자리에 남긴 사진 마커가 화면에서 서로 닿으면 한 무리로 묶어, 두 장은 좌우로 나란히, 세 장 이상은 원으로 벌려 각각 누를 수 있게 합니다. 확대해서 저절로 떨어지면 원래 자리로 돌아옵니다. 고른 장소 핀은 정확한 자리를 가리켜야 해서 옮기지 않습니다 (`features/map/kakao-map/kakao-map-marker-script.ts`).
+- **아래 시트 끌기**: 검색결과·묶음 기록·범위 내 기록·탐색 모드 패널은 손잡이를 손가락으로 끌면 목록 높이가 손가락을 따라오고, 손을 떼면 반 넘게 열렸는지(또는 휙 민 방향)로 끝까지 펼치거나 접습니다 (`features/map/hooks/use-sheet-drag.ts`). 경로 카드는 높이 대신 카드 전체가 손가락을 따라 내려갑니다. 시트·카드를 접고 펼쳐도 지도는 펼친 높이로 맞춘 그대로라 확대·축소되지 않습니다.
+- **실패해도 쓸 수 있게**: 서버 경로 추천이 실패하면 앱이 고른 해시태그의 자리를 직접 고르고, AI 추천 경로에 걷는 길이 오지 않으면 TMAP으로 잇고, TMAP이 실패하면 직선으로, 카카오 키가 없으면 회색 지도로 대신합니다. 위치 권한이 없어도 캠퍼스 가운데를 기준으로 둘러볼 수 있습니다.
+- **좋아요 즉시 반영**: 누르자마자 바꾸고, 서버가 거절하면 되돌린 뒤 알립니다.
+- **정사각형 썸네일**: 사진은 3:4 그대로 받고, 지도 마커와 목록에서는 정사각형 칸에 가운데만 보이게 채웁니다.
+
+**남기기**
+
+- **남기기 값**: 세 화면이 쓰는 값(사진, 위치, 제목, 한 줄, 해시태그)은 `features/upload/upload-draft.tsx`의 Context에 모읍니다.
+- **사진 맞추기**: 가운데를 세로 3:4로 잘라 1080×1440으로 줄이고, 위치는 사진 EXIF가 아니라 셔터를 누른 순간의 위치를 씁니다.
+- **해시태그 다시 고르기**: 한 줄을 고치면 이전 한 줄에 맞춘 추천이므로 고른 해시태그를 지웁니다.
+
+**기록·마이**
+
+- **칭호**: 서버가 얻었다고 한 칭호(최초 발견자, 걸음왕)만 서버 순서대로 붙이고, 조건이 없는 '초보 탐험가'는 앱이 맨 앞에 붙입니다 (`features/my/utils/get-profile-badges.ts`).
+- **알림 빨간 점**: 알림 화면을 마지막으로 본 시각을 폰에 저장하고, 그 뒤에 온 알림에 빨간 점을 붙입니다. 마이 탭 종 버튼도 같은 기준을 써서 두 곳의 표시가 어긋나지 않습니다.
+
+</details>
+
+## 5. 디자인 시스템
+
+Figma 디자인 시스템의 값을 코드로 옮겨, 화면에서는 이름으로만 씁니다.
+
+<details>
+<summary><b>파일과 규칙</b></summary>
+
+| 파일 | 내용 |
+|---|---|
+| `constants/colors.ts` | 색상 (용도별 이름) |
+| `constants/typography.ts`, `components/app-text.tsx` | 글씨 스타일과 글씨 부품 `AppText` |
+| `constants/layout.ts` | 간격, 모서리 |
+| `constants/motion.ts` | 애니메이션 시간과 곡선 (Figma 프로토타입 값) |
+
+- 색은 `colors`의 이름으로, 글씨는 `Text` 대신 `AppText`로 씁니다. 어기면 ESLint 경고가 뜹니다.
+- Figma 값 중 글씨·여백·모서리·색은 그대로, 화면 너비(390)와 고정 위치는 폰 크기에 맞게 바꿔 옮깁니다 (`AGENTS.md` "Figma 수치 옮기기").
+- 화면은 공통 부품으로 먼저 조립합니다: `ScreenContainer`, `ScreenHeader`, `Button`, `TextField`, `Checkbox`, `Radio`, `Chip`, `Badge`, `Icon`, `IconButton`, `LikeButton`, `Toast`, `ConfirmDialog`, `LoadingSpinner`, `PressHighlight`, `PhotoPlaceholder`, `MapPlaceholder`, `AppTabBar`.
+
+</details>
+
+## 6. 개발 환경에서 실행하기
+
+<details>
+<summary><b>설치, 환경 변수, 배포</b></summary>
+
+**준비물**: Node.js 22.13 이상, 폰에 Expo Go 앱
 
 ```bash
 npm install
 npx expo start
 ```
 
-> Windows PowerShell에서 `npx`가 보안 오류로 막히면 `npx.cmd expo start`로 실행해요.
+터미널의 QR 코드를 찍으면 Expo Go에서 앱이 열립니다. 아이폰은 기본 카메라로, 안드로이드는 Expo Go의 "Scan QR code"로 찍습니다. PC와 폰이 다른 와이파이라면 `npx expo start --tunnel`로 실행합니다.
 
-터미널에 뜬 QR 코드를 폰으로 찍으면 Expo Go에서 앱이 열려요.
+> Windows PowerShell에서 `npx`가 막히면 `npx.cmd`를 씁니다.
 
-- **아이폰**: 기본 카메라 앱으로 QR을 찍어요.
-- **안드로이드**: Expo Go 앱의 "Scan QR code"로 찍어요.
-- PC와 폰은 **같은 와이파이**에 있어야 해요. 다른 네트워크라면 `npx expo start --tunnel`로 실행해요.
-
-코드를 저장하면 폰 화면에 바로 반영돼요.
-
-### 검사
-
-작업을 마치면 아래 두 가지를 통과하는지 확인해요.
+**환경 변수**: `.env.example`을 복사해 `.env`를 만들고 키를 넣습니다. 키가 없어도 앱은 열리며, 지도는 회색 지도로, 산책 경로는 직선으로 대신 보입니다.
 
 ```bash
-npx expo lint      # 코드 스타일 검사
-npx tsc --noEmit   # 타입 검사
+EXPO_PUBLIC_KAKAO_MAP_JS_KEY=   # 카카오 JavaScript 키 (지도)
+EXPO_PUBLIC_KAKAO_REST_API_KEY= # 카카오 REST API 키 (장소 검색)
+EXPO_PUBLIC_TMAP_APP_KEY=       # (선택) TMAP 앱 키 (실제 걷는 길)
+EXPO_PUBLIC_API_URL=            # (선택) 서버 주소. 비우면 src/api/config.ts의 기본 주소
 ```
 
-## 폴더 구조
+카카오 개발자 콘솔의 **JavaScript SDK 도메인**에 `http://localhost`를 등록해야 지도가 뜹니다. 앱 안의 지도 페이지가 이 주소로 열리기 때문입니다.
 
-```
-src/
-  app/            화면 주소와 화면 이동 구조 (Expo Router)
-  features/       기능별 코드 (각 폴더의 screens/에 실제 화면)
-    auth/           소개, 로그인, 회원가입, 권한, 취향 설문
-    map/            지도, 검색, 검색한 장소, 묶음 목록, 자리 상세, 열린 자리, 산책 경로, 신고
-    record/         내 기록
-    upload/         남기기 (촬영, 한 줄, 위치 확인)
-    my/             마이, 좋아요 내역, 연 자리 기록, 기호 수정, 설정
-    notification/   다녀갔어요 알림
-  components/     두 개 이상의 기능이 같이 쓰는 부품
-  constants/      디자인 시스템 (색상, 글꼴)
-  hooks/          같이 쓰는 훅 (내 위치 가져오기 등)
-  api/            서버 요청
-  mock/           백엔드 완성 전에 쓰는 가짜 데이터
-  utils/          거리 계산 같은 작은 함수
-  types/          데이터 타입
-assets/
-  fonts/          Pretendard 글꼴 파일
-  images/         앱 아이콘, 시작 화면 이미지
-```
-
-- `src/app/`에는 **화면 파일만** 둬요. 실제 UI와 로직은 `features/`에서 가져와요.
-- 한 기능에서만 쓰는 부품은 그 기능 폴더에, 여러 기능이 같이 쓰는 부품은 `components/`에 둬요.
-- 지도 담당은 주로 `features/map`, 화면 담당은 나머지 기능 폴더에서 작업해서 Git 충돌을 줄여요.
-- 빈 폴더의 `.gitkeep`은 폴더를 GitHub에 올리기 위한 빈 파일이에요. 폴더에 코드가 생기면 지워도 돼요.
-
-## 화면 구성
-
-와이어프레임의 모든 화면(⓪ 시작, ① 지도, ② 기록, ③ 마이)이 **회색 배치**로 만들어져 있어요. 버튼, 입력창, 글자 위치는 와이어프레임대로 맞췄고, 사진 자리는 회색 상자예요. GUI 디자인이 나오면 각 화면 파일에서 색과 그림만 바꾸면 돼요.
-
-가짜 데이터는 `src/mock/`와 각 기능의 `constants/preview-*.ts`에 있어요. 백엔드 API가 나오면 이 값을 서버 데이터로 바꿔요.
-
-지도 화면들과 내 기록 지도, 남기기 위치 확인은 진짜 지도 대신 회색 지도(`components/map-placeholder.tsx`)를 깔아 두었어요. 지도 API는 아직 정하지 않았어요. 정해지면 지도 담당이 이 부분만 진짜 지도로 바꾸고, 위에 올린 검색창, 버튼, 카드는 그대로 써요. 마커와 경로 위치는 `features/map/constants/preview-*.ts`의 가짜 데이터예요.
-
-```
-앱 시작 → 소개 → 로그인 → (회원가입) → 권한 요청 → 취향 설문 → 지도
-                └─ 건너뛰기 ─────────────────────────────────→ 지도
-
-아래 탭
-├─ 지도  /map            → 검색 → 검색한 장소 → 걸어서 가기(자리 상세)
-│                         → 묶음 목록, 자리 상세 → 열린 자리 → 신고(모달)
-│                         → 산책 경로 (추천 → 걷는 중)
-├─ 기록  /record
-└─ 마이  /my             → 좋아요 내역, 연 자리 기록, 다녀갔어요 알림, 기호 수정, 설정
-
-남기기 (탭 바 없는 전체 화면)  /upload/camera → write → confirm → 내 기록
-  지도의 카메라 버튼, 자리 상세, 열린 자리, 내 기록에서 들어와요.
-```
-
-| 주소 | 화면 파일 | 와이어프레임 |
-|---|---|---|
-| `/intro`, `/login`, `/signup`, `/permission`, `/survey` | `features/auth/screens/` | ⓪ 시작 |
-| `/map`, `/map/search`, `/map/place/[id]`, `/map/walk` | `features/map/screens/` | ① 지도 |
-| `/map/cluster/[id]` | `features/map/screens/` | ①-A |
-| `/map/spot/[id]`, `/opening/[id]`, `/map/opened/[id]`, `/report/[id]` | `features/map/screens/` | ①-A, ①-B |
-| `/record` | `features/record/screens/` | ② 기록 |
-| `/upload/camera`, `/upload/write`, `/upload/confirm` | `features/upload/screens/` | ② 기록 |
-| `/my`, `/my/likes`, `/my/opened-history`, `/my/preferences`, `/my/settings` | `features/my/screens/` | ③ 마이 |
-| `/my/notifications` | `features/notification/screens/` | ③ 마이 |
-
-와이어프레임 여러 장이 한 화면의 여러 상태인 경우가 많아요. 예를 들어 지도 확대·축소, 맛보기, 빈 자리, 위치 권한 안내는 모두 `/map` 한 화면이고, AI 추천 산책길과 걷는 중은 `/map/walk` 한 화면이에요. 위치 권한 안내 화면을 보려면 `features/map/hooks/use-location-permission.ts`의 초기값을 `false`로 바꿔요.
-
-- 지도의 `+` `−` 버튼으로 **넓게 / 기본 / 자세히** 세 단계를 볼 수 있어요. 단계마다 마커와 아래 카드가 바뀌어요.
-- 자리 상세(`/map/spot/[id]`)는 자리 종류에 따라 모양이 달라요. 맛보기 사진을 누르면 **맛보기**, 점선 `+`를 누르면 **빈 자리**, 나머지 흐린 사진을 누르면 **거리별 열림 단계**가 열려요.
-- 거리별 열림 단계는 **480m 멀리 → 120m 다가가는 중 → 25m 거의 열림 → 열렸어요(`/opening/[id]`) → 열린 자리(`/map/opened/[id]`)** 순서예요. 진짜 위치를 붙이기 전까지는 화면의 `(시연)` 버튼으로 다음 단계로 넘겨요. 단계와 거리 값은 `features/map/constants/approach-stages.ts`에 있어요.
-
-## 남은 일
-
-화면 배치는 끝났고, 아래는 **아직 진짜로 동작하지 않는 것**이에요. 끝내면 `[x]`로 체크해 주세요. 각 파일 맨 위 주석에도 무엇을 붙여야 하는지 적혀 있어요.
-
-### 지도 담당
-
-- [ ] **지도 API 정하기** (구글 / 카카오 / 네이버 등). Expo Go에서 되는지 먼저 확인
-- [ ] 회색 지도를 진짜 지도로 바꾸기 → `components/map-placeholder.tsx`
-- [ ] 마커·경로를 화면 좌표에서 위도·경도로 바꾸기 → `features/map/constants/preview-*.ts`는 서버 데이터가 오면 지우기
-- [ ] 위치 권한 확인·요청 → `features/map/hooks/use-location-permission.ts` (지금은 항상 허용 상태)
-- [ ] 내 위치 가져오기 (`expo-location`). 남기기 화면에서도 쓰니까 `src/hooks/`에 두기
-- [ ] 거리 계산 함수 → `src/utils/`
-- [ ] 거리에 따라 열림 단계가 자동으로 바뀌게 하기. 캠퍼스에서 걸어보고 거리 값 정하기 → `features/map/constants/approach-stages.ts`
-- [ ] 지도 오른쪽 버튼 연결: 확대·축소(진짜 지도 줌), 내 위치로 이동 → `features/map/components/map-controls.tsx`
-- [ ] 해시태그 필터로 지도 마커 걸러내기 (지금은 칩만 바뀜)
-- [ ] 걸어서 길 안내, AI 산책 경로 받아와서 그리기 (TMAP 보행자 경로 등)
-- [ ] 바텀시트를 손으로 끌어 올리고 내리기 (필요하면) → `features/map/components/bottom-panel.tsx`
-
-### 화면 담당
-
-- [ ] 카메라 연결 (`expo-camera`): 촬영, 카메라 전환 → `features/upload/components/camera-viewfinder.tsx`, `features/upload/screens/camera-screen.tsx`
-- [ ] 권한 안내 화면에서 실제 위치·카메라·알림 권한 요청 → `features/auth/screens/permission-screen.tsx`
-- [ ] 로그인 여부에 따라 첫 화면 정하기 (지금은 항상 소개 화면) → `src/app/index.tsx`
-- [ ] 설정의 권한 상태를 실제 값으로 → `features/my/screens/settings-screen.tsx`
-- [ ] 화면이 없는 메뉴: 내 신고 내역, 이용약관·개인정보 처리방침, 회원 탈퇴, 비밀번호 찾기
-- [ ] 소개 화면 2·3장 문구 디자이너와 확정 (지금은 임시 문구) → `features/auth/constants/intro-slides.ts`
-
-### 서버 연결 (백엔드·AI API가 나오면)
-
-가짜 데이터는 `src/mock/`과 각 기능의 `constants/preview-*.ts`에 있어요. API 요청 코드는 `src/api/`에 모아요.
-
-- [ ] 로그인 (카카오, 구글, 이메일), 회원가입·이메일 인증 → `features/auth/`
-- [ ] 취향 설문 저장, 사용자 기호 수정 저장 → `survey-screen.tsx`, `preferences-screen.tsx`
-- [ ] 지도 주변 사진, 묶음, 자리 상세, 열린 자리 불러오기 → `features/map/`
-- [ ] 검색 → `features/map/screens/search-screen.tsx` (지금은 검색어와 상관없이 같은 결과)
-- [ ] 좋아요, 신고 보내기 → `opened-spot-screen.tsx`, `report-screen.tsx`
-- [ ] 사진 업로드 (얼굴 감지 결과 포함) → `features/upload/screens/confirm-screen.tsx`
-- [ ] AI 해시태그 추천 → `features/upload/screens/write-screen.tsx` (지금은 정해진 2묶음)
-- [ ] AI '내 취향 순' 정렬, 다른 산책길 추천 → `cluster-screen.tsx`, `walk-screen.tsx`
-- [ ] 내 기록, 좋아요 내역, 연 자리 기록, 알림 목록 불러오기 → `features/record/`, `features/my/`, `features/notification/`
-
-### GUI 디자인이 나오면
-
-- [ ] 회색 사진 자리를 실제 흐린 사진으로 (`expo-image`의 `blurRadius`) → `components/photo-placeholder.tsx`
-- [ ] 흐림이 걷히는 애니메이션 → `features/map/screens/opening-screen.tsx`
-- [ ] 아래 탭 아이콘 → `src/app/(tabs)/_layout.tsx`
-- [ ] 와이어프레임 때문에 임시로 추가한 색 4개 맞추기 → `src/constants/colors.ts` 아래쪽
-- [ ] 소개 화면 일러스트, 앱 아이콘, 시작 화면(스플래시) 이미지 → `assets/images/`
-
-### 정해야 할 것
-
-- [ ] 푸시 알림을 할지 (Expo Go에서는 안 돼서 지금은 앱 안 알림 목록으로 대신함)
-- [ ] `develop` 브랜치를 쓸지 (백엔드 레포와 맞추기)
-
-## 디자인 시스템
-
-Figma `디자인 시스템` 페이지의 값을 코드로 옮겨 두었어요.
-
-| 파일 | 내용 |
-|---|---|
-| `src/constants/colors.ts` | 색상 (Primary, Gray, Semantic, Text, Border, Background) |
-| `src/constants/typography.ts` | 글씨 스타일 (Heading, Subtitle, Body, Caption, Button) |
-| `src/components/app-text.tsx` | 글씨 부품 `AppText` |
-| `src/constants/layout.ts` | 간격(`spacing`), 모서리(`radius`), 화면 좌우 여백 |
-
-### 공통 부품
-
-화면을 만들 때 아래 부품을 먼저 가져다 써요. 지도 화면에서도 같이 써요.
-
-| 부품 | 용도 |
-|---|---|
-| `ScreenContainer` | 모든 화면의 바깥 틀 (여백, 안전 영역, 위·아래 고정 영역) |
-| `ScreenHeader` | 뒤로가기, 제목, 오른쪽 버튼 |
-| `Button` | 큰 버튼 (`primary` 강조 / `dark` 기본 / `outline` 보조) |
-| `TextField` | 라벨이 있는 입력창 |
-| `Checkbox` | 체크박스 |
-| `Icon` | 아이콘 (iOS·Android 이름 차이를 맞춰 둠) |
-| `PhotoPlaceholder` | 사진이 붙기 전 회색 사진 자리 |
-| `Chip` | 해시태그·필터·최근 검색어 같은 동그란 작은 버튼 |
-| `Badge` | 맛보기, 곧 열려요, AI 추천 같은 작은 상태 표시 |
-| `IconButton` | 지도 위에 떠 있는 동그란 아이콘 버튼 |
-| `SegmentedToggle` | 리스트 / 지도처럼 보기 방식을 바꾸는 작은 토글 |
-| `Radio` | 여럿 중 하나만 고르는 동그라미 (신고 사유 등) |
-| `MapPlaceholder` | 진짜 지도를 붙이기 전 회색 지도 |
-
-### 사용법
-
-```tsx
-import { AppText } from '@/components/app-text';
-import { colors } from '@/constants/colors';
-
-<AppText variant="heading01">제목</AppText>
-<AppText variant="body02" color="textSecondary">본문</AppText>
-
-<View style={{ backgroundColor: colors.background02 }} />
-```
-
-### 지켜야 할 것
-
-- 색은 `#FB8C00`처럼 직접 쓰지 말고 `colors`에서 이름으로 가져다 써요.
-- 글씨는 React Native의 `Text` 대신 `AppText`를 써요.
-- Figma 디자인 시스템이 바뀌면 위 두 파일만 고치면 앱 전체에 반영돼요.
-- 위 두 가지를 어기면 VS Code에 **노란 줄(경고)**이 떠요. 앱 실행은 막지 않아요.
-
-
-## 코드 규칙
-
-이름 짓는 법, 폴더 사용법, 주석 규칙은 [`AGENTS.md`](AGENTS.md)의 **우리 팀 규칙**에 있어요. AI 도구도 이 파일을 읽고 같은 규칙으로 코드를 써요.
-
-PR을 올리면 짧은 체크리스트가 자동으로 떠요.
-
-## 라이브러리 설치
-
-`npm install` 대신 아래 명령어를 써요. 현재 Expo 버전에 맞는 버전을 골라줘요.
+**배포**: 팀원 공유는 EAS Update로 올리고, 팀원은 Expo Go로 QR을 찍어 엽니다. 안드로이드 Expo Go는 runtimeVersion이 `exposdk:58.0.0`인 업데이트만 엽니다. 앱 키는 Expo 서버 환경 변수에 있습니다.
 
 ```bash
-npx expo install 패키지이름
+npx eas-cli@latest update --branch develop --environment development --message "바뀐 내용"
 ```
 
-Expo Go에 포함되지 않은 네이티브 라이브러리를 넣으면 Expo Go로는 앱이 열리지 않아요. 설치 전에 팀원과 먼저 상의해요.
+안드로이드 APK는 EAS Build로 만듭니다 (`eas.json`의 `preview`). 서버가 `http` 주소라 `expo-build-properties`로 http 연결을 허용해 두었습니다.
 
-## 환경 변수
-
-API 키, 서버 주소 같은 값은 `.env` 파일에 넣어요. `.env`는 GitHub에 올라가지 않아요.
-
-```
-EXPO_PUBLIC_API_URL=https://...
+```bash
+npx eas-cli@latest build -p android --profile preview
 ```
 
-`EXPO_PUBLIC_`로 시작하는 값은 앱 안에 포함되므로, 비밀 키는 넣지 말고 백엔드에 둬요.
+</details>
+
+## 7. 프론트엔드 협업 방법
+
+**브랜치**
+
+| 브랜치 | 용도 |
+|---|---|
+| `main` | 시연·제출용 |
+| `develop` | 작업을 모으는 곳. 앱이 깨지지 않는 것만 합칩니다 |
+| `feature/이름-작업` | 각자 작업하는 곳 (예: `feature/yelim-design-3`) |
+
+**작업 순서**
+1. 최신 `develop`에서 `feature/이름-작업` 브랜치를 만듭니다.
+2. 맡은 폴더에서 작업합니다. 공통 파일(`components/`, `constants/`, 라우트 설정, `package.json`)을 고칠 때는 먼저 상대에게 알립니다.
+3. 올리기 전에 내 컴퓨터에서 두 검사를 통과하고, 폰에서 열어 봅니다.
+   ```bash
+   npx expo lint      # 코드 규칙 검사
+   npx tsc --noEmit   # 타입 검사
+   ```
+4. GitLab에서 `develop`으로 MR(Merge Request)을 올리고, 충돌이 있으면 `develop`을 내 브랜치에 합쳐 풉니다.
+5. `develop` → `main`은 시연·제출 전에 함께 확인하고 합칩니다.
+
+| 담당 | 폴더 |
+|---|---|
+| 지도 | `src/features/map` |
+| 화면 | `src/features/auth`, `upload`, `record`, `my`, `notification` |
+
+<details>
+<summary><b>코드 규칙</b></summary>
+
+자세한 내용은 [`AGENTS.md`](AGENTS.md)에 있습니다.
+
+- 파일은 `kebab-case`, 컴포넌트는 `PascalCase`, 함수·변수는 `camelCase`로 짓습니다.
+- 함수 이름은 하는 일을 동사로 씁니다 (`getDistance`, `uploadPhoto`).
+- 파일이 200줄을 넘거나 컴포넌트가 여러 일을 하면 나눕니다.
+- 주석은 한국어로, "무엇을"보다 "왜 이렇게 했는지"를 씁니다.
+
+</details>
+
+<details>
+<summary><b>라이브러리 추가</b></summary>
+
+- `npx expo install 패키지이름`으로 설치합니다 (Expo 버전에 맞는 버전을 골라 줍니다).
+- Expo 공식 모듈을 먼저 찾고, 없으면 Expo Go를 지원하는 것만 씁니다.
+- 라이선스는 MIT, Apache-2.0, BSD, ISC만 쓰고, 설치하면 기술 스택 표에 적습니다.
+
+</details>

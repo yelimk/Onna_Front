@@ -63,7 +63,9 @@ export const colors = {
   selectedBackground: palette.primary[50],
   disabledBackground: palette.gray[100],
   placeholderBox: palette.gray[200],
-  kakao: '#FEE500', // 카카오 로그인 버튼 (카카오 브랜드 가이드 색)
+  // 아직 열리지 않은 사진을 가리는 흐린 회색 (Figma 공통 컴포넌트의 사진 자리). 가운데가 진하고 가장자리로 갈수록 옅다.
+  lockedPhotoCenter: palette.gray[400],
+  lockedPhotoEdge: palette.gray[300],
 
   // 진짜 지도를 붙이기 전 회색 지도 자리 (와이어프레임 지도 색)
   mapBackground: palette.gray[100],
@@ -71,6 +73,32 @@ export const colors = {
   mapBlock: palette.gray[200],
   // 위치 권한 안내처럼 지도 위를 흐리게 덮을 때
   dimWhite: 'rgba(255, 255, 255, 0.7)',
+  // 버튼을 누르고 있을 때 덮는 막 (Figma button default_pressed: 검정 20%)
+  pressedOverlay: 'rgba(0, 0, 0, 0.2)',
+  // 아이콘·체크박스 테두리 (Figma Gray/800)
+  iconStroke: palette.gray[800],
+  // 권한 '필수'처럼 주황 배경 없이 글자만 강조할 때 (Figma Primary/900)
+  primaryText: palette.primary[900],
+  // 필수 권한 아이콘 동그라미 배경 (Figma Primary/100)
+  primarySoft: palette.primary[100],
+  // 필수 입력칸 이름 뒤 * (Figma Error/03)
+  requiredMark: palette.error[3],
+  // 흐린 사진 중 '내 취향' 사진의 주황 테두리 (Figma Primary/300)
+  photoHighlightFrame: palette.primary[300],
+  // 회색 칸 위에 얹는 옅은 동그라미 버튼 (Figma reload_circle, Gray/200 80%. 디자이너 요청으로 40%에서 바뀜)
+  softCircleButton: 'rgba(225, 225, 225, 0.8)',
+  // 흰 동그라미 버튼을 누르고 있을 때 배경 (Figma bell_circle pressed, Gray/100)
+  pressedCircleButton: palette.gray[100],
+  // 확인 창 뒤를 어둡게 덮는 막 (Figma 삭제 확인, Gray/800 80%)
+  dialogDim: 'rgba(49, 49, 49, 0.8)',
+  // 위치 확인 화면의 회색 지도 칸 (Figma 위치 확인 #ECECEA, 디자인 시스템 회색과 달리 살짝 누런 회색)
+  uploadMapBackground: '#ECECEA',
+  // 토스트 알림 배경 (Figma Gray/800)
+  toastBackground: palette.gray[800],
+  // 좋아요를 누른 버튼 테두리 (Figma like activated, Error/03)
+  likedBorder: palette.error[3],
+  // 카메라 셔터 바깥 고리 (Figma Shutter, Primary/300)
+  shutterRing: palette.primary[300],
 } as const;
 
 export type ColorName = keyof typeof colors;

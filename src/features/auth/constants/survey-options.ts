@@ -1,47 +1,48 @@
-/** 온보딩 설문 선택지. 와이어프레임 ⓪ 설문 1/3~3/3 문구 그대로. 첫 추천의 근거가 된다. */
+import type { WalkDuration, WalkTime } from '@/constants/walk-options';
+import type { RegionRelation } from '@/types/api';
+
+/** 온보딩 설문 선택지. GUI 설문 1/3~3/3 문구 그대로. 첫 추천의 근거가 된다. */
 
 export type RelationOption = {
-  id: 'local' | 'moved' | 'visiting';
+  /** 서버에 그대로 보내는 값이라 서버 이름(NATIVE 등)을 id로 쓴다 */
+  id: RegionRelation;
   title: string;
   description: string;
 };
 
 export const relationOptions: RelationOption[] = [
-  { id: 'local', title: '원래 여기 살아요', description: '대구·경북 토박이예요. 익숙한 곳을 새로 보고 싶어요' },
-  { id: 'moved', title: '대구·경북으로 왔어요', description: '학교나 일 때문에 와서 지내고 있어요' },
-  { id: 'visiting', title: '잠깐 머무는 중이에요', description: '여행이나 짧은 일정으로 왔어요' },
+  { id: 'NATIVE', title: '토박이에요', description: '대구·경북 토박이에요. 익숙한 곳을 새로 보고 싶어요' },
+  { id: 'MOVED_IN', title: '대구·경북으로 왔어요', description: '학교나 일 때문에 와서 지내고 있어요' },
+  { id: 'VISITING', title: '잠깐 머무는 중이에요', description: '여행이나 짧은 일정으로 왔어요' },
 ];
 
-export type PlaceOption = {
-  hashtag: string;
-  description: string;
+/**
+ * 끌리는 자리 카드의 작은 설명. 태그 목록은 서버(/tags)에서 오고, 이름이 같은 태그에만 설명을 붙인다.
+ * 서버 태그에는 설명이 없어서 GUI 문구를 앱에 남겨 둔다.
+ */
+export const placeDescriptions: Record<string, string> = {
+  '#말없이챙겨준': '무뚝뚝한 배려',
+  '#덤': '계산 밖의 호의',
+  '#밥뭇나': '걱정 섞인 안부',
+  '#단골자리': '매일 가는 그곳',
+  '#오래된가게': '시간이 쌓인 곳',
+  '#골목': '큰길 말고 뒷길',
+  '#공강벤치': '혼자 쉬는 자리',
+  '#학교앞분식': '친구 데려가는 곳',
+  '#노을': '해질녘 풍경',
+  '#혼자만의자리': '조용히 머무는 곳',
 };
 
-export const placeOptions: PlaceOption[] = [
-  { hashtag: '#말없이챙겨준', description: '무뚝뚝한 배려' },
-  { hashtag: '#덤', description: '계산 밖의 호의' },
-  { hashtag: '#밥뭇나', description: '걱정 섞인 안부' },
-  { hashtag: '#단골자리', description: '매일 가는 그곳' },
-  { hashtag: '#오래된가게', description: '시간이 쌓인 곳' },
-  { hashtag: '#골목', description: '큰길 말고 뒷길' },
-  { hashtag: '#공강벤치', description: '혼자 쉬는 자리' },
-  { hashtag: '#학교앞분식', description: '친구 데려가는 곳' },
-  { hashtag: '#노을', description: '해 질 녘 풍경' },
-  { hashtag: '#혼자만의자리', description: '조용히 머무는 곳' },
-];
+/** 2/3 단계에서 최소로 골라야 하는 해시태그 수 (서버 기준, 마이 탭 기호 설정과 같다) */
+export { minPreferredTagCount as minPlaceCount } from '@/constants/preferred-tags';
 
-/** 2/3 단계에서 최소로 골라야 하는 해시태그 수 */
-export const minPlaceCount = 3;
-
-export const walkTimeOptions = ['등하굣길', '공강 시간', '저녁 산책', '러닝할 때', '주말 나들이'] as const;
-export type WalkTime = (typeof walkTimeOptions)[number];
-
-export const walkDurationOptions = ['10분', '20분', '30분 이상'] as const;
-export type WalkDuration = (typeof walkDurationOptions)[number];
+// 걷는 때·시간 보기는 마이 탭 기호 설정과 같이 쓰려고 src/constants로 옮겼다
+export { walkDurationOptions, walkTimeOptions, type WalkDuration, type WalkTime } from '@/constants/walk-options';
 
 export type SurveyAnswers = {
   relation?: RelationOption['id'];
-  places: string[];
+  /** 서버 태그 id. 관계·걷는 유형과 함께 '완료'에서 서버에 저장한다. */
+  placeTagIds: number[];
   walkTimes: WalkTime[];
   walkDuration?: WalkDuration;
 };

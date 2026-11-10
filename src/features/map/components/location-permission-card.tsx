@@ -6,6 +6,9 @@ import { Icon } from '@/components/icon';
 import { colors } from '@/constants/colors';
 import { floatingShadow, radius, spacing } from '@/constants/layout';
 
+/** Figma 위치 아이콘 원 크기 */
+const iconCircleSize = 60;
+
 type LocationPermissionCardProps = {
   onRequest: () => void;
   onBrowse: () => void;
@@ -29,7 +32,7 @@ export function LocationPermissionCard({ onRequest, onBrowse }: LocationPermissi
         <Pressable hitSlop={8} onPress={onBrowse}>
           <AppText variant="button03">먼저 둘러보기</AppText>
         </Pressable>
-        <AppText variant="caption02" color="textTertiary" style={styles.center}>
+        <AppText variant="caption04" color="textTertiary" style={styles.center}>
           둘러보기에서는 맛보기 사진과 해시태그만 보여요
         </AppText>
       </View>
@@ -53,8 +56,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background01,
   },
   iconCircle: {
-    width: 60,
-    height: 60,
+    width: iconCircleSize,
+    height: iconCircleSize,
     borderRadius: radius.full,
     backgroundColor: colors.selectedBackground,
     alignItems: 'center',

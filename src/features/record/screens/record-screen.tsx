@@ -1,68 +1,55 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Fragment } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
-import { AreaMapView } from '@/components/area-map-view';
-import { Button } from '@/components/button';
 import { ScreenContainer } from '@/components/screen-container';
-import { SegmentedToggle } from '@/components/segmented-toggle';
-import { spacing } from '@/constants/layout';
+import { ScreenHeader } from '@/components/screen-header';
+import { colors } from '@/constants/colors';
 import { RecordListItem } from '@/features/record/components/record-list-item';
-import { mockMyRecordAreas, mockMyRecords, mockMyRecordSummary } from '@/mock/my-records';
-
-const viewModes = ['리스트', '지도'] as const;
-type ViewMode = (typeof viewModes)[number];
+import { useMyPosts } from '@/hooks/use-my-posts';
 
 /**
- * 와이어프레임 ② 기록 탭: 내 기록. 지도가 비어 있어도 혼자 쓸 이유가 되도록 내가 남긴 자리를 모아 본다.
- * 리스트와 정적 지도 두 가지로 볼 수 있다.
+ * ② 기록 탭: 내 기록. 지도가 비어 있어도 혼자 쓸 이유가 되도록 내가 남긴 자리를 모아 본다.
+ * 새로 남기기는 지도의 카메라 버튼에서 시작한다.
+ * 리스트 ↔ 지도 전환 버튼은 디자이너 요청으로 뺐다 (지도 보기는 Figma에서 보류).
  */
 export function RecordScreen() {
-  const [viewMode, setViewMode] = useState<ViewMode>('리스트');
-  const [selectedAreaId, setSelectedAreaId] = useState<string | null>(null);
-  const isList = viewMode === '리스트';
+  const { posts, hasFailed, reload } = useMyPosts();
 
   return (
     <ScreenContainer
       withBottomInset={false}
-      footer={
-        isList && (
-          <Button
-            label="지금 이 자리 남기기"
-            icon="camera"
-            variant="primary"
-            onPress={() => router.push('/upload/camera')}
-          />
-        )
-      }>
-      <View style={styles.header}>
-        <AppText variant="heading02">내 기록</AppText>
-        <SegmentedToggle options={viewModes} selected={viewMode} onSelect={setViewMode} />
+      contentTopGap={0}
+      header={<ScreenHeader title="내 기록" showBack={false} />}>
+      <View>
+        {hasFailed && (
+          <Pressable onPress={reload} hitSlop={8}>
+            <AppText variant="caption02" color="textTertiary">
+              기록을 불러오지 못했어요. 눌러서 다시 불러오기
+            </AppText>
+          </Pressable>
+        )}
+        {posts?.length === 0 && (
+          <AppText variant="body01" color="textTertiary" keepAll>
+            아직 남긴 자리가 없어요. 지도의 카메라 버튼으로 첫 자리를 남겨 보세요.
+          </AppText>
+        )}
+        {posts?.map((post, index) => (
+          <Fragment key={post.postId}>
+            {index > 0 && <View style={styles.divider} />}
+            <RecordListItem post={post} onPress={() => router.push(`/record/${post.postId}`)} />
+          </Fragment>
+        ))}
       </View>
-      <AppText variant="caption01" color="textTertiary" style={styles.summary}>
-        남긴 자리 <AppText variant="caption03">{mockMyRecordSummary.totalCount}곳</AppText>
-        {isList ? ` · 이번 주 ${mockMyRecordSummary.thisWeekCount}곳` : ' · 마커를 누르면 그 영역 기록만 보여요'}
-      </AppText>
-
-      {isList ? (
-        mockMyRecords.map((record) => <RecordListItem key={record.id} record={record} />)
-      ) : (
-        <AreaMapView areas={mockMyRecordAreas} selectedAreaId={selectedAreaId} onSelectArea={setSelectedAreaId} />
-      )}
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: spacing.md,
-  },
-  summary: {
-    marginTop: spacing.sm,
-    marginBottom: spacing.md,
+  // Figma 기록 사이 선: 0.5 두께, Gray/300
+  divider: {
+    height: 0.5,
+    backgroundColor: colors.borderDeactivated,
   },
 });

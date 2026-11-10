@@ -1,52 +1,87 @@
-import { router } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { Image } from 'expo-image';
+import { useMemo } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { Badge } from '@/components/badge';
 import { Button } from '@/components/button';
 import { Icon } from '@/components/icon';
-import { MapPlaceholder } from '@/components/map-placeholder';
-import { PhotoPlaceholder } from '@/components/photo-placeholder';
 import { ScreenContainer } from '@/components/screen-container';
-import { ScreenHeader } from '@/components/screen-header';
 import { colors } from '@/constants/colors';
 import { radius, spacing } from '@/constants/layout';
+import { PlacePreviewMap } from '@/features/map/components/place-preview-map';
+import { fromServerCoordinate } from '@/features/map/utils/to-coordinate';
+import { DraftPhoto } from '@/features/upload/components/draft-photo';
 import { UploadChecklist } from '@/features/upload/components/upload-checklist';
+import { UploadStepHeader } from '@/features/upload/components/upload-step-header';
+import { useSubmitPost } from '@/features/upload/hooks/use-submit-post';
 import { useUploadDraft } from '@/features/upload/upload-draft';
+import { formatHashtag } from '@/utils/format-hashtag';
 
-const radiusCircleSize = 96;
+const locationPin = require('@/assets/icons/location-pick.svg');
+// location_pick 그림(53 높이)에서 뾰족한 끝 아래로 남은 그림자 높이. 끝이 내 자리를 가리키도록 지도를 맞출 때 쓴다.
+const pinShadowBelowTip = 8;
 
 /**
- * 와이어프레임 ② 기록 탭: 남기기 3/3 위치 확인.
- * 집 위치 같은 개인정보가 드러나지 않게 정확한 좌표 대신 반경으로 저장한다는 것을 보여준다.
- * 업로드 API가 나오면 '남기기 완료'에서 draft를 서버로 보낸다.
+ * ② 기록 탭: 남기기 3/3 위치 확인.
+ * 집 위치 같은 개인정보가 드러나지 않게 정확한 좌표 대신 장소 이름(반경)으로 저장한다.
+ * 작은 지도는 셔터를 누른 자리를 핀으로 보여준다. 새로고침 버튼은 서버가 위치가 부정확하다고 할 때 위치를 다시 잡는다.
+ * '완료'에서 draft(사진, 위치, 질문, 제목, 한 줄, 해시태그)를 서버로 보낸다.
  */
 export function ConfirmScreen() {
   const { draft } = useUploadDraft();
+  const { canSubmit, isLocating, isSubmitting, relocate, submit } = useSubmitPost();
+  const coordinate = useMemo(() => (draft.location ? fromServerCoordinate(draft.location) : null), [draft.location]);
 
   return (
     <ScreenContainer
-      header={<ScreenHeader centerText="3 / 3 · 위치 확인" />}
-      footer={<Button label="남기기 완료" variant="primary" onPress={() => router.dismissTo('/record')} />}>
+      contentTopGap={spacing.sm}
+      header={<UploadStepHeader title="위치 확인" step={3} />}
+      footer={
+        <Button
+          label="완료"
+          variant="primary"
+          disabled={!canSubmit}
+          isLoading={isSubmitting}
+          onPress={submit}
+        />
+      }>
       <AppText variant="heading03" style={styles.title}>
         이 자리에 남길게요
       </AppText>
 
       <View style={styles.mapBox}>
-        <MapPlaceholder>
-          <View style={styles.radiusCircle}>
-            <Icon name="location" size={28} />
-          </View>
-          <Badge label={`${draft.placeLabel} · 정확한 좌표 대신 반경으로 저장`} style={styles.mapLabel} />
-        </MapPlaceholder>
+        <PlacePreviewMap
+          coordinate={coordinate}
+          pinTipInset={pinShadowBelowTip}
+          pin={
+            <View style={styles.pin}>
+              <Badge label={draft.placeLabel} tone="dark" />
+              <Image source={locationPin} style={styles.pinImage} contentFit="contain" />
+            </View>
+          }
+        />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="위치 다시 찾기"
+          disabled={isLocating}
+          onPress={relocate}
+          style={styles.reload}>
+          <Icon name="reload" />
+        </Pressable>
       </View>
 
       <View style={styles.preview}>
-        <PhotoPlaceholder width={56} height={70} />
+        <DraftPhoto uri={draft.photoUri} width={100} height={100} />
         <View style={styles.previewTexts}>
-          <AppText variant="subtitle04">{draft.oneLine || '한 줄을 아직 쓰지 않았어요'}</AppText>
-          <AppText variant="caption02" color="textSecondary">
-            {draft.hashtags.join(' ')}
+          <AppText variant="subtitle02" numberOfLines={1}>
+            {draft.title || '제목'}
+          </AppText>
+          <AppText variant="body01" numberOfLines={2}>
+            {draft.oneLine || '한 줄을 아직 쓰지 않았어요'}
+          </AppText>
+          <AppText variant="caption04" color="textTertiary">
+            {draft.hashtags.map(formatHashtag).join(' ')}
           </AppText>
         </View>
       </View>
@@ -58,46 +93,49 @@ export function ConfirmScreen() {
 
 const styles = StyleSheet.create({
   title: {
-    marginTop: spacing.xs,
-    marginBottom: spacing.lg,
+    paddingHorizontal: spacing.xs,
+    marginBottom: spacing.xl,
   },
   mapBox: {
-    height: 170,
+    height: 145,
     borderRadius: radius.lg,
+    backgroundColor: colors.uploadMapBackground,
+    // 지도(WebView)가 둥근 모서리 밖으로 삐져나오지 않게 자른다
     overflow: 'hidden',
   },
-  radiusCircle: {
+  // 지도 위 떠 있는 버튼(IconButton)과 달리 그림자 없이 옅은 회색 동그라미 (Figma reload_circle)
+  reload: {
     position: 'absolute',
-    top: '15%',
-    left: '50%',
-    width: radiusCircleSize,
-    height: radiusCircleSize,
-    marginLeft: -radiusCircleSize / 2,
+    top: spacing.md,
+    right: spacing.md,
+    width: 48,
+    height: 48,
     borderRadius: radius.full,
-    borderWidth: 1.5,
-    borderStyle: 'dashed',
-    borderColor: colors.borderStrong,
-    backgroundColor: colors.selectedBackground,
+    backgroundColor: colors.softCircleButton,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  mapLabel: {
-    position: 'absolute',
-    left: spacing.sm,
-    bottom: spacing.sm,
+  pin: {
+    alignItems: 'center',
+  },
+  // Figma location_pick은 그림자까지 포함한 크기라 핀 본체(38x45)보다 조금 크다
+  pinImage: {
+    width: 45,
+    height: 53,
   },
   preview: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
-    marginVertical: spacing.lg,
-    padding: spacing.md,
-    borderRadius: radius.lg,
+    gap: spacing.md,
+    marginVertical: spacing.xl,
+    padding: spacing.sm,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.disabledBackground,
+    borderColor: colors.borderDeactivated,
   },
+  // Figma 미리보기 카드: 글 묶음 위아래 4
   previewTexts: {
     flex: 1,
-    gap: spacing.xxs,
+    paddingVertical: spacing.xxs,
   },
 });

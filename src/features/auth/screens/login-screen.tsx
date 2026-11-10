@@ -1,106 +1,120 @@
-import { Link, router } from 'expo-router';
+import { Link } from 'expo-router';
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { isApiError } from '@/api/api-error';
+import { login } from '@/api/auth';
 import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
 import { ScreenContainer } from '@/components/screen-container';
 import { TextField } from '@/components/text-field';
-import { colors } from '@/constants/colors';
-import { spacing } from '@/constants/layout';
-import { SocialLoginButton } from '@/features/auth/components/social-login-button';
+import { showToast } from '@/components/toast';
+import { sectionGap, spacing } from '@/constants/layout';
+import { goAfterLogin } from '@/features/auth/utils/go-after-login';
+import { showApiError } from '@/utils/show-api-error';
 
 /**
- * 와이어프레임 ⓪ 시작: 로그인.
- * 아직 백엔드가 없어서 어떤 버튼을 눌러도 권한 요청 화면으로 넘어간다.
+ * 시작: 이메일 로그인. 서버에서 받은 출입증을 저장하고, 설문 여부에 따라 지도나 권한 안내로 보낸다.
+ * 틀리면 두 칸을 빨갛게 하고 위쪽 토스트로 알려준다 (Figma 로그인 오류 화면).
  */
 export function LoginScreen() {
-  const goNext = () => router.push('/permission');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [hasLoginFailed, setHasLoginFailed] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // 다시 고치기 시작하면 빨간 표시를 지운다
+  const changeEmail = (value: string) => {
+    setEmail(value);
+    setHasLoginFailed(false);
+  };
+  const changePassword = (value: string) => {
+    setPassword(value);
+    setHasLoginFailed(false);
+  };
+
+  const failLogin = (message: string) => {
+    setHasLoginFailed(true);
+    showToast(message, 'error');
+  };
+
+  // Figma처럼 로그인 버튼은 늘 눌린다. 빈 칸으로 누르면 서버에 보내지 않고 바로 알려준다.
+  const submit = async () => {
+    if (isSubmitting) return;
+    if (email.trim().length === 0 || password.length === 0) {
+      failLogin('이메일과 비밀번호를 입력해 주세요');
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      await login(email.trim(), password);
+      await goAfterLogin();
+    } catch (error) {
+      // 이메일 모양이 틀린 것(INVALID_INPUT)도 Figma에 따로 화면이 없어서 '일치하지 않습니다'로 같이 보여준다
+      if (isApiError(error, 'LOGIN_FAILED') || isApiError(error, 'INVALID_INPUT')) failLogin('이메일 또는 비밀번호가 일치하지 않습니다');
+      else showApiError(error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
-    <ScreenContainer
-      footer={
-        <AppText variant="caption02" color="textTertiary" style={styles.center}>
-          신고와 내 사진 관리는 로그인한 사용자만 할 수 있어요
-        </AppText>
-      }>
-      <View style={styles.title}>
-        <AppText variant="heading01">「가까이」</AppText>
-        <AppText variant="heading03">{'다가가야 보이는 지도,\n로그인하고 시작해요'}</AppText>
-      </View>
-
-      <View style={styles.socialButtons}>
-        <SocialLoginButton provider="kakao" onPress={goNext} />
-        <SocialLoginButton provider="google" onPress={goNext} />
-      </View>
-
-      <View style={styles.divider}>
-        <View style={styles.line} />
-        <AppText variant="caption02" color="textTertiary">
-          또는 이메일로
-        </AppText>
-        <View style={styles.line} />
-      </View>
+    <ScreenContainer contentTopGap={spacing.lg}>
+      <AppText variant="heading01">로그인</AppText>
 
       <View style={styles.form}>
         <TextField
           label="이메일"
-          placeholder="example@yu.ac.kr"
+          placeholder="이메일을 입력해 주세요"
+          value={email}
+          onChangeText={changeEmail}
+          // 둘 중 무엇이 틀렸는지 서버가 알려주지 않아서 두 칸 모두 빨갛게만 하고, 문구는 토스트로 한 번만 보여준다
+          error={hasLoginFailed ? '' : undefined}
           keyboardType="email-address"
           autoCapitalize="none"
+          autoComplete="email"
         />
-        <TextField label="비밀번호" placeholder="비밀번호" secureTextEntry />
-        <Button label="로그인" onPress={goNext} style={styles.loginButton} />
+        <TextField
+          label="비밀번호"
+          placeholder="비밀번호를 입력해 주세요"
+          value={password}
+          onChangeText={changePassword}
+          error={hasLoginFailed ? '' : undefined}
+          isPassword
+          autoComplete="current-password"
+        />
       </View>
 
-      <View style={styles.links}>
-        <AppText variant="button04" color="textSecondary">
-          비밀번호 찾기
+      <Link href="/signup" style={styles.signupLink}>
+        <AppText variant="button04" color="textTertiary" style={styles.underline}>
+          아직 회원이 아니신가요?
         </AppText>
-        <AppText variant="button04" color="borderDeactivated">
-          |
-        </AppText>
-        <Link href="/signup">
-          <AppText variant="button03">이메일로 회원가입</AppText>
-        </Link>
-      </View>
+      </Link>
+
+      {/* 키보드가 올라와도 가려지지 않게 GUI처럼 버튼을 입력칸 바로 아래에 둔다 */}
+      <Button
+        label="로그인"
+        variant="primary"
+        onPress={submit}
+        style={styles.loginButton}
+      />
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  title: {
-    marginTop: spacing.xxxl,
-    gap: spacing.xs,
-  },
-  socialButtons: {
-    marginTop: spacing.xxl,
-    gap: spacing.sm,
-  },
-  divider: {
-    marginVertical: spacing.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  line: {
-    flex: 1,
-    height: 1,
-    backgroundColor: colors.disabledBackground,
-  },
   form: {
-    gap: spacing.md,
+    marginTop: sectionGap,
+    gap: spacing.xl,
+  },
+  signupLink: {
+    marginTop: spacing.xxl,
+    alignSelf: 'center',
+  },
+  underline: {
+    textDecorationLine: 'underline',
   },
   loginButton: {
-    marginTop: spacing.xxs,
-  },
-  links: {
-    marginTop: 'auto',
-    paddingTop: spacing.xxl,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: spacing.md,
-  },
-  center: {
-    textAlign: 'center',
+    marginTop: sectionGap,
   },
 });

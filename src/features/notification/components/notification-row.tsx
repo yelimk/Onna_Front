@@ -1,79 +1,66 @@
+import { Image } from 'expo-image';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
-import { PhotoPlaceholder } from '@/components/photo-placeholder';
 import { colors } from '@/constants/colors';
 import { radius, spacing } from '@/constants/layout';
-import type { AppNotification } from '@/mock/notifications';
+import type { AppNotification } from '@/types/api';
+
+// Figma 알림 문구. 누가 열었는지, 몇 명인지는 보여주지 않는다.
+const messages: Record<AppNotification['type'], string> = {
+  OPENED: '누군가 당신의 순간에 다녀갔어요',
+  TEASER: '이 순간이 구역 대표 사진이 되었어요',
+};
 
 type NotificationRowProps = {
   notification: AppNotification;
+  isUnread: boolean;
   onPress: () => void;
 };
 
-/** 알림 한 줄. 안 읽은 알림은 왼쪽에 점이 붙는다. 누가 눌렀는지, 몇 명인지는 보여주지 않는다. */
-export function NotificationRow({ notification, onPress }: NotificationRowProps) {
+/**
+ * 알림 한 줄 (Figma alert). 아래 줄은 내가 남긴 한 줄을 따옴표로 묶어 보여준다. 새 알림은 오른쪽 위에 빨간 점이 붙는다.
+ * 한 줄이 비어 있는 기록이면 기록 제목을 대신 보여준다.
+ */
+export function NotificationRow({ notification, isUnread, onPress }: NotificationRowProps) {
   return (
-    <Pressable style={styles.row} onPress={onPress}>
-      <View style={[styles.dot, notification.isUnread && styles.unreadDot]} />
+    <Pressable accessibilityRole="button" style={styles.row} onPress={onPress}>
+      <Image source={{ uri: notification.imageUrl }} style={styles.photo} contentFit="cover" />
       <View style={styles.texts}>
-        <AppText variant="subtitle04">{notification.title}</AppText>
-        <AppText variant="caption02" color="textTertiary">
-          {notification.detail}
+        <AppText variant="subtitle04" numberOfLines={1}>
+          {messages[notification.type]}
+        </AppText>
+        <AppText variant="caption04" color="textTertiary" numberOfLines={1}>
+          {`“${notification.oneLine ?? notification.title}”`}
         </AppText>
       </View>
-      <PhotoPlaceholder width={52} height={52} />
+      {isUnread && <View style={styles.unreadDot} />}
     </Pressable>
-  );
-}
-
-/** 휴대폰 잠금 화면에 뜰 푸시 알림 모양 예시 */
-export function PushPreview() {
-  return (
-    <View style={styles.push}>
-      <View style={styles.appIcon} />
-      <View style={styles.texts}>
-        <AppText variant="subtitle04">가까이</AppText>
-        <AppText variant="caption01">누군가 당신의 순간에 다녀갔어요</AppText>
-      </View>
-      <PhotoPlaceholder width={40} height={40} />
-    </View>
   );
 }
 
 const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.background02,
+    alignItems: 'flex-end',
+    gap: spacing.md,
+    paddingVertical: spacing.sm,
   },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: radius.full,
-  },
+  // 사진·글자 줄과 따로 오른쪽 위 끝에 붙인다
   unreadDot: {
-    backgroundColor: colors.primary,
+    alignSelf: 'flex-start',
+    width: 8,
+    height: 8,
+    borderRadius: radius.full,
+    backgroundColor: colors.error,
   },
   texts: {
     flex: 1,
     gap: spacing.xxs,
   },
-  push: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    padding: spacing.md,
-    borderRadius: radius.lg,
-    backgroundColor: colors.background02,
-  },
-  appIcon: {
-    width: 24,
-    height: 24,
+  photo: {
+    width: 40,
+    height: 40,
     borderRadius: radius.sm,
-    backgroundColor: colors.primary,
   },
 });

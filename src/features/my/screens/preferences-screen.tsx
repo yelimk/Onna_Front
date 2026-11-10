@@ -1,60 +1,115 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
-import { Chip } from '@/components/chip';
 import { ScreenContainer } from '@/components/screen-container';
 import { ScreenHeader } from '@/components/screen-header';
+import { showToast } from '@/components/toast';
 import { spacing } from '@/constants/layout';
-import { mockSelectedPreferences, preferenceGroups } from '@/features/my/constants/preference-options';
+import { minPreferredTagCount } from '@/constants/preferred-tags';
+import { walkDurationOptions, walkTimeOptions, type WalkTime } from '@/constants/walk-options';
+import { ChipGroup, PreferenceCard } from '@/features/my/components/preference-card';
+import { useSavedPreferences } from '@/features/my/hooks/use-saved-preferences';
+import { useTags } from '@/hooks/use-tags';
+import { formatHashtag } from '@/utils/format-hashtag';
+import { showApiError } from '@/utils/show-api-error';
 
 /**
- * 와이어프레임 ③ 마이 탭: 사용자 기호 수정. 온보딩 설문에서 고른 취향을 다시 고친다.
- * 취향 API가 나오면 '저장하기'에서 서버로 보낸다. 지금은 닫기만 한다.
+ * ③ 마이 탭: 사용자 기호 설정 (Figma 새 버전: 해시태그 유형 카드 + 걸음 유형 카드).
+ * 해시태그와 걷는 유형을 고르고 '저장하기'로 통째로 바꿔 저장한다.
+ * 들어오면 전에 고른 값을 미리 골라 둔다 (use-saved-preferences.ts).
+ * 고르는 기준은 온보딩 설문과 같다: 해시태그 3개 이상, 걷는 방식 1개 이상, 한번에 걷는 시간 1개.
  */
 export function PreferencesScreen() {
-  const [selected, setSelected] = useState<string[]>(mockSelectedPreferences);
+  const { tags, hasFailed, reload } = useTags();
+  const { selectedTagIds, setSelectedTagIds, walkTimes, setWalkTimes, walkDuration, setWalkDuration, savePreferences } =
+    useSavedPreferences();
+  const [isSaving, setIsSaving] = useState(false);
 
-  const toggle = (hashtag: string) =>
-    setSelected(selected.includes(hashtag) ? selected.filter((item) => item !== hashtag) : [...selected, hashtag]);
+  const toggleTag = (tagId: number) =>
+    setSelectedTagIds((ids) => (ids.includes(tagId) ? ids.filter((id) => id !== tagId) : [...ids, tagId]));
+  const toggleWalkTime = (time: WalkTime) =>
+    setWalkTimes((times) => (times.includes(time) ? times.filter((item) => item !== time) : [...times, time]));
+
+  const save = async () => {
+    // 저장하는 동안 버튼 모양은 그대로 두고, 두 번 눌러도 한 번만 보낸다
+    if (isSaving) return;
+    // 서버는 기준보다 적게 고르면 받지 않는다. 버튼은 Figma처럼 늘 주황으로 두고, 모자라면 저장하지 않고 알려준다.
+    if (selectedTagIds.length < minPreferredTagCount) {
+      showToast(`해시태그를 ${minPreferredTagCount}개 이상 선택해 주세요`, 'error');
+      return;
+    }
+    if (walkTimes.length === 0) {
+      showToast('걷는 방식을 하나 이상 선택해 주세요', 'error');
+      return;
+    }
+    if (!walkDuration) {
+      showToast('한번에 걷는 시간을 선택해 주세요', 'error');
+      return;
+    }
+    setIsSaving(true);
+    try {
+      await savePreferences(tags ?? [], walkDuration);
+      router.back();
+    } catch (error) {
+      showApiError(error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <ScreenContainer
-      header={<ScreenHeader title="사용자 기호 수정" />}
-      footer={<Button label="저장하기" variant="primary" onPress={() => router.back()} />}>
-      <AppText variant="heading03">어떤 자리에 끌리나요?</AppText>
-      <AppText variant="caption01" color="textTertiary" style={styles.caption}>
-        고른 해시태그로 지도에 띄울 사진과 산책길을 골라요 · {selected.length}개 선택
-      </AppText>
+      background="gray"
+      contentTopGap={spacing.xs}
+      header={<ScreenHeader title="사용자 기호 설정" />}
+      footer={<Button label="저장하기" variant="primary" onPress={save} />}>
+      <View style={styles.cards}>
+        <PreferenceCard title="해시태그 유형" description="마음이 가는 해시태그를 모두 선택해 주세요">
+          {hasFailed && (
+            <Pressable onPress={reload} hitSlop={8}>
+              <AppText variant="caption02" color="textTertiary">
+                해시태그를 불러오지 못했어요. 눌러서 다시 불러오기
+              </AppText>
+            </Pressable>
+          )}
+          <ChipGroup
+            options={(tags ?? []).map((tag) => ({ key: tag.id, label: formatHashtag(tag.name) }))}
+            isSelected={(tagId) => selectedTagIds.includes(tagId)}
+            onToggle={toggleTag}
+          />
+        </PreferenceCard>
 
-      {preferenceGroups.map((group) => (
-        <View key={group.title} style={styles.group}>
-          <AppText variant="subtitle04">{group.title}</AppText>
-          <View style={styles.chips}>
-            {group.hashtags.map((hashtag) => (
-              <Chip key={hashtag} label={hashtag} selected={selected.includes(hashtag)} onPress={() => toggle(hashtag)} />
-            ))}
+        <PreferenceCard title="걸음 유형" gapBelowTitle={spacing.sm}>
+          <View style={styles.walkGroups}>
+            <ChipGroup
+              label="걷는 방식"
+              options={walkTimeOptions.map((time) => ({ key: time, label: time }))}
+              isSelected={(time) => walkTimes.includes(time)}
+              onToggle={toggleWalkTime}
+            />
+            <ChipGroup
+              label="한번에 걷는 시간"
+              options={walkDurationOptions.map((duration) => ({ key: duration, label: duration }))}
+              isSelected={(duration) => walkDuration === duration}
+              onToggle={setWalkDuration}
+            />
           </View>
-        </View>
-      ))}
+        </PreferenceCard>
+      </View>
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  caption: {
-    marginTop: spacing.xs,
-    marginBottom: spacing.xl,
+  // Figma: 카드끼리 20
+  cards: {
+    gap: spacing.lg,
   },
-  group: {
-    gap: spacing.sm,
-    marginBottom: spacing.xl,
-  },
-  chips: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.xs,
+  // Figma 걸음 유형: 묶음끼리 24
+  walkGroups: {
+    gap: spacing.xl,
   },
 });

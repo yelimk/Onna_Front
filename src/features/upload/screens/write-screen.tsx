@@ -1,84 +1,127 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Keyboard, Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
-import { PhotoPlaceholder } from '@/components/photo-placeholder';
 import { ScreenContainer } from '@/components/screen-container';
-import { ScreenHeader } from '@/components/screen-header';
 import { TextField } from '@/components/text-field';
-import { spacing } from '@/constants/layout';
-import { AiHashtagPicker, maxHashtagCount, minHashtagCount } from '@/features/upload/components/ai-hashtag-picker';
+import { sectionGap, spacing } from '@/constants/layout';
+import { AiHashtagPicker } from '@/features/upload/components/ai-hashtag-picker';
+import { DraftPhoto } from '@/features/upload/components/draft-photo';
+import { UploadStepHeader } from '@/features/upload/components/upload-step-header';
+import { useHashtagSuggestions } from '@/features/upload/hooks/use-hashtag-suggestions';
+import { useWriteQuestion } from '@/features/upload/hooks/use-write-question';
 import { useUploadDraft } from '@/features/upload/upload-draft';
-import { mockAiHashtagSets } from '@/mock/ai-hashtags';
 
-/** 입력 부담을 줄이려고 한 줄은 한 문장, 40자까지만 받는다 */
+// 서버가 받는 길이에 맞춘다 (제목 10자, 한 줄 40자). Figma는 제목 0/15지만 서버 기준을 따른다.
+const maxTitleLength = 10;
 const maxOneLineLength = 40;
 
 /**
- * 와이어프레임 ② 기록 탭: 남기기 2/3 한 줄.
- * 지금은 정해진 추천 묶음을 보여준다. AI API가 나오면 한 줄을 다 쓴 뒤 그 내용으로 추천을 요청한다.
+ * ② 기록 탭: 남기기 2/3 한 줄 남기기.
+ * 위쪽 질문은 서버가 무작위로 하나 골라 준다.
+ * 해시태그는 한 줄 코멘트를 다 쓰고 입력칸을 벗어나면 AI에게 받아 와서 보여준다.
  */
 export function WriteScreen() {
   const { draft, updateDraft } = useUploadDraft();
-  const [suggestionSetIndex, setSuggestionSetIndex] = useState(0);
+  const { question, hasFailed: questionFailed, reload: reloadQuestion } = useWriteQuestion();
+  const { suggestions, hasFailed, isLoading, requestSuggestions, clearSuggestions } = useHashtagSuggestions();
 
-  const hashtagCount = draft.hashtags.length;
-  const canGoNext =
-    draft.oneLine.trim().length > 0 && hashtagCount >= minHashtagCount && hashtagCount <= maxHashtagCount;
+  // 한 줄을 고치면 그 한 줄로 고른 해시태그도 더는 맞지 않으니 함께 지운다
+  const changeOneLine = (oneLine: string) => {
+    updateDraft({ oneLine, hashtags: [] });
+    clearSuggestions();
+  };
+  const isTitleValid = draft.title.trim().length > 0 && draft.title.length <= maxTitleLength;
+  const isOneLineValid = draft.oneLine.trim().length > 0 && draft.oneLine.length <= maxOneLineLength;
+  const canGoNext = isTitleValid && isOneLineValid && draft.hashtags.length > 0;
 
-  const showOtherSuggestions = () => {
-    setSuggestionSetIndex((suggestionSetIndex + 1) % mockAiHashtagSets.length);
-    updateDraft({ hashtags: [] });
+  // 글자수를 넘긴 한 줄로는 해시태그를 받지 않는다 (어차피 다음으로 못 간다)
+  const askSuggestions = () => {
+    if (isOneLineValid) requestSuggestions(draft.oneLine);
   };
 
   return (
     <ScreenContainer
-      header={<ScreenHeader centerText="2 / 3 · 한 줄 남기기" />}
-      footer={
-        <Button label="다음" variant="primary" disabled={!canGoNext} onPress={() => router.push('/upload/confirm')} />
-      }>
-      <View style={styles.title}>
-        <PhotoPlaceholder width={64} height={80} />
-        <AppText variant="heading03" style={styles.titleText}>
-          {'이 자리에서\n어떤 마음을 받았나요?'}
-        </AppText>
-      </View>
+      contentTopGap={spacing.sm}
+      header={<UploadStepHeader title="한 줄 남기기" step={2} />}
+      // Figma처럼 다 채우기 전(글자수 초과, 해시태그 안 고름 등)에는 '다음' 버튼을 아예 보여주지 않는다
+      footer={canGoNext && <Button label="다음" variant="primary" onPress={() => router.push('/upload/confirm')} />}>
+      {/* 빈 곳을 누르면 키보드를 닫는다. 닫히는 순간 한 줄 칸을 벗어나서 해시태그를 받아 온다. */}
+      <Pressable accessible={false} onPress={Keyboard.dismiss} style={styles.blankArea}>
+        <View style={styles.title}>
+          <DraftPhoto uri={draft.photoUri} width={100} height={100} />
+          {questionFailed ? (
+            <Pressable onPress={reloadQuestion} hitSlop={8} style={styles.titleText}>
+              <AppText variant="body01" color="textTertiary">
+                질문을 불러오지 못했어요. 눌러서 다시 불러오기
+              </AppText>
+            </Pressable>
+          ) : (
+            <AppText variant="heading03" style={styles.titleText}>
+              {question ?? ''}
+            </AppText>
+          )}
+        </View>
 
-      <TextField
-        label="한 문장으로 짧게"
-        value={draft.oneLine}
-        onChangeText={(oneLine) => updateDraft({ oneLine })}
-        placeholder="공강마다 앉는 그 벤치, 오늘도 비어 있었다."
-        helper="예) 사장님이 말없이 고기 더 얹어주는 국밥집."
-        maxLength={maxOneLineLength}
-        showCount
-      />
-
-      <View style={styles.hashtags}>
-        <AiHashtagPicker
-          suggestions={mockAiHashtagSets[suggestionSetIndex]}
-          selected={draft.hashtags}
-          onChange={(hashtags) => updateDraft({ hashtags })}
-          onRefresh={showOtherSuggestions}
-        />
-      </View>
+        <View style={styles.fields}>
+          <TextField
+            label="제목"
+            required
+            value={draft.title}
+            onChangeText={(title) => updateDraft({ title })}
+            placeholder="제목을 입력해 주세요"
+            limit={maxTitleLength}
+          />
+          <TextField
+            label="한줄 코멘트"
+            required
+            // AI는 제목이 아니라 한 줄만 읽고 해시태그를 고르고, 칸을 벗어나자마자 요청한다. 그래서 쓰기 전에 보이는 이 칸 옆에 둔다 (디자이너 요청)
+            labelHint="자세히 쓸수록 해시태그가 잘 맞아요"
+            value={draft.oneLine}
+            onChangeText={changeOneLine}
+            onBlur={askSuggestions}
+            returnKeyType="done"
+            placeholder="한줄 코멘트를 적어주세요"
+            limit={maxOneLineLength}
+          />
+          {hasFailed && (
+            <Pressable onPress={askSuggestions} hitSlop={8}>
+              <AppText variant="caption02" color="textTertiary">
+                해시태그를 받아 오지 못했어요. 눌러서 다시 받기
+              </AppText>
+            </Pressable>
+          )}
+          {/* 한 줄을 쓰기 전에는 칸을 아예 숨기고, AI를 기다리는 동안은 '생성하고 있어요' 상자를 보여준다 */}
+          {(isLoading || suggestions.length > 0) && (
+            <AiHashtagPicker
+              isLoading={isLoading}
+              suggestions={suggestions}
+              selected={draft.hashtags}
+              onChange={(hashtags) => updateDraft({ hashtags })}
+            />
+          )}
+        </View>
+      </Pressable>
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
+  // 화면 아래 빈 곳까지 눌리도록 남은 높이를 채운다
+  blankArea: {
+    flexGrow: 1,
+  },
   title: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    marginBottom: spacing.xl,
   },
   titleText: {
     flex: 1,
   },
-  hashtags: {
-    marginTop: spacing.xl,
+  fields: {
+    marginTop: sectionGap,
+    gap: spacing.xl,
   },
 });

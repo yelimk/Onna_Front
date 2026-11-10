@@ -40,6 +40,13 @@ Docs: https://docs.expo.dev/eas/index.md
 - Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a development build: `npx expo run:ios|android` locally, or `eas build --profile development`.
 - Prefer recommended Expo modules over third-party libraries, and check your available skills before adding dependencies. Docs: https://docs.expo.dev/versions/latest/index.md
 
+### 라이브러리 추가 규칙 (KkoKko_Front)
+
+- Expo Go로 QR 테스트를 계속해야 하므로 **Expo Go에 포함된 모듈만** 쓴다. Expo SDK 공식 모듈을 먼저 찾고, 없으면 React Native Directory에서 Expo Go 지원 표시가 있는 것을 고른다.
+- 라이선스는 MIT, Apache-2.0, BSD, ISC만 쓴다. GPL·AGPL·라이선스 없음은 쓰지 않는다.
+- 설치는 `npx expo install`로 하고, README의 기술 스택 표에 추가한다.
+- 푸시 알림은 1차에서 하지 않는다 (앱 안 알림 목록만). `expo-notifications`는 온보딩 알림 권한 요청에만 쓴다. Android Expo Go에서 불러오기만 해도 경고가 뜨므로 파일 맨 위에서 import하지 않고 쓰는 곳에서 `await import()`로 불러온다.
+
 ## 우리 팀 규칙 (KkoKko_Front)
 
 이 프로젝트는 해커톤 심사에서 **코드 가독성, 아키텍처 설계, 문서화**를 평가받는다. 코드를 쓸 때 아래를 지킨다.
@@ -50,7 +57,7 @@ Docs: https://docs.expo.dev/eas/index.md
 - 글씨는 React Native `Text` 대신 `src/components/app-text.tsx`의 `AppText`를 쓰고, `variant`로 스타일을 고른다. `fontSize`, `fontFamily`를 직접 쓰지 않는다.
 - 디자인 시스템에 없는 값이 필요하면 화면에 임시로 넣지 말고 `src/constants/`에 이름을 붙여 추가한다.
 - 간격과 모서리는 `src/constants/layout.ts`의 `spacing`, `radius`를 쓴다.
-- 화면은 `src/components/`의 공통 부품(`ScreenContainer`, `ScreenHeader`, `Button`, `TextField`, `Checkbox`, `Icon`, `PhotoPlaceholder`, `Chip`, `Badge`, `IconButton`, `SegmentedToggle`, `Radio`, `MapPlaceholder`)으로 먼저 조립하고, 없을 때만 새로 만든다.
+- 화면은 `src/components/`의 공통 부품(`ScreenContainer`, `ScreenHeader`, `Button`, `TextField`, `Checkbox`, `Icon`, `PhotoPlaceholder`, `Chip`, `Badge`, `IconButton`, `Radio`, `MapPlaceholder`, `AppTabBar`, `Toast`, `LikeButton`)으로 먼저 조립하고, 없을 때만 새로 만든다.
 - Figma 파일: `https://www.figma.com/design/yPo9TnNjD86Gedi8oPqgWt/Design` (디자인 시스템, 와이어 프레임, GUI 디자인 페이지)
 
 ### Figma 수치 옮기기
@@ -72,9 +79,9 @@ Figma(Dev Mode, MCP)의 값은 390 너비 아이폰 화면 기준이다. 폰마�
 - `src/features/<기능>/`: 기능별 코드 (`auth`, `map`, `record`, `upload`, `my`, `notification`). 화면은 `screens/`에 두고, 그 기능에서만 쓰는 부품, 훅, 함수도 이 폴더에 둔다.
 - `src/app/`의 라우트 파일은 `export { XxxScreen as default } from '@/features/...'` 한 줄만 둔다.
 - 모든 화면은 와이어프레임 기준 회색 배치(mid-fidelity)로 되어 있다. GUI 디자인을 입힐 때는 배치와 화면 이동은 유지하고 색·그림·간격만 바꾼다.
-- 가짜 데이터는 `src/mock/`와 `features/*/constants/preview-*.ts`에 있다. 화면 안에 가짜 값을 직접 쓰지 않는다.
+- 화면 안에 가짜 값을 직접 쓰지 않는다. 서버 목록이 비어 있으면 가짜 데이터 대신 빈 화면 안내를 보여준다.
 - `src/components/`: 두 개 이상의 기능이 같이 쓰는 부품만 둔다.
-- `src/hooks/`, `src/utils/`, `src/api/`, `src/mock/`, `src/types/`: 여러 기능이 같이 쓰는 훅, 순수 함수, 서버 요청, 가짜 데이터, 데이터 타입.
+- `src/hooks/`, `src/utils/`, `src/api/`, `src/types/`: 여러 기능이 같이 쓰는 훅, 순수 함수, 서버 요청, 데이터 타입.
 - 지도 담당은 주로 `features/map`, 화면 담당은 그 외 기능 폴더에서 작업해서 Git 충돌을 줄인다.
 
 ### 이름과 주석

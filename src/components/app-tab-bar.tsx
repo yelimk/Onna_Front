@@ -1,0 +1,109 @@
+import { useSegments } from 'expo-router';
+import type { BottomTabBarProps } from 'expo-router/tabs';
+import { Pressable, StyleSheet, View } from 'react-native';
+import Animated from 'react-native-reanimated';
+
+import { AppText } from '@/components/app-text';
+import { Icon, type IconName } from '@/components/icon';
+import { colors } from '@/constants/colors';
+import { radius, spacing } from '@/constants/layout';
+import { duration } from '@/constants/motion';
+import { useFadeStyle } from '@/hooks/use-fade-style';
+
+/** 탭 이름(app/(tabs)의 폴더)마다 Figma 탭 아이콘 */
+const tabIcons: Record<string, IconName> = {
+  map: 'location',
+  record: 'record',
+  my: 'person',
+};
+
+// GUI에서 탭 첫 화면에만 탭 바가 있고 안쪽 화면(기록 상세, 좋아요 내역, 설정 등)에는 없는 탭.
+// 지도 탭은 GUI가 화면마다 달라서 지도 담당이 정한 뒤에 추가한다.
+const tabsHidingBarOnInnerScreens = ['record', 'my'];
+
+// Figma '지도 홈 화면 애니메이션'에서 검색을 열면 탭 바가 흐리게 사라진다.
+// 자리까지 없애면 아래 지도 크기가 바뀌어 지도가 출렁이므로, 자리는 두고 흐리게만 지운다.
+const fadingBarScreens = ['map/search'];
+
+const indicatorWidth = 32;
+const indicatorHeight = spacing.xxs;
+
+/**
+ * Figma '지도 홈탭 컴포넌트'의 아래 탭 바.
+ * 고른 탭은 위에 주황 막대를 달고 아이콘·글자를 검게, 나머지는 회색으로 둔다.
+ */
+export function AppTabBar({ state, descriptors, emitter, navigateToTab, insets }: BottomTabBarProps) {
+  // 지금 주소를 조각으로 받는다. 예: /my → ['(tabs)', 'my'], /my/likes → ['(tabs)', 'my', 'likes']
+  const segments = useSegments() as string[];
+  const [, tabName, innerScreen] = segments;
+  const isFadedOut = fadingBarScreens.includes(`${tabName}/${innerScreen}`);
+  const fadeStyle = useFadeStyle(!isFadedOut, duration.fast);
+  if (tabsHidingBarOnInnerScreens.includes(tabName) && innerScreen !== undefined) {
+    return null;
+  }
+
+  return (
+    <Animated.View
+      style={[styles.bar, { paddingBottom: insets.bottom, pointerEvents: isFadedOut ? 'none' : 'auto' }, fadeStyle]}>
+      {state.routes.map((route, index) => {
+        const isFocused = state.index === index;
+        const { options } = descriptors[route.key];
+        const label = options.title ?? route.name;
+        const color = isFocused ? 'textPrimary' : 'textDeactivated';
+
+        // 기본 탭 바와 같은 순서: 먼저 'tabPress'를 알려서 화면이 막을 기회를 주고, 막지 않으면 탭을 옮긴다.
+        const press = () => {
+          const event = emitter.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
+          if (!isFocused && !event.defaultPrevented) navigateToTab(route.key);
+        };
+
+        return (
+          <Pressable
+            key={route.key}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: isFocused }}
+            accessibilityLabel={label}
+            onPress={press}
+            style={styles.tab}>
+            <View style={[styles.indicator, !isFocused && styles.indicatorOff]} />
+            <Icon name={tabIcons[route.name] ?? 'location'} color={color} />
+            <AppText variant="caption03" color={color}>
+              {label}
+            </AppText>
+          </Pressable>
+        );
+      })}
+    </Animated.View>
+  );
+}
+
+const styles = StyleSheet.create({
+  // 탭 바와 위 화면을 나누는 얇은 선 (Figma navigation_bar 상단 stroke 0.5)
+  bar: {
+    flexDirection: 'row',
+    borderTopWidth: 0.5,
+    borderTopColor: colors.borderDeactivated,
+    backgroundColor: colors.background01,
+  },
+  tab: {
+    flex: 1,
+    alignItems: 'center',
+    gap: spacing.xxs,
+    paddingBottom: spacing.xs,
+  },
+  // 고르지 않은 탭도 같은 자리를 비워 둬서, 탭을 바꿔도 아이콘 높이가 흔들리지 않게 한다.
+  // Figma 탭 바: 주황 막대와 아이콘 사이 8. 탭 안 간격(4)에 4를 더해서 맞춘다
+  indicator: {
+    width: indicatorWidth,
+    height: indicatorHeight,
+    marginBottom: spacing.xxs,
+    // 네 모서리를 모두 둥글게 한다 (Figma 선택 탭 주황 line, 모서리 4)
+    borderRadius: radius.xs,
+    backgroundColor: colors.primary,
+  },
+  // 고르지 않은 탭은 색을 빼지 않고 투명하게만 한다.
+  // 배경색을 넣었다 뺐다 하면 안드로이드가 이 칸을 지웠다 다시 만들면서 모서리 둥글기를 놓쳐 각지게 보인다
+  indicatorOff: {
+    opacity: 0,
+  },
+});

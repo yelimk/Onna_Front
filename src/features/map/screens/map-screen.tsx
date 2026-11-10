@@ -1,102 +1,150 @@
-import { router } from 'expo-router';
-import { useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Badge } from '@/components/badge';
-import { IconButton } from '@/components/icon-button';
-import { MapPlaceholder } from '@/components/map-placeholder';
 import { screenPaddingX, spacing } from '@/constants/layout';
-import { HashtagFilter } from '@/features/map/components/hashtag-filter';
+import { AiBadge } from '@/features/map/components/ai-badge';
+import { ExploreModeToggle } from '@/features/map/components/explore-mode-toggle';
+import { ExploreSheet } from '@/features/map/components/explore-sheet';
 import { LocationPermissionCard } from '@/features/map/components/location-permission-card';
-import { CampusSummaryCard, MapLegend } from '@/features/map/components/map-bottom-info';
-import { MapControls } from '@/features/map/components/map-controls';
-import { ClusterMarker, EmptySpotMarker, PhotoMarker } from '@/features/map/components/map-markers';
+import { MapActionButtons } from '@/features/map/components/map-action-buttons';
 import { MapSearchBar } from '@/features/map/components/map-search-bar';
-import { NearestSpotCard } from '@/features/map/components/nearest-spot-card';
-import { MyLocationDot, OpenRadius } from '@/features/map/components/open-radius';
-import {
-  previewCampusSummary,
-  previewFilterHashtags,
-  previewMapLevels,
-  previewNearestSpot,
-  zoomLevels,
-  type ZoomLevel,
-} from '@/features/map/constants/preview-markers';
-import { useLocationPermission } from '@/features/map/hooks/use-location-permission';
+import { getSelectedResultKey, SelectedResultCard } from '@/features/map/components/selected-result-card';
+import { SlidingPanel } from '@/features/map/components/sliding-panel';
+import { openRadiusMeters } from '@/features/map/constants/map-config';
+import { mapChromeFadeMs } from '@/features/map/constants/map-motion';
+import { useHomeMapMarkers } from '@/features/map/hooks/use-home-map-markers';
+import { useHomeRoutes } from '@/features/map/hooks/use-home-routes';
+import { refreshZones, setZonesCenter } from '@/features/map/hooks/use-map-zones';
+import { useMyLocation } from '@/features/map/hooks/use-my-location';
+import { useMyMapPosts } from '@/features/map/hooks/use-my-map-posts';
+import { KakaoMapView } from '@/features/map/kakao-map/kakao-map-view';
+import type { MapMarker } from '@/features/map/types/home-map-marker';
+import { getZonesNotice } from '@/features/map/utils/get-zones-notice';
+import { openRecord } from '@/features/map/utils/open-search-result';
+import { useFadeStyle } from '@/hooks/use-fade-style';
+
+function openMarker(marker: MapMarker) {
+  if (marker.kind === 'cluster') router.push(`/map/cluster/${marker.id}`);
+  else if (marker.kind === 'photo') openRecord(marker.id);
+}
 
 /**
- * 와이어프레임 ① 지도(홈) 탭, ①-A 축척.
- * 확대 단계(넓게 / 기본 / 자세히)마다 보이는 마커와 아래 카드가 바뀐다.
+ * Figma '지도 홈 화면 UI'. 카카오맵 위에 사진 마커, 검색창, 탐색 모드 스위치, 남기기 버튼을 올린다.
+ * 탐색 모드를 켜면 내 위치 둘레에 열림 반경을 그리고, 아래 패널에서 가장 가까운 기록을 보여준다.
+ * 해시태그 검색에서 넘겨받은 장소의 경로 추천과 '산책 경로 추천' 버튼의 AI 추천 경로는 useHomeRoutes가 다룬다.
+ * 내가 남긴 기록은 지도 구역에 들어 있지 않아서(남의 사진만 옴) 따로 받아 함께 올린다.
  * 위치 권한이 없으면 지도 위에 권한 안내를 덮는다.
+ * 검색창을 누르면 Figma '지도 홈 화면 애니메이션'처럼 검색창·탐색 모드만 남기고 나머지를 흐리게 지운 뒤 검색 창을 띄운다.
  */
 export function MapScreen() {
   const insets = useSafeAreaInsets();
-  const { granted, request } = useLocationPermission();
+  const { isChecking, isGranted, location, request } = useMyLocation();
+  const { markers, nearestPhoto, errorCode } = useHomeMapMarkers(location);
+  const zonesNotice = getZonesNotice(errorCode);
+  const myPostMarkers = useMyMapPosts();
+  const [isExploring, setIsExploring] = useState(false);
+  // 탐색 모드를 켜면 바로 가장 가까운 기록이 보이도록 펼친 상태로 시작한다.
+  const [isSheetExpanded, setIsSheetExpanded] = useState(true);
   const [isBrowsing, setIsBrowsing] = useState(false);
-  const [selectedHashtag, setSelectedHashtag] = useState('전체');
-  const [zoomLevel, setZoomLevel] = useState<ZoomLevel>('default');
+  const [isOpeningSearch, setIsOpeningSearch] = useState(false);
+  const chromeStyle = useFadeStyle(!isOpeningSearch, mapChromeFadeMs);
 
-  const level = previewMapLevels[zoomLevel];
-  const isDefaultZoom = zoomLevel === 'default';
-  const showPermissionCard = !granted && !isBrowsing;
+  // 지도 홈으로 돌아오면 검색을 열 때 지웠던 버튼과 이름표를 다시 보여주고, 그사이 남겨진 새 기록이 보이게 구역을 새로 받는다.
+  useFocusEffect(
+    useCallback(() => {
+      setIsOpeningSearch(false);
+      refreshZones();
+    }, []),
+  );
 
-  const changeZoom = (step: 1 | -1) => {
-    const nextIndex = zoomLevels.indexOf(zoomLevel) + step;
-    const next = zoomLevels[Math.min(Math.max(nextIndex, 0), zoomLevels.length - 1)];
-    setZoomLevel(next);
+  const routes = useHomeRoutes(location);
+
+  // 오른쪽 '내 위치' 버튼을 누를 때마다 번호를 올려, 지도가 내 위치로 돌아오게 한다 (다른 곳을 둘러보다가 돌아올 때).
+  const [recenterRequest, setRecenterRequest] = useState(0);
+  const moveToMyLocation = () => setRecenterRequest((count) => count + 1);
+
+  const openSearch = () => {
+    // 검색에서 장소를 골라 돌아오면 그 장소 경로를 보므로, 보고 있던 AI 추천 경로는 닫는다.
+    routes.closeAiRoute();
+    setIsOpeningSearch(true);
+    router.push('/map/search');
+  };
+  // 남의 기록(구역)에 내 기록을 더하고, 고른 장소가 있으면 그 핀을 위에 더한다.
+  const mapMarkers = useMemo<MapMarker[]>(
+    () => [...markers, ...myPostMarkers, ...routes.placeMarkers],
+    [markers, myPostMarkers, routes.placeMarkers],
+  );
+
+  const showPermissionCard = !isChecking && !isGranted && !isBrowsing;
+
+  const changeExploring = (next: boolean) => {
+    setIsExploring(next);
+    if (next) setIsSheetExpanded(true);
   };
 
   return (
     <View style={styles.screen}>
-      <MapPlaceholder>
-        {level.clusters.map(({ id, ...cluster }) => (
-          <ClusterMarker key={id} {...cluster} onPress={() => router.push(`/map/cluster/${id}`)} />
-        ))}
-        {level.emptySpot && (
-          <EmptySpotMarker
-            {...level.emptySpot}
-            onPress={() => router.push(`/map/spot/${level.emptySpot?.id}`)}
-          />
-        )}
-        {level.myLocation.showRadius ? (
-          <OpenRadius {...level.myLocation} showLabel={isDefaultZoom} />
-        ) : (
-          <MyLocationDot {...level.myLocation} />
-        )}
-        {level.photos.map(({ id, ...photo }) => (
-          <PhotoMarker key={`${zoomLevel}-${id}`} {...photo} onPress={() => router.push(`/map/spot/${id}`)} />
-        ))}
-      </MapPlaceholder>
+      <KakaoMapView
+        markers={mapMarkers}
+        myLocation={location}
+        openRadiusMeters={isExploring ? openRadiusMeters : null}
+        focus={routes.focus}
+        routePath={routes.routePath}
+        isQuiet={isOpeningSearch}
+        onMarkerPress={openMarker}
+        recenterRequest={recenterRequest}
+        onCenterChange={setZonesCenter}
+      />
 
       <View style={[styles.top, { paddingTop: insets.top + spacing.xs }]}>
-        <MapSearchBar regionLabel={level.regionLabel} />
-        {level.notice ? (
-          <View style={styles.notice}>
-            <Badge label={level.notice} tone="dark" />
-          </View>
-        ) : (
-          <HashtagFilter hashtags={previewFilterHashtags} selected={selectedHashtag} onSelect={setSelectedHashtag} />
+        <MapSearchBar onPress={openSearch} />
+        <View style={styles.toggle}>
+          <ExploreModeToggle value={isExploring} onChange={changeExploring} />
+        </View>
+        {zonesNotice && <Badge label={zonesNotice} tone="dark" style={styles.notice} />}
+        {routes.isAiRouteShown && (
+          <Animated.View style={chromeStyle}>
+            <AiBadge label="AI 추천 경로" />
+          </Animated.View>
         )}
       </View>
 
-      <View style={styles.bottom}>
-        <View style={styles.sideButtons}>
-          <MapControls onZoomIn={() => changeZoom(1)} onZoomOut={() => changeZoom(-1)} zoomOnly={!isDefaultZoom} />
-          {isDefaultZoom && (
-            <IconButton
-              icon="camera"
-              accessibilityLabel="지금 이 자리 남기기"
-              emphasized
-              size={56}
-              onPress={() => router.push('/upload/camera')}
+      <Animated.View style={[styles.chrome, chromeStyle]}>
+        {routes.card ? (
+          // Figma '지도 경로 탐색 애니메이션': 카드가 아래에서 올라오고, 장소 카드 → 경로 카드처럼 바뀌면 이전 카드가 내려간 뒤 새 카드가 올라온다.
+          <SlidingPanel key={getSelectedResultKey(routes.card)}>
+            <SelectedResultCard
+              state={routes.card}
+              onLayout={({ nativeEvent }) => routes.setCardHeight(Math.round(nativeEvent.layout.height))}
+              onClose={routes.closeCard}
+              onRecommend={routes.recommendRoute}
+              onRouteExpandedChange={routes.setIsRouteExpanded}
+              onWalk={routes.walkThisRoute}
             />
-          )}
-        </View>
-        {zoomLevel === 'overview' && <CampusSummaryCard spotCount={previewCampusSummary.spotCount} />}
-        {zoomLevel === 'default' && <NearestSpotCard {...previewNearestSpot} />}
-        {zoomLevel === 'detail' && <MapLegend />}
-      </View>
+          </SlidingPanel>
+        ) : (
+          // 탐색 모드 시트와 오른쪽 버튼을 따로 둔다. 한 줄로 쌓으면 시트가 생기거나 펼쳐질 때 버튼이 밀려 올라간다.
+          // 버튼 셋은 탐색 모드를 켜고 끄거나 시트를 펼쳐도 늘 같은 자리다 (사용자 결정). 시트보다 나중에 그려 겹치면 버튼이 위에 보인다.
+          <>
+            {isExploring && (
+              <View style={styles.sheetArea}>
+                <ExploreSheet
+                  nearestPhoto={nearestPhoto}
+                  isExpanded={isSheetExpanded}
+                  onExpandedChange={setIsSheetExpanded}
+                />
+              </View>
+            )}
+            <View style={styles.actions}>
+              <MapActionButtons onMyLocationPress={moveToMyLocation} onRoutePress={routes.openAiRoute} />
+            </View>
+          </>
+        )}
+      </Animated.View>
 
       {showPermissionCard && <LocationPermissionCard onRequest={request} onBrowse={() => setIsBrowsing(true)} />}
     </View>
@@ -107,25 +155,39 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
+  // 지도를 끌 수 있도록 검색창·버튼이 없는 빈 곳의 터치는 아래 지도로 넘긴다.
   top: {
     position: 'absolute',
     left: 0,
     right: 0,
     paddingHorizontal: screenPaddingX,
     gap: spacing.sm,
+    pointerEvents: 'box-none',
+  },
+  // 아래쪽 버튼·패널을 한 번에 흐리게 하려고 덮는 층. 빈 곳의 터치는 지도로 넘긴다.
+  chrome: {
+    ...StyleSheet.absoluteFill,
+    pointerEvents: 'box-none',
+  },
+  toggle: {
+    alignSelf: 'flex-end',
   },
   notice: {
-    alignItems: 'center',
+    alignSelf: 'center',
   },
-  bottom: {
+  // Figma 지도 홈(위치 관련 추가사항): 카메라 버튼 아래 끝이 탭 바에서 24 떨어져 있다 (Figma 코드의 bottom 110은 탭 바 높이를 포함한 값).
+  // 탐색 모드를 켜고 꺼도 이 자리 그대로다.
+  actions: {
+    position: 'absolute',
+    right: screenPaddingX,
+    bottom: spacing.xl,
+  },
+  // Figma 탐색 모드 패널: 펼치면 탭 바 위에 뜨고, 접으면 탭 바 뒤로 내려가 손잡이만 보인다 (오르내림은 ExploreSheet).
+  // 버튼보다 먼저 그려서 겹치면 버튼이 위에 보인다.
+  sheetArea: {
     position: 'absolute',
     left: screenPaddingX,
     right: screenPaddingX,
-    bottom: spacing.md,
-    gap: spacing.md,
-  },
-  sideButtons: {
-    alignItems: 'flex-end',
-    gap: spacing.md,
+    bottom: 0,
   },
 });
