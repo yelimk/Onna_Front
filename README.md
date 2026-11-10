@@ -88,7 +88,7 @@ src/api/                  서버 요청. 모든 요청은 client.ts를 거침
 ```
 
 - **라우트와 화면 분리**: `src/app/`의 파일은 `export { MapScreen as default } from '@/features/map/screens/map-screen';` 한 줄이라, 주소와 화면을 따로 바꿀 수 있습니다.
-- **기능별 폴더**: 한 기능만 쓰는 코드는 그 기능 폴더에, 두 기능 이상이 쓰면 공통 폴더에 둡니다. 공통 폴더는 기능 폴더를 가져다 쓰지 않습니다.
+- **기능별 폴더**: 기능 코드는 그 기능 폴더에 두고, 디자인 시스템 부품·서버 요청·데이터 타입처럼 앱 전체가 쓰는 것은 공통 폴더에 둡니다. 공통 폴더는 기능 폴더를 가져다 쓰지 않습니다. 기능끼리는 필요한 부품만 가져다 씁니다 (예: 남기기 위치 확인의 작은 지도, 마이 좋아요 상세의 신고 창은 지도 기능의 것을 씁니다).
 - **화면은 그리기, 훅은 데이터**: 서버에서 받고 다시 받고 실패를 처리하는 일은 `use-*.ts` 훅이 맡고, 화면은 결과만 그립니다.
 - **서버 요청 한 곳**: 모든 요청이 `api/client.ts`를 거쳐 토큰 붙이기, 만료 시 재발급, 오류 변환을 한 번에 처리합니다.
 
@@ -333,7 +333,7 @@ npx eas-cli@latest update --branch develop --environment development --message "
    npx expo lint      # 코드 규칙 검사
    npx tsc --noEmit   # 타입 검사
    ```
-4. `develop`으로 PR을 올리고, 충돌이 있으면 `develop`을 내 브랜치에 합쳐 풉니다.
+4. GitLab에서 `develop`으로 MR(Merge Request)을 올리고, 충돌이 있으면 `develop`을 내 브랜치에 합쳐 풉니다.
 5. `develop` → `main`은 시연·제출 전에 함께 확인하고 합칩니다.
 
 | 담당 | 폴더 |
