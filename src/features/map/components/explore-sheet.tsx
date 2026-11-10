@@ -1,6 +1,14 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import Animated, { SlideInDown, SlideOutDown } from 'react-native-reanimated';
+import Animated, {
+  SlideInDown,
+  SlideOutDown,
+  useAnimatedReaction,
+  useAnimatedStyle,
+  useDerivedValue,
+  withTiming,
+  type SharedValue,
+} from 'react-native-reanimated';
 
 import { AppText } from '@/components/app-text';
 import { Icon } from '@/components/icon';
@@ -17,35 +25,70 @@ import { openRecord } from '@/features/map/utils/open-search-result';
 const sheetEntering = SlideInDown.duration(duration.normal);
 const sheetExiting = SlideOutDown.duration(duration.fast);
 
+/** 펼쳤을 때 패널 아래와 탭 바 사이 틈. 접으면 이 틈을 지나 탭 바 뒤로 내려간다. */
+const floatGap = spacing.xs;
+const sheetPaddingBottom = spacing.sm;
+
 type ExploreSheetProps = {
   nearestPhoto: PhotoMarker | null;
   isExpanded: boolean;
   onExpandedChange: (isExpanded: boolean) => void;
+  /**
+   * 접힌 패널 바로 위에 놓인 것(지도 홈 오른쪽 버튼)이 패널에 가리지 않으려면 올라가야 하는 높이(px).
+   * 접으면 0, 펼치면 패널이 올라온 높이 + 간격이다. 끄는 동안 손가락을 따라 바뀐다.
+   */
+  aboveLift: SharedValue<number>;
 };
 
 /**
  * 탐색 모드의 아래 패널. Figma '가장 가까운 기록 표시 / 미표시' 두 상태다.
- * 손잡이를 누르거나, 패널을 손가락으로 끌어 펼치고 접는다. 끄는 동안 기록 칸이 손가락을 따라 드러난다.
+ * - 펼침: 탭 바 위에 뜬 카드에 가장 가까운 기록을 보여준다.
+ * - 접음: Figma '미표시'처럼 카드가 탭 바 뒤로 내려가 손잡이만 보인다. 지도를 가리지 않는다.
+ * 손잡이를 누르거나, 패널을 손가락으로 끌어 펼치고 접는다. 끄는 동안 기록 칸과 카드가 손가락을 따라 오르내린다.
  */
-export function ExploreSheet({ nearestPhoto, isExpanded, onExpandedChange }: ExploreSheetProps) {
+export function ExploreSheet({ nearestPhoto, isExpanded, onExpandedChange, aboveLift }: ExploreSheetProps) {
   // 기록 칸은 내용(사진 여부)에 따라 높이가 달라서 그려진 높이를 재서 펼칠 높이로 쓴다.
   const [recordHeight, setRecordHeight] = useState(0);
-  const { panHandlers, contentStyle } = useSheetDrag({ isExpanded, onExpandedChange, openHeight: recordHeight });
+  const { panHandlers, contentStyle, openAmount } = useSheetDrag({ isExpanded, onExpandedChange, openHeight: recordHeight });
+
+  // 0(접음) ~ 1(펼침). 기록 칸이 열린 만큼 카드도 탭 바 뒤에서 올라와 뜬다.
+  const openRatio = useDerivedValue(() => {
+    if (recordHeight > 0) return openAmount.get() / recordHeight;
+    return isExpanded ? 1 : 0;
+  });
+  // 접으면 아래 여백만큼 탭 바 뒤로 내려가 손잡이만 남고, 펼치면 탭 바 위로 floatGap만큼 뜬다.
+  const sinkStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: sheetPaddingBottom - openRatio.get() * (sheetPaddingBottom + floatGap) }],
+  }));
+
+  // 접었을 때보다 더 올라온 높이 = 열린 기록 칸 + 탭 바 뒤에서 올라온 만큼. 펼칠수록 버튼과 패널 사이 간격도 벌린다.
+  useAnimatedReaction(
+    () => openAmount.get() + openRatio.get() * (sheetPaddingBottom + floatGap + spacing.md),
+    (lift) => aboveLift.set(lift),
+  );
+  // 탐색 모드를 끄면 패널이 내려가므로 버튼도 제자리로 내린다.
+  useEffect(() => () => aboveLift.set(withTiming(0, { duration: duration.fast })), [aboveLift]);
 
   return (
-    <Animated.View entering={sheetEntering} exiting={sheetExiting} style={styles.sheet} {...panHandlers}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={isExpanded ? '가장 가까운 기록 접기' : '가장 가까운 기록 펼치기'}
-        hitSlop={spacing.sm}
-        onPress={() => onExpandedChange(!isExpanded)}
-        style={styles.handleArea}>
-        <SheetHandle />
-      </Pressable>
-      <Animated.View style={[styles.recordArea, contentStyle]}>
-        <View onLayout={({ nativeEvent }) => setRecordHeight(Math.round(nativeEvent.layout.height))}>
-          <NearestRecord photo={nearestPhoto} />
-        </View>
+    <Animated.View entering={sheetEntering} exiting={sheetExiting} {...panHandlers}>
+      <Animated.View style={[styles.sheet, sinkStyle]}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={isExpanded ? '가장 가까운 기록 접기' : '가장 가까운 기록 펼치기'}
+          hitSlop={spacing.sm}
+          onPress={() => onExpandedChange(!isExpanded)}
+          style={styles.handleArea}>
+          <SheetHandle />
+        </Pressable>
+        <Animated.View style={[styles.recordArea, contentStyle]}>
+          {/* 바깥 칸 높이가 0(접음)이어도 기록 칸은 제 높이로 재야 해서 위에 띄워 놓는다.
+              칸 안에 그냥 두면 높이가 0으로 재져서 펼칠 높이도 0이 되고, 패널만 오르내리고 기록이 안 보였다. */}
+          <View
+            style={styles.recordContent}
+            onLayout={({ nativeEvent }) => setRecordHeight(Math.round(nativeEvent.layout.height))}>
+            <NearestRecord photo={nearestPhoto} />
+          </View>
+        </Animated.View>
       </Animated.View>
     </Animated.View>
   );
@@ -87,12 +130,18 @@ function NearestRecord({ photo }: { photo: PhotoMarker | null }) {
 const styles = StyleSheet.create({
   sheet: {
     ...floatingShadow,
-    paddingBottom: spacing.sm,
+    paddingBottom: sheetPaddingBottom,
     borderRadius: radius.lg,
     backgroundColor: colors.background01,
   },
   recordArea: {
     overflow: 'hidden',
+  },
+  recordContent: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
   },
   handleArea: {
     alignItems: 'center',

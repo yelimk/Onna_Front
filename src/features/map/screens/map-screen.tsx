@@ -1,7 +1,7 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Badge } from '@/components/badge';
@@ -52,6 +52,9 @@ export function MapScreen() {
   const [isBrowsing, setIsBrowsing] = useState(false);
   const [isOpeningSearch, setIsOpeningSearch] = useState(false);
   const chromeStyle = useFadeStyle(!isOpeningSearch, mapChromeFadeMs);
+  // 탐색 모드 패널을 펼치면 그만큼 오른쪽 버튼을 올려, 패널에 가리지 않고 카메라 버튼도 계속 보이게 한다.
+  const buttonLift = useSharedValue(0);
+  const actionsLiftStyle = useAnimatedStyle(() => ({ transform: [{ translateY: -buttonLift.get() }] }));
 
   // 지도 홈으로 돌아오면 검색을 열 때 지웠던 버튼과 이름표를 다시 보여주고, 그사이 남겨진 새 기록이 보이게 구역을 새로 받는다.
   useFocusEffect(
@@ -80,7 +83,6 @@ export function MapScreen() {
   );
 
   const showPermissionCard = !isChecking && !isGranted && !isBrowsing;
-  const isRecordVisible = isExploring && isSheetExpanded;
 
   const changeExploring = (next: boolean) => {
     setIsExploring(next);
@@ -128,8 +130,8 @@ export function MapScreen() {
             />
           </SlidingPanel>
         ) : (
-          // 탐색 모드 시트와 오른쪽 버튼을 따로 둔다. 한 줄로 쌓으면 시트가 생기거나 펼쳐질 때 버튼이 밀려 올라간다.
-          // Figma 지도 홈은 탐색 모드를 켜도 버튼 셋이 같은 자리다.
+          // 탐색 모드 시트와 오른쪽 버튼을 따로 둔다. 한 줄로 쌓으면 시트가 생길 때 버튼이 밀려 올라간다.
+          // Figma 지도 홈은 탐색 모드를 켜도(시트를 접은 채로는) 버튼 셋이 같은 자리고, 시트를 펼칠 때만 buttonLift만큼 올라간다.
           <>
             {isExploring && (
               <View style={styles.sheetArea}>
@@ -137,16 +139,13 @@ export function MapScreen() {
                   nearestPhoto={nearestPhoto}
                   isExpanded={isSheetExpanded}
                   onExpandedChange={setIsSheetExpanded}
+                  aboveLift={buttonLift}
                 />
               </View>
             )}
-            <View style={styles.actions}>
-              <MapActionButtons
-                onMyLocationPress={moveToMyLocation}
-                onRoutePress={routes.openAiRoute}
-                showCamera={!isRecordVisible}
-              />
-            </View>
+            <Animated.View style={[styles.actions, actionsLiftStyle]}>
+              <MapActionButtons onMyLocationPress={moveToMyLocation} onRoutePress={routes.openAiRoute} />
+            </Animated.View>
           </>
         )}
       </Animated.View>
@@ -187,11 +186,12 @@ const styles = StyleSheet.create({
     right: screenPaddingX,
     bottom: spacing.xl,
   },
-  // Figma에서 탐색 모드 패널은 탭 바 바로 위에 붙어 있다. 버튼보다 먼저 그려서 겹치면 버튼이 위에 보인다.
+  // Figma 탐색 모드 패널: 펼치면 탭 바 위에 뜨고, 접으면 탭 바 뒤로 내려가 손잡이만 보인다 (오르내림은 ExploreSheet).
+  // 버튼보다 먼저 그려서 겹치면 버튼이 위에 보인다.
   sheetArea: {
     position: 'absolute',
     left: screenPaddingX,
     right: screenPaddingX,
-    bottom: spacing.xs,
+    bottom: 0,
   },
 });
