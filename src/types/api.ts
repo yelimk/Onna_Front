@@ -59,6 +59,12 @@ export type PostPreview = Coordinate & {
  * 대표 사진이 있으면 첫 대표 사진(previews[0])의 흐린 좌표, 없으면 구역 가운데 (2026-11-09 서버 변경).
  * 마커 위에 서면 그 대표 사진의 열림 반경(25m) 안에 든다.
  */
+/** 올리기 전 구역 이름 (GET /map/zone-at). 구역 밖이면 둘 다 null */
+export type ZoneName = {
+  zoneId: number | null;
+  name: string | null;
+};
+
 export type Zone = Coordinate & {
   zoneId: number;
   name: string;

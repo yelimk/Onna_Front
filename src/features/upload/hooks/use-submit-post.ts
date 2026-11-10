@@ -6,6 +6,7 @@ import { createPost } from '@/api/posts';
 import { getToastDurationMs, showToast } from '@/components/toast';
 import { useUploadDraft } from '@/features/upload/upload-draft';
 import { getPhotoLocation, hasLocationPermission } from '@/features/upload/utils/get-photo-location';
+import { getPlaceLabel } from '@/features/upload/utils/get-place-label';
 import { showApiError } from '@/utils/show-api-error';
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -30,6 +31,9 @@ export function useSubmitPost() {
     setIsLocating(false);
     if (location) {
       updateDraft({ location });
+      // 다시 잡은 자리가 다른 구역일 수 있어서 핀 위 장소 이름도 새로 받는다
+      const placeLabel = await getPlaceLabel(location);
+      if (placeLabel) updateDraft({ placeLabel });
       return;
     }
     // 권한이 꺼져 있으면 기다려도 소용없어서 권한을 켜라고 하고, 권한이 있으면 신호를 못 잡은 거라 잠시 뒤 다시 누르게 한다

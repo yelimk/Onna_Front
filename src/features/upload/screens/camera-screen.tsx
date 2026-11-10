@@ -9,9 +9,9 @@ import { Icon } from '@/components/icon';
 import { colors } from '@/constants/colors';
 import { radius, screenPaddingX, spacing } from '@/constants/layout';
 import { CameraViewfinder } from '@/features/upload/components/camera-viewfinder';
-import { getRegionName } from '@/features/map/api/get-region-name';
 import { useUploadDraft } from '@/features/upload/upload-draft';
 import { getPhotoLocation } from '@/features/upload/utils/get-photo-location';
+import { getPlaceLabel } from '@/features/upload/utils/get-place-label';
 import { normalizePhoto } from '@/features/upload/utils/normalize-photo';
 import { useScreenInsets } from '@/hooks/use-screen-insets';
 
@@ -55,13 +55,13 @@ export function CameraScreen() {
     else requestPermission();
   };
 
-  // 셔터를 누른 순간의 위치와, 위치 확인 화면에 보여줄 동네 이름(지도 담당의 카카오 동네 이름 함수)을 채운다
+  // 셔터를 누른 순간의 위치와, 위치 확인 화면에 보여줄 장소 이름(구역 이름, 없으면 동네 이름)을 채운다
   const recordPhotoLocation = async () => {
     const location = await getPhotoLocation();
     updateDraft({ location: location ?? undefined });
     if (!location) return;
-    const regionName = await getRegionName({ latitude: location.lat, longitude: location.lng }).catch(() => '');
-    if (regionName) updateDraft({ placeLabel: regionName });
+    const placeLabel = await getPlaceLabel(location);
+    if (placeLabel) updateDraft({ placeLabel });
   };
 
   const takePhoto = async () => {
